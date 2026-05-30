@@ -1429,22 +1429,31 @@ window.PruvaAiManager = class PruvaAiManager {
         input.value = '';
 
         let conversations = this.app.state.pricingConversations;
-        if (!conversations) {
-            conversations = this.initializeDefaultConversations(this.app.state);
+        if (!conversations || conversations.length === 0) {
+            conversations = [];
+            this.app.state.pricingConversations = conversations;
         }
 
         let activeConvId = this.app.state.activeConversationId;
         
-        // Eger aktif konusma yoksa, komut icinden firma ismi cikarmaya calis
-        if (!activeConvId) {
-            const textLower = text.toLowerCase();
-            const foundConv = conversations.find(c => textLower.includes(c.company.toLowerCase()));
-            if (foundConv) {
-                activeConvId = foundConv.id;
-            } else {
-                activeConvId = conversations[0]?.id || 11;
-            }
+        // Eğer aktif konuşma yoksa veya konuşma listesi boşsa, otomatik olarak yeni bir canlı kanal başlatalım
+        const hasActive = activeConvId && conversations.some(c => c.id === activeConvId);
+        if (!hasActive || conversations.length === 0) {
+            activeConvId = 'live-' + Date.now();
+            const newConv = {
+                id: activeConvId,
+                company: 'Canlı Yapay Zeka Asistanı',
+                logoLetter: '⚡',
+                logoBg: 'linear-gradient(135deg, #2563eb, #3b82f6)',
+                lastMessage: text,
+                time: new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }),
+                status: 'PENDING',
+                messages: []
+            };
+            conversations.push(newConv);
+            this.app.state.pricingConversations = conversations;
             this.app.state.activeConversationId = activeConvId;
+            localStorage.setItem('pruva_pricing_conversations', JSON.stringify(conversations));
         }
 
         const convIdx = conversations.findIndex(c => c.id === activeConvId);
