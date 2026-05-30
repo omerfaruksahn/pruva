@@ -12,6 +12,7 @@ GÖREV TANIMLARIN:
 3. Yapılandırılmış JSON yanıt döndür
 
 ALGILAYACAĞIN AKSİYONLAR:
+- SEND_CUSTOM_EMAIL: Belirli bir e-posta adresine doğrudan özel tanıtım, bilgilendirme, iş birliği veya ad-hoc fiyat e-postası tasarlama aksiyonu (örn: 'hedef@hedef.com adresine ABC Lojistik adıyla tanıtım e-postası gönder', 'x@y.com adresine Hamburg fiyatı sor').
 - SEND_RATE_REQUEST: Taşıyıcılardan fiyat talep et (rfq, fiyat sor, rate iste, navlun sor)
 - SEND_OFFER: Müşteriye teklif gönder (teklif ver, teklif hazırla, fiyat ver, price offer)
 - SEND_MISSING_INFO: Eksik bilgi iste (eksik bilgi, missing info, bilgi iste)
@@ -21,18 +22,20 @@ ALGILAYACAĞIN AKSİYONLAR:
 
 YANIT FORMATI (Her zaman bu JSON formatında yanıt ver):
 {
-  "action": "SEND_RATE_REQUEST|SEND_OFFER|SEND_MISSING_INFO|SEND_FOLLOWUP|INFO_QUERY|GENERAL",
+  "action": "SEND_CUSTOM_EMAIL|SEND_RATE_REQUEST|SEND_OFFER|SEND_MISSING_INFO|SEND_FOLLOWUP|INFO_QUERY|GENERAL",
   "confidence": 0.0-1.0,
   "companyMention": "algılanan şirket adı veya null",
   "summary": "Kullanıcıya gösterilecek kısa Türkçe açıklama",
   "details": {
+    "to_email": "SEND_CUSTOM_EMAIL durumunda alıcının e-posta adresi (örn: destek@pruvahub.com), aksi halde null",
+    "subject": "SEND_CUSTOM_EMAIL durumunda Türkçe e-posta konu başlığı, aksi halde null",
     "transportMode": "FCL|LCL|AIR|ROAD|null",
     "route": { "pol": "varsa", "pod": "varsa" },
     "carriers": ["önerilen taşıyıcılar"],
-    "templateKey": "kullanılacak template key (ör: fcl-request)",
+    "templateKey": "kullanılacak template key (ör: fcl-request veya custom-email)",
     "urgency": "LOW|MEDIUM|HIGH"
   },
-  "suggestedMessage": "Taşıyıcıya/müşteriye gönderilecek önerilen mail içeriği"
+  "suggestedMessage": "Alıcıya gönderilecek veya onayınıza sunulacak Türkçe e-posta gövdesi (HTML/Rich-text formatında yazılabilir)"
 }
 
 ÖNEMLİ KURALLAR:
@@ -86,8 +89,34 @@ function fallbackAnalysis(text) {
   let summary = 'Mesajınız alındı.';
   let templateKey = null;
   let carriers = [];
+  let toEmail = null;
+  let subject = null;
+  let suggestedMessage = null;
+
+  const emailMatch = text.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
   
-  if (lower.includes('fiyat sor') || lower.includes('rate iste') || lower.includes('rfq') || lower.includes('navlun')) {
+  if (emailMatch && (lower.includes('tanıtım') || lower.includes('tanitim') || lower.includes('mail') || lower.includes('gönder') || lower.includes('gonder'))) {
+    action = 'SEND_CUSTOM_EMAIL';
+    toEmail = emailMatch[0];
+    templateKey = 'custom-email';
+    
+    // Şirket adını çıkarmaya çalışalım
+    let companyName = 'Pruva Lojistik';
+    const companyMatch = text.match(/\[([^\]]+)\]/);
+    if (companyMatch) {
+      companyName = companyMatch[1];
+    } else {
+      const parts = text.split(/\s+/);
+      const nameIndex = parts.findIndex(p => p.toLowerCase().includes('adıyla') || p.toLowerCase().includes('ismiyle'));
+      if (nameIndex > 0) {
+        companyName = parts[nameIndex - 1];
+      }
+    }
+    
+    summary = `${toEmail} adresine ${companyName} tanıtım e-postası taslağı hazırlandı.`;
+    subject = `${companyName} — Tanıtım ve İş Birliği Talebi`;
+    suggestedMessage = `Sayın Yetkili,<br><br><b>${companyName}</b> olarak lojistik operasyonlarımızda spot navlun, gümrükleme ve tedarik zinciri çözümleri sunmaktayız. Şirketinizin lojistik ihtiyaçları doğrultusunda spot FCL/LCL, hava yolu ve kara yolu taşımalarınız için fiyat teklifleri sunmaktan ve iş birliği yapmaktan memnuniyet duyarız.<br><br>Güncel navlun taleplerinizi paylaşmanız halinde en kısa sürede fiyatlandırma çalışmasını tamamlayabiliriz.<br><br>Saygılarımızla,<br>Pruva Pricing Team`;
+  } else if (lower.includes('fiyat sor') || lower.includes('rate iste') || lower.includes('rfq') || lower.includes('navlun')) {
     action = 'SEND_RATE_REQUEST';
     summary = 'Taşıyıcılara fiyat talebi gönderilecek.';
     templateKey = 'fcl-request';
@@ -108,10 +137,10 @@ function fallbackAnalysis(text) {
   }
   
   return {
-    success: true, action, confidence: action === 'GENERAL' ? 0.3 : 0.75,
+    success: true, action, confidence: action === 'GENERAL' ? 0.3 : 0.85,
     companyMention: null, summary,
-    details: { transportMode: null, route: { pol: null, pod: null }, carriers, templateKey, urgency: 'MEDIUM' },
-    suggestedMessage: null
+    details: { to_email: toEmail, subject, transportMode: null, route: { pol: null, pod: null }, carriers, templateKey, urgency: 'MEDIUM' },
+    suggestedMessage
   };
 }
 

@@ -719,13 +719,14 @@ router.get('/conversations', auth, async (req, res) => {
     result.rows.forEach(row => {
       const email = row.sender_email;
       if (!convMap[email]) {
-        const company = row.customer_company || row.sender_name || email.split('@')[0];
+        const isCopilot = email === 'copilot@pruva.ai';
+        const company = isCopilot ? 'Pruva AI Co-pilot' : (row.customer_company || row.sender_name || email.split('@')[0]);
         convMap[email] = {
-          id: row.customer_id || `rfq-${row.id}`,
+          id: isCopilot ? 'copilot' : (row.customer_id || `rfq-${row.id}`),
           company: company,
           email: email,
-          logoLetter: company.charAt(0).toUpperCase(),
-          logoBg: `hsl(${Math.abs(company.split('').reduce((a,c) => a + c.charCodeAt(0), 0)) % 360}, 60%, 50%)`,
+          logoLetter: isCopilot ? '🤖' : company.charAt(0).toUpperCase(),
+          logoBg: isCopilot ? 'linear-gradient(135deg, #2563eb, #1d4ed8)' : `hsl(${Math.abs(company.split('').reduce((a,c) => a + c.charCodeAt(0), 0)) % 360}, 60%, 50%)`,
           status: row.status,
           customerType: row.customer_type || 'unknown',
           regions: row.active_regions || [],
@@ -736,11 +737,13 @@ router.get('/conversations', auth, async (req, res) => {
       }
       
       // Her RFQ'yu mesaj olarak ekle
+      const isCopilot = email === 'copilot@pruva.ai';
       convMap[email].messages.push({
-        sender: row.sender_name || email,
+        sender: isCopilot ? 'Kullanıcı' : (row.sender_name || email),
         time: new Date(row.created_at).toLocaleString('tr-TR'),
-        type: 'incoming',
-        text: row.subject + '\n' + (row.body || '').substring(0, 200)
+        timestamp: new Date(row.created_at),
+        type: isCopilot ? 'outgoing' : 'incoming',
+        text: isCopilot ? row.subject : (row.subject + '\n' + (row.body || '').substring(0, 200))
       });
       
       // Son mesajı ve zamanı güncelle
@@ -765,15 +768,62 @@ router.get('/conversations', auth, async (req, res) => {
     actions.rows.forEach(action => {
       const conv = convMap[action.sender_email];
       if (conv) {
+        let type = action.status === 'PENDING' ? 'ai_suggestion' : 'ai_action';
+        let sender = 'Pruva AI';
+        
+        if (action.action_type === 'USER_MESSAGE') {
+          type = 'outgoing';
+          sender = 'Kullanıcı';
+        } else if (action.action_type === 'AI_RESPONSE') {
+          type = 'incoming';
+          sender = 'Pruva AI';
+        }
+
         conv.messages.push({
-          sender: 'Pruva AI',
+          sender: sender,
           time: new Date(action.created_at).toLocaleString('tr-TR'),
-          type: action.status === 'PENDING' ? 'ai_suggestion' : 'ai_action',
-          text: action.body || action.preview || action.subject,
-          action: action.type,
-          actionId: action.id
+          timestamp: new Date(action.created_at),
+          type: type,
+          text: action.description || action.body || action.preview || action.subject,
+          action: action.action_type || action.type,
+          actionId: action.id,
+          suggestedMail: action.suggested_mail
         });
       }
+    });
+
+    // Pinned Co-pilot kanalının her zaman var olmasını ve en tepede selamlama mesajıyla başlamasını garantileyelim
+    if (!convMap['copilot@pruva.ai']) {
+      convMap['copilot@pruva.ai'] = {
+        id: 'copilot',
+        company: 'Pruva AI Co-pilot',
+        email: 'copilot@pruva.ai',
+        logoLetter: '🤖',
+        logoBg: 'linear-gradient(135deg, #2563eb, #1d4ed8)',
+        status: 'COMPLETED',
+        customerType: 'standard',
+        regions: [],
+        messages: [],
+        lastMessage: 'Genel Komut & Yapay Zeka Sohbeti',
+        time: ''
+      };
+    }
+
+    const copilotConv = convMap['copilot@pruva.ai'];
+    const hasGreeting = copilotConv.messages.some(m => m.text && m.text.includes('Ben Pruva AI Co-pilot'));
+    if (!hasGreeting) {
+      copilotConv.messages.unshift({
+        sender: 'Pruva AI',
+        time: 'Sistem',
+        timestamp: new Date(0), // her zaman ilk mesaj olsun
+        type: 'incoming',
+        text: 'Merhaba! Ben Pruva AI Co-pilot. Bana dilediğiniz lojistik komutunu verebilirsiniz. Örneğin:<br><br>• <i>\'destek@pruvahub.com adresine [Firma Adı] adıyla tanıtım e-postası tasarla\'</i><br>• <i>\'Hamburg\'dan İzmir\'e TIR fiyatı al\'</i>'
+      });
+    }
+
+    // Her konuşmanın mesajlarını zamana göre kronolojik sıralayalım
+    Object.values(convMap).forEach(conv => {
+      conv.messages.sort((a, b) => a.timestamp - b.timestamp);
     });
     
     res.json(Object.values(convMap));

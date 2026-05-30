@@ -143,7 +143,24 @@ window.pruvaAiView = (state) => {
 
                 <!-- Konuşma Listesi (Scrollable) -->
                 <div class="chat-list-scroll">
-                    ${filteredConversations.map(conv => `
+                    <!-- PRUVA AI CO-PILOT PINNED CHANNEL -->
+                    <div class="chat-list-item ${activeConvId === 'copilot' ? 'active' : ''}" onclick="window.pruvaAiManager.selectConversation('copilot')" style="background: ${activeConvId === 'copilot' ? 'rgba(37,99,235,0.08)' : 'transparent'}; border-left: 3px solid #2563eb; margin-bottom: 8px; border-radius: var(--radius-md);">
+                        <div class="chat-avatar" style="background: linear-gradient(135deg, #2563eb, #1d4ed8); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; color: white;">
+                            🤖
+                        </div>
+                        <div class="chat-item-details">
+                            <div class="chat-item-row1">
+                                <span class="chat-item-name" style="font-weight: 800; color: var(--primary);">Pruva AI Co-pilot</span>
+                                <span class="chat-item-time" style="font-size: 0.7rem; color: #2563eb; font-weight: 700; background: rgba(37,99,235,0.1); padding: 1px 5px; border-radius: 4px;">Pinned</span>
+                            </div>
+                            <div class="chat-item-row2">
+                                <span class="chat-item-snippet" style="color: var(--text-secondary); font-weight: 600;">Genel Komut & AI Sohbeti</span>
+                                <span class="chat-status-dot" style="background-color: #2563eb;" title="Co-pilot"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    ${filteredConversations.filter(c => c.id !== 'copilot').map(conv => `
                         <div class="chat-list-item ${conv.id === activeConvId ? 'active' : ''}" onclick="window.pruvaAiManager.selectConversation('${conv.id}')">
                             <div class="chat-avatar" style="background-color: ${conv.logoBg || '#3b82f6'};">
                                 ${conv.logoLetter || conv.company.charAt(0).toUpperCase()}
@@ -160,7 +177,7 @@ window.pruvaAiView = (state) => {
                             </div>
                         </div>
                     `).join('')}
-                    ${filteredConversations.length === 0 ? `
+                    ${filteredConversations.filter(c => c.id !== 'copilot').length === 0 ? `
                         <div style="text-align: center; padding: 40px; color: var(--text-secondary); font-size: 0.8rem;">
                             Konuşma bulunamadı.
                         </div>
