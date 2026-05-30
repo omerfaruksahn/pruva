@@ -10,6 +10,9 @@ require('dotenv').config({ path: path.join(__dirname, '.env') });
 
 const app = express();
 
+// Trust proxy (Render/Cloudflare) for express-rate-limit
+app.set('trust proxy', 1);
+
 // --- PARANOID SECURITY MIDDLEWARE ---
 app.use(helmet({
     contentSecurityPolicy: {
