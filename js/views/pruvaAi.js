@@ -8,10 +8,17 @@ window.pruvaAiView = (state) => {
     // 1. Durum / Konuşmalar State Yükle
     let conversations = state.pricingConversations;
     
-    // ZIRHLANDIRILMIŞ GEÇİŞ (Zorunlu Seeding): Eğer eski tarayıcı cache'i kalmışsa ve MSC/Maersk taşıyıcı konuşmaları (id: 21, 22) yoksa otomatik sıfırla ve ekle
-    const hasCarriers = conversations && conversations.some(c => c.id === 21 || c.id === 22);
-    if (!conversations || !hasCarriers) {
-        conversations = window.pruvaAiManager.initializeDefaultConversations(state);
+    // Eğer Outlook bağlıysa mock dataları zorlama, boş başlasın; bağlı değilse keşif için mock dataları göster
+    if (state.outlookConnected) {
+        if (!conversations) {
+            conversations = [];
+            state.pricingConversations = [];
+        }
+    } else {
+        const hasCarriers = conversations && conversations.some(c => c.id === 21 || c.id === 22);
+        if (!conversations || !hasCarriers) {
+            conversations = window.pruvaAiManager.initializeDefaultConversations(state);
+        }
     }
 
     const activeConvId = state.activeConversationId || null;

@@ -265,7 +265,7 @@ window.PruvaAiManager = class PruvaAiManager {
                 const convRes = await fetch('/api/pricing/conversations', { headers });
                 if (convRes.ok) {
                     const apiConversations = await convRes.json();
-                    if (apiConversations.length > 0) {
+                    if (apiConversations.length > 0 || this.app.state.outlookConnected) {
                         this.app.state.pricingConversations = apiConversations;
                         localStorage.setItem('pruva_pricing_conversations', JSON.stringify(apiConversations));
                         needsCommit = true;
