@@ -1,0 +1,412 @@
+.marketplace-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 30px;
+}
+
+.marketplace-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.filter-chips-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid var(--border);
+}
+
+.filter-chip {
+    padding: 8px 18px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    user-select: none;
+}
+
+.filter-chip:hover {
+    background: var(--bg-surface);
+    border-color: var(--secondary);
+    color: var(--secondary);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(59, 130, 246, 0.1);
+}
+
+.filter-chip.active {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: white;
+    box-shadow: 0 5px 15px rgba(0, 82, 212, 0.2);
+}
+
+/* Recent Listings Grid */
+.recent-listings-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+}
+
+.recent-listing-card {
+    background: var(--bg-surface);
+    border-radius: 16px;
+    padding: 22px;
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.rl-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+}
+
+.rl-transport {
+    font-size: 1.6rem;
+}
+
+.rl-incoterm {
+    background: rgba(59, 130, 246, 0.1);
+    color: var(--secondary);
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 6px;
+    letter-spacing: 0.5px;
+}
+
+.rl-route {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+}
+
+.rl-city {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--primary);
+}
+
+.rl-arrow {
+    color: var(--accent);
+    font-weight: 800;
+    font-size: 1rem;
+}
+
+.rl-cargo {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-bottom: 14px;
+}
+
+.rl-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 12px;
+    border-top: 1px solid var(--border-light);
+}
+
+.rl-deadline {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+}
+
+.rl-bids {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--secondary);
+    background: rgba(59, 130, 246, 0.1);
+    padding: 3px 10px;
+    border-radius: 10px;
+}
+
+@media (max-width: 1024px) {
+    .recent-listings-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Market Header & Filter Bar */
+.market-header {
+    background: var(--bg-surface);
+    padding: 25px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    margin-bottom: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.market-header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.market-header-top h1 {
+    margin: 0;
+    font-size: 1.8rem;
+    color: var(--primary);
+}
+
+.market-count {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.market-filter-bar {
+    display: grid;
+    grid-template-columns: 1fr 1fr 150px;
+    gap: 15px;
+    align-items: end;
+}
+
+/* Pagination */
+.pagination-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin-top: 30px;
+    padding: 20px 0;
+}
+
+.pagination-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    border: 1px solid var(--border-dim);
+    background: var(--bg-surface);
+    cursor: pointer;
+    font-size: 0.8rem;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+}
+
+.pagination-btn.active {
+    border-color: var(--secondary);
+    background: var(--secondary);
+    color: white;
+    font-weight: 700;
+}
+
+.pagination-btn:hover:not(.active) {
+    background: var(--bg-elevated);
+}
+
+.pagination-btn.nav {
+    width: auto;
+    padding: 8px 16px;
+    font-size: 0.85rem;
+}
+
+.pagination-info {
+    text-align: center;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin-top: 5px;
+}
+
+/* Ticket Details Enhanced */
+.ticket-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.ticket-header-left {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.ticket-header-title {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 400;
+}
+
+.ticket-header-title strong {
+    color: var(--primary);
+}
+
+.ticket-header-title span {
+    color: var(--text-muted);
+    margin: 0 8px;
+    font-style: italic;
+}
+
+.ticket-toggle-icon {
+    font-size: 1.5rem;
+    color: var(--secondary);
+    font-weight: bold;
+}
+
+.ticket-privacy-notice {
+    background: #fff9f0;
+    border: 1px dashed #f39c12;
+    padding: 15px;
+    border-radius: 12px;
+    margin-top: 15px;
+}
+
+body.dark-mode .ticket-privacy-notice {
+    background: #2a1b0a;
+    border-color: #d35400;
+}
+
+.ticket-privacy-notice p {
+    color: #d35400;
+    font-size: 0.85rem;
+    margin: 0;
+}
+
+.ticket-info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.photo-gallery {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding-bottom: 10px;
+    margin-top: 10px;
+}
+
+.photo-thumbnail {
+    height: 100px;
+    width: 140px;
+    object-fit: cover;
+    border-radius: 12px;
+    border: 1px solid var(--border-dim);
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.photo-thumbnail:hover {
+    transform: scale(1.05);
+}
+
+@media (max-width: 1024px) {
+    .recent-listings-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .recent-listings-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .market-filter-bar {
+        grid-template-columns: 1fr !important;
+    }
+    
+    .ticket-header-left {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+}
+
+/* Subscription Locks */
+.locked-chip {
+    opacity: 0.7;
+    background: var(--bg-elevated);
+    border-style: dashed !important;
+    cursor: help !important;
+}
+
+.locked-chip:hover {
+    border-color: var(--text-muted) !important;
+    color: var(--text-muted) !important;
+    transform: none !important;
+}
+
+.subscription-lock-notice {
+    background: rgba(99, 102, 241, 0.05);
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    padding: 12px 20px;
+    border-radius: 12px;
+    color: var(--secondary);
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.subscription-lock-notice:hover {
+    background: rgba(99, 102, 241, 0.1);
+    transform: translateY(-2px);
+}
+
+.subscription-lock-notice i {
+    color: var(--secondary);
+}
+
+.active-package {
+    border-color: var(--secondary) !important;
+    box-shadow: 0 0 20px rgba(99, 102, 241, 0.2) !important;
+}
+
+/* ── MOBILE FILTER DRAWER STYLES ── */
+.mobile-filter-header {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .mobile-filter-header {
+        display: block;
+    }
+    
+    .market-filter-bar {
+        display: none !important;
+        grid-template-columns: 1fr !important;
+        gap: 15px !important;
+        background: var(--bg-elevated);
+        padding: 20px;
+        border-radius: var(--radius-md);
+        border: 1px solid var(--border);
+        margin-top: 12px;
+        animation: fadeInUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    
+    .market-filter-bar.active {
+        display: grid !important;
+    }
+    
+    .market-filter-bar button {
+        height: 44px !important;
+        margin-top: 8px;
+    }
+    
+    .ticket-header-left {
+        gap: 8px;
+    }
+}
+
+

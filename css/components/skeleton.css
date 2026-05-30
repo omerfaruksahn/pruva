@@ -1,0 +1,10 @@
+.skeleton-line {
+    background: linear-gradient(90deg, var(--bg-elevated) 25%, var(--border-light) 50%, var(--bg-elevated) 75%);
+    background-size: 400px 100%;
+    animation: shimmer 1.2s ease infinite;
+    border-radius: 12px;
+}
+
+.loading-skeleton {
+    animation: fadeIn 0.2s ease;
+}

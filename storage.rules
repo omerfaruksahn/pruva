@@ -1,0 +1,38 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // Avatar: Sadece sahip yükleyebilir, herkes okuyabilir
+    match /avatars/{userId}/{allPaths=**} {
+      allow read: if true;
+      allow write: if request.auth != null
+        && request.auth.uid == userId
+        && request.resource.size < 5 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+    }
+
+    // İlan fotoğrafları
+    match /ad_photos/{allPaths=**} {
+      allow read: if true;
+      allow write: if request.auth != null
+        && request.resource.size < 10 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+    }
+
+    // Sevkiyat evrakları
+    match /shipment_docs/{allPaths=**} {
+      allow read, write: if request.auth != null
+        && request.resource.size < 15 * 1024 * 1024;
+    }
+
+    // Referans belgeleri
+    match /references/{allPaths=**} {
+      allow read, write: if request.auth != null
+        && request.resource.size < 5 * 1024 * 1024;
+    }
+
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

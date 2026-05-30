@@ -1,0 +1,562 @@
+/* =============================================
+   PRUVA - Dark Mode System (Complete Overhaul)
+   Tüm hardcoded renkler burada override ediliyor.
+   Artık CSS variables sayesinde %95 otomatik çalışıyor,
+   bu dosya sadece kalan edge-case'leri düzeltiyor.
+   ============================================= */
+
+/* --- BASE OVERRIDES --- */
+body.dark-mode {
+    background-color: var(--bg-page);
+    color: var(--text-primary);
+    color-scheme: dark;
+}
+
+/* --- CARD & SURFACE COMPONENTS --- */
+body.dark-mode .card,
+body.dark-mode .modal-content,
+body.dark-mode .stats-bar,
+body.dark-mode .step-card,
+body.dark-mode .feature-card,
+body.dark-mode .transport-mode-card,
+body.dark-mode .recent-listing-card,
+body.dark-mode .ticket-card,
+body.dark-mode .stat-card,
+body.dark-mode .auth-card,
+body.dark-mode .post-ad-card,
+body.dark-mode .dash-ad-card,
+body.dark-mode .dash-overlay-card,
+body.dark-mode .bid-row,
+body.dark-mode .cargo-row-item,
+body.dark-mode .market-header {
+    background-color: var(--bg-surface);
+    border-color: var(--border);
+    color: var(--text-primary);
+}
+
+/* Kart hover'ları dark mode'da daha soft */
+body.dark-mode .card:hover,
+body.dark-mode .ticket-card:hover {
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+    border-color: var(--secondary);
+}
+
+/* --- TYPOGRAPHY --- */
+body.dark-mode h1, body.dark-mode h2, body.dark-mode h3, body.dark-mode h4,
+body.dark-mode strong, body.dark-mode b {
+    color: var(--text-primary);
+}
+
+body.dark-mode .section-header h2 {
+    color: var(--text-primary);
+}
+
+/* --- HERO SECTION --- */
+body.dark-mode .hero {
+    background: linear-gradient(135deg, rgba(2, 6, 23, 0.97) 0%, rgba(15, 23, 42, 0.9) 100%), 
+                url('https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=2000&q=80');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    border-bottom: 1px solid var(--border);
+}
+
+body.dark-mode .hero h1 {
+    color: #ffffff;
+}
+
+/* --- NAVIGATION --- */
+body.dark-mode nav {
+    background-color: var(--bg-nav);
+    border-bottom-color: var(--border);
+    backdrop-filter: blur(16px);
+}
+
+body.dark-mode .logo {
+    color: var(--text-primary);
+}
+
+body.dark-mode .nav-links a {
+    color: var(--text-secondary);
+}
+
+body.dark-mode .nav-links a:hover,
+body.dark-mode .nav-links a.active {
+    color: var(--accent);
+}
+
+/* --- FORM ELEMENTS --- */
+body.dark-mode input,
+body.dark-mode select,
+body.dark-mode textarea,
+body.dark-mode .form-control {
+    background-color: var(--bg-elevated);
+    color: var(--text-primary);
+    border-color: var(--border);
+}
+
+body.dark-mode input::placeholder,
+body.dark-mode textarea::placeholder {
+    color: var(--text-muted);
+}
+
+body.dark-mode input:focus,
+body.dark-mode select:focus,
+body.dark-mode textarea:focus,
+body.dark-mode .form-control:focus {
+    border-color: var(--secondary);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+/* --- BUTTONS --- */
+body.dark-mode .btn-outline {
+    border-color: var(--border-light);
+    color: var(--text-primary);
+    background: transparent;
+}
+
+body.dark-mode .btn-outline:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: var(--secondary);
+}
+
+body.dark-mode .btn-google {
+    background: var(--bg-elevated);
+    border-color: var(--border);
+    color: var(--text-primary);
+}
+
+body.dark-mode .btn-google:hover {
+    background: var(--bg-surface);
+    border-color: var(--border-light);
+}
+
+/* --- STATUS BADGES --- */
+body.dark-mode .status-pending { background: rgba(245, 158, 11, 0.15); color: #fbbf24; }
+body.dark-mode .status-bidded { background: rgba(59, 130, 246, 0.15); color: #60a5fa; }
+body.dark-mode .status-accepted { background: rgba(16, 185, 129, 0.15); color: #34d399; }
+
+/* --- TICKET CARDS --- */
+body.dark-mode .ticket-card {
+    background: var(--bg-surface);
+    border-color: var(--border);
+}
+
+body.dark-mode .ticket-stub {
+    background: var(--bg-elevated);
+    color: var(--text-secondary);
+    border-right-color: var(--border);
+}
+
+body.dark-mode .ticket-stub::after {
+    background-image: radial-gradient(circle at 10px 50%, transparent 6px, var(--bg-surface) 7px);
+}
+
+body.dark-mode .ticket-main {
+    background: var(--bg-surface);
+}
+
+body.dark-mode .ticket-details {
+    border-top-color: var(--border);
+}
+
+body.dark-mode .ticket-privacy-notice {
+    background: rgba(243, 156, 18, 0.08);
+    border-color: #d35400;
+}
+
+/* --- MARKETPLACE --- */
+body.dark-mode .filter-chip {
+    background: var(--bg-elevated);
+    border-color: var(--border);
+    color: var(--text-secondary);
+}
+
+body.dark-mode .filter-chip:hover {
+    background: var(--bg-surface);
+    border-color: var(--secondary);
+    color: var(--secondary);
+}
+
+body.dark-mode .filter-chip.active {
+    background: var(--secondary);
+    border-color: var(--secondary);
+    color: white;
+}
+
+body.dark-mode .filter-chips-container {
+    border-top-color: var(--border);
+}
+
+body.dark-mode .rl-incoterm {
+    background: rgba(59, 130, 246, 0.12);
+    color: #60a5fa;
+}
+
+body.dark-mode .rl-bids {
+    background: rgba(59, 130, 246, 0.12);
+    color: #60a5fa;
+}
+
+body.dark-mode .rl-footer {
+    border-top-color: var(--border);
+}
+
+body.dark-mode .pagination-btn:hover:not(.active) {
+    background: var(--bg-elevated);
+}
+
+/* --- DASHBOARD --- */
+body.dark-mode .dashboard-tabs {
+    border-bottom-color: var(--border);
+}
+
+body.dark-mode .tab-btn {
+    color: var(--text-muted);
+}
+
+body.dark-mode .tab-btn.active {
+    color: var(--secondary);
+    border-bottom-color: var(--secondary);
+}
+
+body.dark-mode .dash-ad-icon {
+    background: var(--bg-elevated);
+}
+
+body.dark-mode .timeline-container {
+    background: var(--bg-elevated);
+}
+
+body.dark-mode .timeline-list::before {
+    background: var(--border);
+}
+
+body.dark-mode .timeline-point {
+    background: var(--bg-elevated);
+    color: var(--text-secondary);
+    border-color: var(--bg-surface);
+}
+
+body.dark-mode .dash-overlay {
+    background: rgba(0, 0, 0, 0.7);
+}
+
+/* --- FEATURE ICONS (Home Page) --- */
+body.dark-mode .fi-blue { background: rgba(59, 130, 246, 0.12); color: #60a5fa; }
+body.dark-mode .fi-green { background: rgba(16, 185, 129, 0.12); color: #34d399; }
+body.dark-mode .fi-amber { background: rgba(245, 158, 11, 0.12); color: #fbbf24; }
+body.dark-mode .fi-indigo { background: rgba(99, 102, 241, 0.12); color: #818cf8; }
+body.dark-mode .fi-rose { background: rgba(244, 63, 94, 0.12); color: #fb7185; }
+body.dark-mode .fi-cyan { background: rgba(6, 182, 212, 0.12); color: #22d3ee; }
+
+/* --- TRANSPORT MODE CARDS hover --- */
+body.dark-mode .transport-mode-card:hover {
+    background: var(--secondary);
+    border-color: var(--secondary);
+    color: white;
+}
+
+/* --- STEP CARDS --- */
+body.dark-mode .step-icon-wrapper {
+    background: var(--bg-elevated);
+}
+
+body.dark-mode .step-number {
+    color: var(--border);
+}
+
+/* --- CTA SECTION --- */
+body.dark-mode .cta-section {
+    background: var(--bg-surface);
+    border-top: 1px solid var(--border);
+}
+
+body.dark-mode .cta-btn-white {
+    background: var(--secondary);
+    color: white;
+}
+
+body.dark-mode .cta-btn-outline {
+    border-color: var(--border-light);
+    color: var(--text-primary);
+}
+
+/* --- FOOTER --- */
+body.dark-mode #app-footer {
+    background: #000000;
+    border-top: 1px solid var(--border);
+}
+
+body.dark-mode .footer-desc,
+body.dark-mode .footer-col a {
+    color: var(--text-muted);
+}
+
+body.dark-mode .footer-col a:hover {
+    color: var(--text-primary);
+}
+
+body.dark-mode .footer-bottom {
+    color: var(--text-muted);
+    border-top-color: var(--border);
+}
+
+/* --- NOTIFICATIONS DROPDOWN --- */
+body.dark-mode .notif-header {
+    background: var(--bg-elevated);
+    border-bottom-color: var(--border);
+}
+
+body.dark-mode .notif-group-title {
+    background: var(--bg-page);
+    color: var(--text-muted);
+}
+
+body.dark-mode .notif-item:hover {
+    background: var(--bg-elevated);
+}
+
+body.dark-mode .notif-item.unread {
+    background: rgba(59, 130, 246, 0.05);
+}
+
+body.dark-mode .notif-empty {
+    color: var(--text-muted);
+}
+
+body.dark-mode .notif-footer-link {
+    border-top-color: var(--border);
+}
+
+body.dark-mode .notif-footer-link:hover {
+    background: var(--bg-elevated);
+}
+
+body.dark-mode .notif-action-btn.read { color: var(--secondary); }
+
+/* --- TOAST --- */
+body.dark-mode .toast {
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    border-color: var(--border);
+}
+
+/* --- MODAL --- */
+body.dark-mode .modal-overlay {
+    background: rgba(0, 0, 0, 0.7);
+}
+
+body.dark-mode .modal-content {
+    background: var(--bg-surface);
+    color: var(--text-primary);
+}
+
+body.dark-mode .modal-divider {
+    border-top-color: var(--border);
+}
+
+body.dark-mode .modal-divider span {
+    background: var(--bg-surface);
+    color: var(--text-muted);
+}
+
+/* --- AUTOCOMPLETE --- */
+body.dark-mode .autocomplete-results {
+    background: var(--bg-surface);
+    border-color: var(--border);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+}
+
+body.dark-mode .autocomplete-item {
+    border-bottom-color: var(--border);
+    color: var(--text-secondary);
+}
+
+body.dark-mode .autocomplete-item:hover {
+    background: var(--bg-elevated);
+    color: var(--secondary);
+}
+
+/* --- SKELETON LOADING --- */
+body.dark-mode .skeleton-line {
+    background: linear-gradient(90deg, var(--bg-elevated) 25%, var(--bg-surface) 50%, var(--bg-elevated) 75%);
+    background-size: 400px 100%;
+}
+
+/* --- POST AD PAGE --- */
+body.dark-mode .form-section.highlight {
+    background: var(--bg-elevated);
+    border-color: var(--border);
+}
+
+/* --- ROLE SWITCHER (Fixed bottom-left) --- */
+body.dark-mode #role-switcher {
+    background: var(--bg-surface) !important;
+    border-color: var(--border) !important;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4) !important;
+}
+
+/* --- INLINE STYLE FORCE OVERRIDES ---
+   JS'de hardcoded olan inline style'ları override ediyoruz.
+   Bu override'lar !important ile yapılıyor çünkü inline style 
+   specificity'si normal CSS'den yüksektir. */
+
+body.dark-mode [style*="background: white"],
+body.dark-mode [style*="background: #ffffff"],
+body.dark-mode [style*="background-color: white"],
+body.dark-mode [style*="background:#fff"] {
+    background-color: var(--bg-surface) !important;
+}
+
+body.dark-mode [style*="background: #f8f9fc"],
+body.dark-mode [style*="background: #f8f9fa"],
+body.dark-mode [style*="background:#f8f9fc"],
+body.dark-mode [style*="background: #fdfdfd"] {
+    background-color: var(--bg-elevated) !important;
+}
+
+body.dark-mode [style*="background: #fff5f5"],
+body.dark-mode [style*="background: #fff9e6"],
+body.dark-mode [style*="background: #fff3cd"],
+body.dark-mode [style*="background: #cce5ff"],
+body.dark-mode [style*="background: #d4edda"],
+body.dark-mode [style*="background: #fff9f0"],
+body.dark-mode [style*="background: #f0f7ff"] {
+    background-color: var(--bg-elevated) !important;
+}
+
+body.dark-mode [style*="color: #666"],
+body.dark-mode [style*="color: #888"],
+body.dark-mode [style*="color: #999"],
+body.dark-mode [style*="color: #aaa"],
+body.dark-mode [style*="color:#666"] {
+    color: var(--text-secondary) !important;
+}
+
+body.dark-mode [style*="color: #444"],
+body.dark-mode [style*="color: #333"],
+body.dark-mode [style*="color: #2c3e50"],
+body.dark-mode [style*="color: #555"] {
+    color: var(--text-primary) !important;
+}
+
+body.dark-mode [style*="border-top: 1px solid #eee"],
+body.dark-mode [style*="border-bottom: 1px solid #eee"],
+body.dark-mode [style*="border: 1px solid #eee"],
+body.dark-mode [style*="border-top: 1px solid #ddd"],
+body.dark-mode [style*="border: 1px solid #ddd"] {
+    border-color: var(--border) !important;
+}
+
+body.dark-mode [style*="border-left: 5px solid #ddd"],
+body.dark-mode [style*="border-left: 5px solid #eee"] {
+    border-left-color: var(--border) !important;
+}
+
+body.dark-mode [style*="border-left: 5px solid #e74c3c"] {
+    border-left-color: #ef4444 !important;
+}
+
+body.dark-mode [style*="border-left: 5px solid #3498db"] {
+    border-left-color: #3b82f6 !important;
+}
+
+body.dark-mode [style*="border-top: 5px solid #e74c3c"] {
+    border-top-color: #ef4444 !important;
+}
+
+body.dark-mode [style*="border-top: 5px solid #f39c12"] {
+    border-top-color: #f59e0b !important;
+}
+
+body.dark-mode [style*="border-bottom: 4px solid var(--primary)"] {
+    border-bottom-color: var(--secondary) !important;
+}
+
+/* Scrollbar */
+body.dark-mode ::-webkit-scrollbar {
+    width: 8px;
+}
+
+body.dark-mode ::-webkit-scrollbar-track {
+    background: var(--bg-page);
+}
+
+body.dark-mode ::-webkit-scrollbar-thumb {
+    background: var(--border-light);
+    border-radius: 4px;
+}
+
+body.dark-mode ::-webkit-scrollbar-thumb:hover {
+    background: var(--text-muted);
+}
+
+/* Smooth transition for theme toggle */
+body {
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+nav, .card, .ticket-card, .toast, input, select, textarea, .modal-content, footer {
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+/* ─────────────────────────────────────────
+   MOBILE-SPECIFIC DARK MODE (Faz 8)
+   ───────────────────────────────────────── */
+body.dark-mode .mobile-nav-drawer {
+    background: var(--bg-surface);
+    border-left-color: var(--border);
+}
+
+body.dark-mode .mobile-nav-overlay {
+    background: rgba(0, 0, 0, 0.7);
+}
+
+body.dark-mode .hamburger-btn {
+    border-color: var(--border);
+}
+
+body.dark-mode .hamburger-btn:hover {
+    background: var(--bg-elevated);
+}
+
+body.dark-mode .hamburger-btn span {
+    background: var(--text-primary);
+}
+
+body.dark-mode .mobile-nav-drawer a {
+    color: var(--text-primary);
+}
+
+body.dark-mode .mobile-nav-drawer a:hover,
+body.dark-mode .mobile-nav-drawer a.active {
+    background: var(--bg-page);
+    color: var(--secondary);
+}
+
+body.dark-mode .mobile-nav-divider {
+    background: var(--border);
+}
+
+/* Admin tab bar in dark mode */
+body.dark-mode .admin-tab-bar {
+    background: var(--bg-elevated) !important;
+}
+
+body.dark-mode .admin-tab-bar button {
+    color: var(--text-secondary) !important;
+}
+
+/* Admin table rows in dark mode */
+body.dark-mode table tr {
+    border-color: var(--border) !important;
+}
+
+body.dark-mode table thead tr {
+    background: var(--bg-elevated) !important;
+}
+
+body.dark-mode table td,
+body.dark-mode table th {
+    color: var(--text-primary);
+}

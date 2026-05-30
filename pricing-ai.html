@@ -1,0 +1,2513 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pruva Pricing AI — Şablon ve Taşıyıcı Yönetim Paneli</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* CSS Değişkenleri & Temalar */
+        :root {
+            /* Açık Tema (Varsayılan) */
+            --bg-page: #f4f6fa;
+            --bg-surface: #ffffff;
+            --bg-elevated: #f8fafc;
+            --border: #e2e8f0;
+            --border-hover: #cbd5e1;
+            
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-muted: #94a3b8;
+            
+            /* Aksan Renkleri */
+            --primary: #0f172a; /* Derin Lacivert/Siyah */
+            --primary-light: #1e293b;
+            --accent: #f59e0b; /* Amber/Turuncu */
+            --accent-hover: #d97706;
+            --success: #10b981;
+            --danger: #ef4444;
+            --info: #3b82f6;
+            
+            /* Mod Renkleri */
+            --color-fcl: #3b82f6;   /* Mavi */
+            --color-lcl: #14b8a6;   /* Teal */
+            --color-air: #8b5cf6;   /* Mor */
+            --color-road: #f97316;  /* Turuncu */
+            
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.02);
+            --shadow-premium: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 16px;
+            --radius-full: 9999px;
+            
+            --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            --font-mono: 'JetBrains Mono', 'Courier New', Courier, monospace;
+            --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body.dark-mode {
+            /* Koyu Tema */
+            --bg-page: #070d19; /* Derin Gece Mavisi */
+            --bg-surface: #0f172a; /* Koyu Lacivert */
+            --bg-elevated: #1e293b;
+            --border: #1e293b;
+            --border-hover: #334155;
+            
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --text-muted: #64748b;
+            
+            --primary: #f8fafc;
+            --primary-light: #e2e8f0;
+            
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.5);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+            --shadow-premium: 0 20px 25px -5px rgba(0, 0, 0, 0.6);
+        }
+
+        /* Reset & Temel Stiller */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            background-color: var(--bg-page);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        button, input, select, textarea {
+            font-family: inherit;
+            color: inherit;
+        }
+
+        /* Ana Layout */
+        header {
+            height: 64px;
+            background-color: var(--bg-surface);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            z-index: 100;
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-icon {
+            color: var(--accent);
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo-text {
+            font-weight: 800;
+            font-size: 1.15rem;
+            letter-spacing: -0.5px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .logo-tag {
+            background-color: rgba(245, 158, 11, 0.1);
+            color: var(--accent);
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: var(--radius-sm);
+            letter-spacing: 0;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        /* 3 Kolonlu Ana Konteyner */
+        .main-container {
+            display: flex;
+            flex: 1;
+            height: calc(100vh - 64px - 40px); /* Kalan alanı kapla (Header ve Footer hariç) */
+            min-height: 500px;
+        }
+
+        /* Sol Panel (Şablonlar) */
+        .left-panel {
+            width: 240px;
+            background-color: var(--bg-surface);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            flex-shrink: 0;
+            transition: var(--transition);
+        }
+
+        /* Mod Sekmeleri */
+        .mode-tabs {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            border-bottom: 1px solid var(--border);
+            background-color: var(--bg-elevated);
+        }
+
+        .mode-tab {
+            padding: 12px 4px;
+            text-align: center;
+            font-size: 0.7rem;
+            font-weight: 700;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            transition: var(--transition);
+            color: var(--text-secondary);
+            border-bottom: 2px solid transparent;
+            text-transform: uppercase;
+        }
+
+        .mode-tab:hover {
+            color: var(--text-primary);
+            background-color: rgba(0,0,0,0.02);
+        }
+
+        .mode-tab.active[data-mode="fcl"] { border-bottom-color: var(--color-fcl); color: var(--color-fcl); }
+        .mode-tab.active[data-mode="lcl"] { border-bottom-color: var(--color-lcl); color: var(--color-lcl); }
+        .mode-tab.active[data-mode="air"] { border-bottom-color: var(--color-air); color: var(--color-air); }
+        .mode-tab.active[data-mode="road"] { border-bottom-color: var(--color-road); color: var(--color-road); }
+
+        /* Şablon Listesi */
+        .templates-scroll-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .template-section-title {
+            font-size: 0.7rem;
+            font-weight: 800;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .template-card {
+            background-color: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 12px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .template-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 3px;
+            height: 100%;
+            background-color: transparent;
+            transition: var(--transition);
+        }
+
+        .template-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-sm);
+            border-color: var(--border-hover);
+        }
+
+        .template-card.active {
+            background-color: var(--bg-surface);
+            border-color: var(--text-primary);
+            box-shadow: var(--shadow-md);
+        }
+
+        /* Aktif Karta Göre Kenarlık */
+        .template-card.active::before {
+            background-color: var(--active-color, var(--primary));
+        }
+
+        .template-card h4 {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .template-card p {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Ortak Şablon Bölümü (Alt Kısım) */
+        .common-templates-area {
+            border-top: 1px solid var(--border);
+            padding: 16px;
+            background-color: rgba(245, 158, 11, 0.02);
+        }
+
+        .template-card.missing-info-card {
+            border: 1.5px dashed var(--accent);
+            background-color: rgba(245, 158, 11, 0.04);
+        }
+
+        .template-card.missing-info-card.active {
+            border-style: solid;
+            background-color: var(--bg-surface);
+            box-shadow: 0 0 0 1px var(--accent), var(--shadow-md);
+        }
+
+        /* Orta Panel (Editör) */
+        .center-panel {
+            flex: 1;
+            background-color: var(--bg-elevated);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            padding: 24px;
+            gap: 20px;
+        }
+
+        /* Editör Kartı */
+        .editor-card {
+            background-color: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            overflow: hidden;
+            transition: var(--transition);
+        }
+
+        .editor-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: var(--bg-surface);
+        }
+
+        .editor-title-area h2 {
+            font-size: 1.05rem;
+            font-weight: 800;
+        }
+
+        .editor-title-area span {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .editor-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* Butonlar */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 8px 16px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: var(--transition);
+            border: 1px solid transparent;
+        }
+
+        .btn-icon-only {
+            padding: 8px;
+            border-radius: var(--radius-md);
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: var(--bg-surface);
+            border-color: var(--primary);
+        }
+
+        .btn-primary:hover {
+            opacity: 0.9;
+        }
+
+        .btn-secondary {
+            background-color: var(--bg-surface);
+            color: var(--text-primary);
+            border-color: var(--border);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--border-hover);
+            background-color: var(--bg-elevated);
+        }
+
+        .btn-accent {
+            background-color: var(--accent);
+            color: #0f172a;
+            border-color: var(--accent);
+        }
+
+        .btn-accent:hover {
+            background-color: var(--accent-hover);
+            border-color: var(--accent-hover);
+        }
+
+        .btn-danger {
+            background-color: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+            border-color: rgba(239, 68, 68, 0.2);
+        }
+
+        .btn-danger:hover {
+            background-color: var(--danger);
+            color: white;
+            border-color: var(--danger);
+        }
+
+        /* Konu & Metin Alanları */
+        .editor-body {
+            padding: 20px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .input-label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .text-input {
+            width: 100%;
+            padding: 10px 14px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border);
+            background-color: var(--bg-surface);
+            color: var(--text-primary);
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .text-input:focus {
+            outline: none;
+            border-color: var(--text-primary);
+            box-shadow: 0 0 0 2px rgba(15, 23, 42, 0.05);
+        }
+
+        .textarea-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 200px;
+            position: relative;
+        }
+
+        .editor-textarea {
+            width: 100%;
+            flex: 1;
+            resize: none;
+            padding: 16px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border);
+            background-color: var(--bg-surface);
+            color: var(--text-primary);
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            line-height: 1.6;
+            transition: var(--transition);
+        }
+
+        .editor-textarea:focus {
+            outline: none;
+            border-color: var(--text-primary);
+            box-shadow: 0 0 0 2px rgba(15, 23, 42, 0.05);
+        }
+
+        /* Araç Çubuğu (Değişken Ekle vb.) */
+        .editor-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: var(--bg-elevated);
+            padding: 8px 12px;
+            border-radius: var(--radius-md) var(--radius-md) 0 0;
+            border: 1px solid var(--border);
+            border-bottom: none;
+            margin-bottom: -1px;
+            z-index: 10;
+        }
+
+        /* Değişken Ekle Dropdown Konsepti */
+        .dropdown-wrapper {
+            position: relative;
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            margin-top: 6px;
+            width: 280px;
+            background-color: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-premium);
+            display: none;
+            flex-direction: column;
+            z-index: 200;
+            overflow: hidden;
+            animation: slideDown 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .dropdown-menu.show {
+            display: flex;
+        }
+
+        .dropdown-header {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+            font-weight: 700;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            background-color: var(--bg-elevated);
+        }
+
+        .dropdown-sections {
+            max-height: 320px;
+            overflow-y: auto;
+            padding: 8px 0;
+        }
+
+        .dropdown-section {
+            margin-bottom: 10px;
+        }
+
+        .dropdown-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .dropdown-section-title {
+            font-size: 0.65rem;
+            font-weight: 800;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 4px 16px;
+        }
+
+        .dropdown-items {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .dropdown-item {
+            padding: 8px 16px;
+            font-size: 0.75rem;
+            text-align: left;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .dropdown-item:hover {
+            background-color: var(--bg-elevated);
+            color: var(--accent);
+        }
+
+        .dropdown-item code {
+            font-family: var(--font-mono);
+            font-weight: 600;
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            background-color: rgba(0, 0, 0, 0.05);
+            padding: 2px 4px;
+            border-radius: var(--radius-sm);
+        }
+
+        .dropdown-item:hover code {
+            color: var(--accent);
+            background-color: rgba(245, 158, 11, 0.1);
+        }
+
+        /* Önizleme Modu */
+        .preview-container {
+            display: none;
+            flex: 1;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            background-color: var(--bg-elevated);
+            overflow-y: auto;
+            padding: 24px;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .preview-container.show {
+            display: flex;
+        }
+
+        .preview-mail-meta {
+            background-color: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .meta-line {
+            display: flex;
+            font-size: 0.8rem;
+        }
+
+        .meta-label {
+            width: 80px;
+            font-weight: 700;
+            color: var(--text-secondary);
+        }
+
+        .meta-value {
+            flex: 1;
+            font-weight: 500;
+        }
+
+        .preview-mail-body {
+            background-color: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 24px;
+            box-shadow: var(--shadow-sm);
+            font-size: 0.9rem;
+            line-height: 1.7;
+            white-space: pre-wrap;
+            min-height: 250px;
+            color: var(--text-primary);
+        }
+
+        /* Değişken Analiz Bölümü */
+        .analysis-card {
+            background-color: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 16px 20px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .analysis-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .analysis-header h3 {
+            font-size: 0.85rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .chips-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: var(--radius-full);
+            font-size: 0.7rem;
+            font-weight: 600;
+            border: 1px solid var(--border);
+            background-color: var(--bg-elevated);
+            transition: var(--transition);
+        }
+
+        .chip.valid {
+            border-color: rgba(16, 185, 129, 0.2);
+            background-color: rgba(16, 185, 129, 0.08);
+            color: var(--success);
+        }
+
+        .chip.invalid {
+            border-color: rgba(239, 68, 68, 0.2);
+            background-color: rgba(239, 68, 68, 0.08);
+            color: var(--danger);
+        }
+
+        .chip.optional {
+            border-color: var(--border);
+            background-color: var(--bg-elevated);
+            color: var(--text-secondary);
+            opacity: 0.7;
+        }
+
+        .chip.optional.valid {
+            border-color: rgba(16, 185, 129, 0.15);
+            background-color: rgba(16, 185, 129, 0.04);
+            color: var(--success);
+            opacity: 1;
+        }
+
+        /* Sağ Panel */
+        .right-panel {
+            width: 300px;
+            background-color: var(--bg-surface);
+            border-left: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            flex-shrink: 0;
+            transition: var(--transition);
+        }
+
+        .right-panel-scroll {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        /* Sağ Panel Widget Stilleri */
+        .panel-widget {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .widget-title {
+            font-size: 0.8rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        /* Eksik Bilgi Kuralları Kontrolleri */
+        .rules-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            background-color: var(--bg-elevated);
+            padding: 14px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border);
+        }
+
+        .rule-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .form-switch {
+            position: relative;
+            display: inline-block;
+            width: 34px;
+            height: 20px;
+        }
+
+        .form-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .switch-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--border-hover);
+            transition: .3s;
+            border-radius: 20px;
+        }
+
+        .switch-slider:before {
+            position: absolute;
+            content: "";
+            height: 14px;
+            width: 14px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .3s;
+            border-radius: 50%;
+        }
+
+        input:checked + .switch-slider {
+            background-color: var(--accent);
+        }
+
+        input:checked + .switch-slider:before {
+            transform: translateX(14px);
+        }
+
+        .rule-group-title {
+            font-size: 0.65rem;
+            font-weight: 800;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            margin-top: 6px;
+            margin-bottom: 2px;
+        }
+
+        .rule-checkbox-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            cursor: pointer;
+            color: var(--text-secondary);
+        }
+
+        .checkbox-label input {
+            accent-color: var(--accent);
+            width: 13px;
+            height: 13px;
+        }
+
+        .rule-numeric-input {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .rule-numeric-input input {
+            width: 50px;
+            padding: 4px 6px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+            text-align: center;
+            background-color: var(--bg-surface);
+        }
+
+        /* Taşıyıcı Kartları */
+        .carriers-list {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .carrier-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .carrier-group-title {
+            font-size: 0.7rem;
+            font-weight: 800;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            margin-bottom: 2px;
+        }
+
+        .carrier-card {
+            background-color: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            transition: var(--transition);
+        }
+
+        .carrier-card:hover {
+            border-color: var(--border-hover);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .carrier-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .carrier-info h4 {
+            font-size: 0.8rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .carrier-email {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+        }
+
+        .carrier-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.65rem;
+            color: var(--text-secondary);
+            border-top: 1px solid var(--border);
+            padding-top: 6px;
+            margin-top: 4px;
+        }
+
+        .carrier-routes {
+            font-weight: 600;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 140px;
+        }
+
+        .carrier-stars {
+            display: flex;
+            color: var(--accent);
+            gap: 1px;
+        }
+
+        .carrier-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .delete-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .delete-btn:hover {
+            color: var(--danger);
+        }
+
+        /* Taşıyıcı Ekleme Modalı / Formu */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(15, 23, 42, 0.4);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background-color: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            width: 420px;
+            max-width: 90%;
+            box-shadow: var(--shadow-premium);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .modal-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .modal-header h3 {
+            font-size: 0.95rem;
+            font-weight: 800;
+        }
+
+        .modal-body {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            max-height: 480px;
+            overflow-y: auto;
+        }
+
+        .modal-footer {
+            padding: 16px 20px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            background-color: var(--bg-elevated);
+        }
+
+        /* Yıldız Seçimi Formu */
+        .stars-select {
+            display: flex;
+            gap: 4px;
+            color: var(--text-muted);
+            font-size: 1.25rem;
+            cursor: pointer;
+        }
+
+        .stars-select span.selected {
+            color: var(--accent);
+        }
+
+        /* Alt Bar */
+        .footer-bar {
+            height: 40px;
+            background-color: var(--bg-surface);
+            border-top: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            font-size: 0.72rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+            z-index: 100;
+            transition: var(--transition);
+        }
+
+        .footer-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background-color: var(--success);
+            position: relative;
+        }
+
+        .status-dot.active::after {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            width: 11px;
+            height: 11px;
+            border-radius: 50%;
+            background-color: var(--success);
+            opacity: 0.4;
+            animation: ping 1.5s infinite;
+        }
+
+        .footer-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .footer-badge {
+            background-color: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 2px 6px;
+            font-weight: 600;
+            font-size: 0.68rem;
+        }
+
+        /* Tema Değiştirme Butonu */
+        .theme-toggle-btn {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            width: 36px;
+            height: 36px;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            transition: var(--transition);
+        }
+
+        .theme-toggle-btn:hover {
+            background-color: var(--bg-elevated);
+            color: var(--accent);
+        }
+
+        /* Animasyonlar */
+        @keyframes ping {
+            0% { transform: scale(1); opacity: 0.4; }
+            100% { transform: scale(2); opacity: 0; }
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-10px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        /* Scrollbar Özelleştirme */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-hover);
+            border-radius: var(--radius-full);
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted);
+        }
+
+        /* Mobil Uyum */
+        @media (max-width: 1024px) {
+            .main-container {
+                flex-direction: column;
+                height: auto;
+                overflow: visible;
+            }
+            .left-panel, .right-panel {
+                width: 100%;
+                border: none;
+                height: 400px;
+            }
+            .center-panel {
+                height: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Üst Başlık ve Navigasyon -->
+    <header>
+        <div class="logo-area">
+            <span class="logo-icon">
+                <!-- Anchor SVG -->
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="3"/><line x1="12" y1="22" x2="12" y2="8"/><path d="M5 12H2a10 10 0 0 0 20 0h-3"/><path d="M19 12a7 7 0 0 1-14 0"/></svg>
+            </span>
+            <span class="logo-text">PRUVA <span class="logo-tag">PRICING AI</span></span>
+        </div>
+        <div class="header-actions">
+            <!-- Açık/Koyu Tema Değiştirici -->
+            <button class="theme-toggle-btn" id="theme-toggle" title="Temayı Değiştir">
+                <!-- Sun/Moon SVG -->
+                <svg id="theme-sun" style="display:none;" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="M4.93 4.93l1.41 1.41"/><path d="M17.66 17.66l1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="M6.34 17.66l-1.41 1.41"/><path d="M19.07 4.93l-1.41 1.41"/></svg>
+                <svg id="theme-moon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+            </button>
+        </div>
+    </header>
+
+    <!-- 3 Kolonlu Ana Konteyner -->
+    <div class="main-container">
+        
+        <!-- SOL PANEL: Taşıma Modları ve Şablon Listesi -->
+        <div class="left-panel">
+            <!-- Taşıma Modu Sekmeleri -->
+            <div class="mode-tabs">
+                <button class="mode-tab active" data-mode="fcl" onclick="switchMode('fcl')">D-FCL</button>
+                <button class="mode-tab" data-mode="lcl" onclick="switchMode('lcl')">D-LCL</button>
+                <button class="mode-tab" data-mode="air" onclick="switchMode('air')">Hava</button>
+                <button class="mode-tab" data-mode="road" onclick="switchMode('road')">Kara</button>
+            </div>
+            
+            <!-- Şablon Kartı Listesi -->
+            <div class="templates-scroll-area">
+                <div class="template-section-title">Şablon Modelleri</div>
+                <div id="templates-list-container">
+                    <!-- Dinamik olarak yüklenecek -->
+                </div>
+            </div>
+
+            <!-- Ortak Şablon: Eksik Bilgi Sorgulama -->
+            <div class="common-templates-area">
+                <div class="template-section-title">Ortak Şablon</div>
+                <div class="template-card missing-info-card" id="card-missing-info" onclick="selectTemplate('common-missing')">
+                    <h4>Eksik Bilgi Sorgulama</h4>
+                    <p id="desc-common-missing">Müşteriden eksik detayları talep eden mail şablonu</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ORTA PANEL: Editör ve Canlı Değişken Analizi -->
+        <div class="center-panel">
+            
+            <!-- Editör Kartı -->
+            <div class="editor-card">
+                <div class="editor-header">
+                    <div class="editor-title-area">
+                        <h2 id="current-template-title">Yükleniyor...</h2>
+                        <span id="current-template-subtitle">Şablon düzenleme alanı</span>
+                    </div>
+                    <div class="editor-actions">
+                        <!-- Önizleme / Editör Geçişi -->
+                        <button class="btn btn-secondary" id="preview-toggle-btn" onclick="togglePreviewMode()">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                            <span>Önizleme</span>
+                        </button>
+                        
+                        <!-- Sıfırla ve Kaydet Butonları -->
+                        <button class="btn btn-danger btn-icon-only" onclick="resetCurrentTemplate()" title="Varsayılana Sıfırla">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                        </button>
+                        <button class="btn btn-primary" onclick="saveCurrentTemplate()">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                            <span>Şablonu Kaydet</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Editör Gövdesi -->
+                <div class="editor-body" id="editor-body-panel">
+                    
+                    <!-- Konu Satırı Girişi -->
+                    <div class="input-group">
+                        <label class="input-label" for="template-subject">E-POSTA KONU SATIRI</label>
+                        <input type="text" class="text-input" id="template-subject" oninput="analyzeVariables()" placeholder="E-posta konu satırı buraya gelecek...">
+                    </div>
+
+                    <!-- E-posta Gövdesi Editörü -->
+                    <div class="input-group textarea-container">
+                        <label class="input-label">E-POSTA İÇERİĞİ</label>
+                        
+                        <!-- Toolbar -->
+                        <div class="editor-toolbar">
+                            <!-- Değişken Ekle Dropdown -->
+                            <div class="dropdown-wrapper">
+                                <button class="btn btn-secondary" onclick="toggleVariablesDropdown(event)">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                                    <span>Değişken Ekle</span>
+                                </button>
+                                
+                                <div class="dropdown-menu" id="variables-dropdown">
+                                    <div class="dropdown-header">Eklenebilir Değişkenler</div>
+                                    <div class="dropdown-sections" id="dropdown-variables-container">
+                                        <!-- Dinamik olarak yüklenecek -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <textarea class="editor-textarea" id="template-body" oninput="analyzeVariables()" placeholder="E-posta metnini yazın. Değişken eklemek için yukarıdaki butonu kullanın..."></textarea>
+                    </div>
+                </div>
+
+                <!-- Önizleme Gövdesi (Varsayılan Olarak Gizli) -->
+                <div class="preview-container" id="preview-body-panel">
+                    <div class="preview-mail-meta">
+                        <div class="meta-line">
+                            <span class="meta-label">Kime:</span>
+                            <span class="meta-value" id="preview-to">Alici Firma</span>
+                        </div>
+                        <div class="meta-line">
+                            <span class="meta-label">Konu:</span>
+                            <span class="meta-value" id="preview-subject" style="font-weight: 700;">Konu Önizlemesi</span>
+                        </div>
+                    </div>
+                    <div class="preview-mail-body" id="preview-content">
+                        Mail önizleme içeriği...
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Şablon Değişken Analiz Bölümü -->
+            <div class="analysis-card">
+                <div class="analysis-header">
+                    <h3>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+                        Şablon Değişken Analizi
+                    </h3>
+                    <span id="analysis-summary" style="font-size: 0.72rem; font-weight: 700;"></span>
+                </div>
+                <div class="chips-container" id="variables-analysis-chips">
+                    <!-- Dinamik Değişken Analizi -->
+                </div>
+            </div>
+
+        </div>
+
+        <!-- SAĞ PANEL: Ayarlar & Taşıyıcı Yönetimi -->
+        <div class="right-panel">
+            <div class="right-panel-scroll">
+                
+                <!-- WIDGET 1: Eksik Bilgi Kuralları (Taşıma moduna göre dinamikleşir) -->
+                <div class="panel-widget">
+                    <div class="widget-title">
+                        <span>Eksik Bilgi Kuralları</span>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    </div>
+                    
+                    <div class="rules-container">
+                        <!-- Otomatik Sorgulama Toggle -->
+                        <div class="rule-item" style="padding-bottom: 8px; border-bottom: 1px solid var(--border); margin-bottom: 4px;">
+                            <span>Otomatik Sorgulama</span>
+                            <label class="form-switch">
+                                <input type="checkbox" id="rule-auto-inquiry" onchange="saveRuleSettings()">
+                                <span class="switch-slider"></span>
+                            </label>
+                        </div>
+                        
+                        <!-- Maksimum Sorgulama Turu -->
+                        <div class="rule-numeric-input">
+                            <span>Maks. Sorgulama Turu:</span>
+                            <input type="number" id="rule-max-rounds" min="1" max="10" value="3" onchange="saveRuleSettings()">
+                        </div>
+                        
+                        <!-- Zorunlu Değişken Seçiciler -->
+                        <div class="rule-group-title">Zorunlu Alanlar</div>
+                        <div class="rule-checkbox-grid" id="mandatory-rules-checkboxes">
+                            <!-- Dinamik olarak o modun zorunlu değişkenleri listelenir -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- WIDGET 2: Taşıyıcı Listesi -->
+                <div class="panel-widget">
+                    <div class="widget-title">
+                        <span>Taşıyıcı / Acenteler</span>
+                        <button class="btn btn-secondary btn-icon-only" style="padding: 2px 6px; font-size: 0.7rem; display: flex; align-items: center; gap: 4px;" onclick="openAddCarrierModal()">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                            <span>Ekle</span>
+                        </button>
+                    </div>
+                    
+                    <div class="carriers-list" id="carriers-list-container">
+                        <!-- Dinamik olarak kategoriye göre listelenecek -->
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Alt Bar (Footer Status) -->
+    <div class="footer-bar">
+        <div class="footer-left">
+            <div class="status-indicator">
+                <span class="status-dot active"></span>
+                <span>Outlook Bağlantısı Aktif</span>
+            </div>
+            <span style="color: var(--text-muted);">|</span>
+            <span id="last-scan-time">Son Mail Tarama: 2 dakika önce</span>
+        </div>
+        <div class="footer-right">
+            <span class="footer-badge" id="badge-pending-actions" style="border-color: rgba(59, 130, 246, 0.3); background-color: rgba(59, 130, 246, 0.05); color: var(--info);">3 Bekleyen Aksiyon</span>
+            <span class="footer-badge" id="badge-pending-rfqs" style="border-color: rgba(245, 158, 11, 0.3); background-color: rgba(245, 158, 11, 0.05); color: var(--accent);">5 Eksik Bilgi Bekleyen</span>
+        </div>
+    </div>
+
+    <!-- TAŞIYICI EKLEME MODALI -->
+    <div class="modal-overlay" id="add-carrier-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Yeni Taşıyıcı Ekle</h3>
+                <button class="delete-btn" onclick="closeAddCarrierModal()" style="font-size: 1.2rem;">&times;</button>
+            </div>
+            <div class="modal-body">
+                <!-- Firma Adı -->
+                <div class="input-group">
+                    <label class="input-label" for="carrier-form-name">Firma Adı</label>
+                    <input type="text" class="text-input" id="carrier-form-name" placeholder="Örn: MSC, Mars Lojistik...">
+                </div>
+                
+                <!-- E-posta -->
+                <div class="input-group">
+                    <label class="input-label" for="carrier-form-email">E-posta Adresi</label>
+                    <input type="email" class="text-input" id="carrier-form-email" placeholder="Örn: pricing@msc.com">
+                </div>
+                
+                <!-- Kategori Seçimi -->
+                <div class="input-group">
+                    <label class="input-label" for="carrier-form-category">Kategori</label>
+                    <select class="text-input" id="carrier-form-category" style="padding: 8px 12px;">
+                        <option value="armator">Armatörler</option>
+                        <option value="nvocc">NVOCC / Konsolidatörler</option>
+                        <option value="acente">Yurt Dışı Acenteler</option>
+                        <option value="hava">Havayolu / Hava Freight</option>
+                        <option value="kara">Kara Nakliye Firmaları</option>
+                    </select>
+                </div>
+                
+                <!-- Tercih Skoru (Yıldızlar) -->
+                <div class="input-group">
+                    <label class="input-label">Tercih Skoru</label>
+                    <div class="stars-select" id="carrier-form-stars">
+                        <span onclick="setFormStars(1)" data-star="1">&#9733;</span>
+                        <span onclick="setFormStars(2)" data-star="2">&#9733;</span>
+                        <span onclick="setFormStars(3)" data-star="3">&#9733;</span>
+                        <span onclick="setFormStars(4)" data-star="4">&#9733;</span>
+                        <span onclick="setFormStars(5)" data-star="5">&#9733;</span>
+                    </div>
+                </div>
+
+                <!-- Hangi Şablon Gönderilsin -->
+                <div class="input-group">
+                    <label class="input-label" for="carrier-form-template">Varsayılan Gönderim Şablonu</label>
+                    <select class="text-input" id="carrier-form-template" style="padding: 8px 12px;">
+                        <!-- Dinamik doldurulacak -->
+                    </select>
+                </div>
+
+                <!-- Güzergahlar / Bölgeler (Checkboxlar) -->
+                <div class="input-group">
+                    <label class="input-label">Etkin Güzergahlar</label>
+                    <div class="rule-checkbox-grid" style="margin-top: 4px;">
+                        <label class="checkbox-label"><input type="checkbox" name="carrier-regions" value="Far East"> Far East</label>
+                        <label class="checkbox-label"><input type="checkbox" name="carrier-regions" value="Med"> Med</label>
+                        <label class="checkbox-label"><input type="checkbox" name="carrier-regions" value="Karadeniz"> Karadeniz</label>
+                        <label class="checkbox-label"><input type="checkbox" name="carrier-regions" value="Kuzey Avrupa"> Kuzey Avrupa</label>
+                        <label class="checkbox-label"><input type="checkbox" name="carrier-regions" value="Amerika"> Amerika</label>
+                        <label class="checkbox-label"><input type="checkbox" name="carrier-regions" value="Orta Doğu"> Orta Doğu</label>
+                        <label class="checkbox-label"><input type="checkbox" name="carrier-regions" value="Afrika"> Afrika</label>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeAddCarrierModal()">Vazgeç</button>
+                <button class="btn btn-primary" onclick="saveNewCarrier()">Taşıyıcıyı Kaydet</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT ÇEKİRDEK MANTIĞI -->
+    <script>
+        // ─────────────────────────────────────────────────────────────
+        // 1. DEFAULT ŞABLON VERİLERİ (Hardcoded Orijinaller)
+        // ─────────────────────────────────────────────────────────────
+        const DEFAULT_TEMPLATES = {
+            // Deniz FCL
+            'fcl-request': {
+                name: 'FCL Rate Request',
+                subject: 'Rate Request – {{POL}} / {{POD}} – {{KONTEYNER_TİPİ}} x{{ADET}} – {{YÜKLEME_TARİHİ}}',
+                body: 'Sayın {{TAŞIYICI_ADI}},\n\nAşağıdaki yük için spot navlun fiyatı talep ediyoruz:\n\nPOL: {{POL}}\nPOD: {{POD}}\nKonteyner: {{KONTEYNER_TİPİ}} x {{ADET}}\nYükleme Tarihi: {{YÜKLEME_TARİHİ}}\nIncoterm: {{INCOTERM}}\nYük Cinsi: {{YÜK_CİNSİ}}\n\nAll-in fiyat bekliyoruz. Fiyatınızı geçerlilik süresiyle birlikte iletirseniz seviniriz.\n\nTeşekkürler,\n{{İMZA}}'
+            },
+            'fcl-offer': {
+                name: 'FCL Müşteri Teklifi',
+                subject: 'Navlun Teklifi – {{POL}} / {{POD}} – {{KONTEYNER_TİPİ}} x{{ADET}}',
+                body: 'Sayın {{MÜŞTERİ_ADI}},\n\nTalebiniz doğrultusunda aşağıdaki navlun teklifini sunmaktayız:\n\nGüzergah: {{POL}} → {{POD}}\nKonteyner: {{KONTEYNER_TİPİ}} x {{ADET}}\nYükleme Tarihi: {{YÜKLEME_TARİHİ}}\nIncoterm: {{INCOTERM}}\nNavlun (All-in): USD {{NAVLUN_FİYATI}} / konteyner\nFiyat Geçerliliği: {{GEÇERLİLİK_SÜRESİ}}\n\nSorularınız için her zaman ulaşabilirsiniz.\n\nSaygılarımızla,\n{{İMZA}}'
+            },
+            'fcl-negotiation': {
+                name: 'FCL Pazarlık',
+                subject: 'Re: Rate Request – {{POL}} / {{POD}} – Revize Talep',
+                body: 'Sayın {{TAŞIYICI_ADI}},\n\nVerdiğiniz fiyat için teşekkür ederiz. Ancak müşterimizin bütçesi doğrultusunda USD {{BEKLENEN_FİYAT}} seviyesinde revize talep ediyoruz.\n\nMevcut fiyatınız: USD {{NAVLUN_FİYATI}}\nBeklenen fiyat: USD {{BEKLENEN_FİYAT}}\nFark: USD {{FARK}}\n\nBu güzergahta düzenli yük potansiyelimiz bulunmaktadır. Revizenizi bekliyoruz.\n\nTeşekkürler,\n{{İMZA}}'
+            },
+            'fcl-followup': {
+                name: 'FCL Takip',
+                subject: 'Takip – Rate Request – {{POL}} / {{POD}} – {{YÜKLEME_TARİHİ}}',
+                body: 'Sayın {{TAŞIYICI_ADI}},\n\n{{TARİH}} tarihinde ilettiğimiz rate request\'e henüz dönüş alamadık. Yükleme tarihi yaklaşmaktadır, fiyatınızı paylaşabilir misiniz?\n\nTeşekkürler,\n{{İMZA}}'
+            },
+            
+            // Deniz LCL
+            'lcl-request': {
+                name: 'LCL Rate Request',
+                subject: 'LCL Rate Request – {{POL}} / {{POD}} – {{CBM}} CBM / {{KG}} KG – {{YÜKLEME_TARİHİ}}',
+                body: 'Sayın {{TAŞIYICI_ADI}},\n\nAşağıdaki parsiyel yük için navlun fiyatı talep ediyoruz:\n\nPOL / CFS: {{POL}} / {{CFS_POL}}\nPOD / CFS: {{POD}} / {{CFS_POD}}\nHacim: {{CBM}} CBM\nAğırlık: {{KG}} KG\nPaket Adedi: {{PAKET_ADEDI}}\nW/M: {{W_M}}\nYükleme Tarihi: {{YÜKLEME_TARİHİ}}\nIncoterm: {{INCOTERM}}\nYük Cinsi: {{YÜK_CİNSİ}}\n\nFiyatınızı geçerlilik süresiyle iletirseniz seviniriz.\n\nTeşekkürler,\n{{İMZA}}'
+            },
+            'lcl-offer': {
+                name: 'LCL Müşteri Teklifi',
+                subject: 'LCL Navlun Teklifi – {{POL}} / {{POD}} – {{CBM}} CBM',
+                body: 'Sayın {{MÜŞTERİ_ADI}},\n\nParsiyel yük talebiniz için aşağıdaki teklifi sunmaktayız:\n\nGüzergah: {{POL}} → {{POD}}\nHacim: {{CBM}} CBM / {{KG}} KG\nYükleme Tarihi: {{YÜKLEME_TARİHİ}}\nIncoterm: {{INCOTERM}}\nNavlun: USD {{NAVLUN_FİYATI}} / W/M\nFiyat Geçerliliği: {{GEÇERLİLİK_SÜRESİ}}\n\nSaygılarımızla,\n{{İMZA}}'
+            },
+            'lcl-negotiation': {
+                name: 'LCL Pazarlık',
+                subject: 'Re: LCL Rate Request – {{POL}} / {{POD}} – Revize Talep',
+                body: 'Sayın {{TAŞIYICI_ADI}},\n\nFiyatınız için teşekkürler. USD {{BEKLENEN_FİYAT}}/W/M seviyesinde revize mümkün müdür?\n\nMevcut: USD {{NAVLUN_FİYATI}} / W/M\nBeklenen: USD {{BEKLENEN_FİYAT}} / W/M\n\nTeşekkürler,\n{{İMZA}}'
+            },
+            'lcl-followup': {
+                name: 'LCL Takip',
+                subject: 'Takip – LCL Rate Request – {{POL}} / {{POD}} – {{YÜKLEME_TARİHİ}}',
+                body: 'Sayın {{TAŞIYICI_ADI}},\n\n{{TARİH}} tarihinde ilettiğimiz LCL rate request\'e dönüş alamadık. Fiyatınızı paylaşabilir misiniz?\n\nTeşekkürler,\n{{İMZA}}'
+            },
+
+            // Hava Yolu
+            'air-request': {
+                name: 'Hava Rate Request',
+                subject: 'Air Freight Rate Request – {{POL}} / {{POD}} – {{CHARGEABLE_WEIGHT}} KG – {{YÜKLEME_TARİHİ}}',
+                body: 'Sayın {{TAŞIYICI_ADI}},\n\nAşağıdaki hava yükü için fiyat talep ediyoruz:\n\nGüzergah: {{UCUŞ_GÜZERGAHI}}\nGerçek Ağırlık: {{KG}} KG\nHacimsel Ağırlık: {{HACIMSEL_AGIRLIK}} KG\nChargeable Weight: {{CHARGEABLE_WEIGHT}} KG\nBoyutlar: {{BOYUT}} cm\nPaket Adedi: {{PAKET_ADEDI}}\nYükleme Tarihi: {{YÜKLEME_TARİHİ}}\nIncoterm: {{INCOTERM}}\nYük Cinsi: {{YÜK_CİNSİ}}\n\nAll-in fiyat bekliyoruz.\n\nTeşekkürler,\n{{İMZA}}'
+            },
+            'air-offer': {
+                name: 'Hava Müşteri Teklifi',
+                subject: 'Hava Yolu Navlun Teklifi – {{POL}} / {{POD}} – {{CHARGEABLE_WEIGHT}} KG',
+                body: 'Sayın {{MÜŞTERİ_ADI}},\n\nHava yolu talebiniz için teklifimiz:\n\nGüzergah: {{UCUŞ_GÜZERGAHI}}\nChargeable Weight: {{CHARGEABLE_WEIGHT}} KG\nYükleme Tarihi: {{YÜKLEME_TARİHİ}}\nIncoterm: {{INCOTERM}}\nNavlun: USD {{NAVLUN_FİYATI}} / KG\nFiyat Geçerliliği: {{GEÇERLİLİK_SÜRESİ}}\n\nSaygılarımızla,\n{{İMZA}}'
+            },
+            'air-negotiation': {
+                name: 'Hava Pazarlık',
+                subject: 'Re: Air Freight Rate Request – {{POL}} / {{POD}} – Revize Talep',
+                body: 'Sayın {{TAŞIYICI_ADI}},\n\nFiyatınız için teşekkürler. USD {{BEKLENEN_FİYAT}}/KG seviyesinde revize mümkün müdür?\n\nMevcut: USD {{NAVLUN_FİYATI}} / KG\nBeklenen: USD {{BEKLENEN_FİYAT}} / KG\n\nTeşekkürler,\n{{İMZA}}'
+            },
+            'air-followup': {
+                name: 'Hava Takip',
+                subject: 'Takip – Air Freight Rate Request – {{POL}} / {{POD}} – {{YÜKLEME_TARİHİ}}',
+                body: 'Sayın {{TAŞIYICI_ADI}},\n\n{{TARİH}} tarihinde ilettiğimiz hava yolu rate request\'e dönüş alamadık. Fiyatınızı paylaşabilir misiniz?\n\nTeşekkürler,\n{{İMZA}}'
+            },
+
+            // Kara Yolu
+            'road-request': {
+                name: 'Kara Rate Request',
+                subject: 'Kara Taşıma Fiyat Talebi – {{POL}} / {{POD}} – {{ARAÇ_TİPİ}} – {{YÜKLEME_TARİHİ}}',
+                body: 'Sayın {{TAŞIYICI_ADI}},\n\nAşağıdaki kara taşıması için fiyat talep ediyoruz:\n\nGüzergah: {{GÜZERGAH}}\nAraç Tipi: {{ARAÇ_TİPİ}}\nAraç Adedi: {{ARAÇ_ADEDI}}\nAğırlık: {{KG}} KG\nYükleme Metresi: {{LDM}} LDM\nGümrük Noktası: {{GÜMRÜK_NOKTASI}}\nYükleme Tarihi: {{YÜKLEME_TARİHİ}}\nIncoterm: {{INCOTERM}}\nYük Cinsi: {{YÜK_CİNSİ}}\n\nTeşekkürler,\n{{İMZA}}'
+            },
+            'road-offer': {
+                name: 'Kara Müşteri Teklifi',
+                subject: 'Kara Taşıma Teklifi – {{POL}} / {{POD}} – {{ARAÇ_TİPİ}}',
+                body: 'Sayın {{MÜŞTERİ_ADI}},\n\nKara taşıma talebiniz için teklifimiz:\n\nGüzergah: {{GÜZERGAH}}\nAraç Tipi: {{ARAÇ_TİPİ}}\nYükleme Tarihi: {{YÜKLEME_TARİHİ}}\nNavlun: USD {{NAVLUN_FİYATI}} / araç\nFiyat Geçerliliği: {{GEÇERLİLİK_SÜRESİ}}\n\nSaygılarımızla,\n{{İMZA}}'
+            },
+            'road-negotiation': {
+                name: 'Kara Pazarlık',
+                subject: 'Re: Kara Taşıma Fiyat Talebi – {{POL}} / {{POD}} – Revize Talep',
+                body: 'Sayın {{TAŞIYICI_ADI}},\n\nFiyatınız için teşekkürler. USD {{BEKLENEN_FİYAT}}/araç seviyesinde revize mümkün müdür?\n\nMevcut: USD {{NAVLUN_FİYATI}} / araç\nBeklenen: USD {{BEKLENEN_FİYAT}} / araç\n\nTeşekkürler,\n{{İMZA}}'
+            },
+            'road-followup': {
+                name: 'Kara Takip',
+                subject: 'Takip – Kara Taşıma Fiyat Talebi – {{POL}} / {{POD}} – {{YÜKLEME_TARİHİ}}',
+                body: 'Sayın {{TAŞIYICI_ADI}},\n\n{{TARİH}} tarihinde ilettiğimiz kara taşıma fiyat talebine dönüş alamadık. Fiyatınızı paylaşabilir misiniz?\n\nTeşekkürler,\n{{İMZA}}'
+            },
+
+            // Ortak Şablon
+            'common-missing': {
+                name: 'Eksik Bilgi Sorgulama',
+                subject: 'Navlun Talebi – Ek Bilgi Gerekli',
+                body: 'Sayın {{MÜŞTERİ_ADI}},\n\nNavlun talebinizi aldık, teşekkür ederiz.\n\nFiyatlandırma yapabilmemiz için aşağıdaki bilgilere ihtiyaç duyuyoruz:\n{{EKSİK_BİLGİLER}}\n\nMevcut bilgileriniz:\n{{MEVCUT_BİLGİLER}}\n\nBu bilgileri ilettiğinizde en kısa sürede fiyat teklifimizi sunacağız.\n\nSaygılarımızla,\n{{İMZA}}'
+            }
+        };
+
+        // ─────────────────────────────────────────────────────────────
+        // 2. MOCK TAŞIYICI VERİLERİ (Başlangıç Seti)
+        // ─────────────────────────────────────────────────────────────
+        const DEFAULT_CARRIERS = [
+            { id: 1, name: 'MSC', email: 'pricing@msc.com', category: 'armator', regions: ['Far East', 'Med'], rating: 5, template: 'fcl-request', active: true },
+            { id: 2, name: 'Maersk', email: 'quotes@maersk.com', category: 'armator', regions: ['Far East', 'Kuzey Avrupa', 'Amerika'], rating: 4, template: 'fcl-request', active: true },
+            { id: 3, name: 'Hapag-Lloyd', email: 'rates@hlcl.com', category: 'armator', regions: ['Med', 'Karadeniz', 'Orta Doğu'], rating: 4, template: 'fcl-request', active: false },
+            { id: 4, name: 'Cargo One', email: 'lcl@cargoone.com', category: 'nvocc', regions: ['Far East', 'Med'], rating: 3, template: 'lcl-request', active: true },
+            { id: 5, name: 'Seafreight Hub', email: 'spot@seafreighthub.com', category: 'nvocc', regions: ['Far East', 'Kuzey Avrupa'], rating: 4, template: 'lcl-request', active: true },
+            { id: 6, name: 'Turkish Cargo', email: 'cargo@thy.com', category: 'hava', regions: ['Far East', 'Med', 'Karadeniz', 'Kuzey Avrupa', 'Amerika', 'Orta Doğu', 'Afrika'], rating: 5, template: 'air-request', active: true },
+            { id: 7, name: 'Lufthansa Cargo', email: 'pricing@lh-cargo.com', category: 'hava', regions: ['Kuzey Avrupa', 'Amerika'], rating: 4, template: 'air-request', active: true },
+            { id: 8, name: 'Ekol Lojistik', email: 'road.pricing@ekol.com', category: 'kara', regions: ['Kuzey Avrupa', 'Orta Asya'], rating: 4, template: 'road-request', active: true },
+            { id: 9, name: 'Mars Lojistik', email: 'prices@mars.com', category: 'kara', regions: ['Kuzey Avrupa', 'Orta Doğu'], rating: 3, template: 'road-request', active: false }
+        ];
+
+        // Kategori Etiketleri
+        const CATEGORIES = {
+            'armator': 'Armatörler',
+            'nvocc': 'NVOCC / Konsolidatörler',
+            'acente': 'Yurt Dışı Acenteler',
+            'hava': 'Havayolu / Hava Freight',
+            'kara': 'Kara Nakliye Firmaları'
+        };
+
+        // ─────────────────────────────────────────────────────────────
+        // 3. DEĞİŞKEN TANIMLARI (Taşıma Moduna Göre)
+        // ─────────────────────────────────────────────────────────────
+        const VARIABLES_CONFIG = {
+            common: {
+                title: 'Ortak Değişkenler',
+                items: [
+                    { key: 'TAŞIYICI_ADI', label: 'Taşıyıcı Firma Adı' },
+                    { key: 'MÜŞTERİ_ADI', label: 'Müşteri Firma Adı' },
+                    { key: 'MÜŞTERİ_MAİL', label: 'Müşteri E-Posta' },
+                    { key: 'ŞİRKET_ADI', label: 'Kendi Şirket Adı' },
+                    { key: 'İMZA', label: 'İmza Satırı' },
+                    { key: 'TARİH', label: 'Bugünün Tarihi' },
+                    { key: 'BÖLGE', label: 'Güzergah Özeti' },
+                    { key: 'POL', label: 'Yükleme Limanı (POL)' },
+                    { key: 'POD', label: 'Varış Limanı (POD)' },
+                    { key: 'INCOTERM', label: 'Incoterm (FOB, EXW vb.)' },
+                    { key: 'YÜK_CİNSİ', label: 'Yükün Cinsi' },
+                    { key: 'YÜKLEME_TARİHİ', label: 'Yükleme Tarihi' },
+                    { key: 'GEÇERLİLİK_SÜRESİ', label: 'Teklif Geçerlilik Süresi' },
+                    { key: 'NAVLUN_FİYATI', label: 'Navlun Fiyatı' },
+                    { key: 'BEKLENEN_FİYAT', label: 'Müşteri Hedef Fiyatı' },
+                    { key: 'FARK', label: 'Fiyat Farkı' },
+                    { key: 'EKSİK_BİLGİLER', label: 'AI Dinamik Eksik Bilgiler' },
+                    { key: 'MEVCUT_BİLGİLER', label: 'Mevcut Bilgiler Özeti' }
+                ]
+            },
+            fcl: {
+                title: 'FCL Özel Değişkenleri',
+                items: [
+                    { key: 'KONTEYNER_TİPİ', label: 'Konteyner Tipi (40HC, 20GP...)' },
+                    { key: 'ADET', label: 'Konteyner Adedi' },
+                    { key: 'ARMATÖR', label: 'Tercih Edilen Armatör' }
+                ]
+            },
+            lcl: {
+                title: 'LCL Özel Değişkenleri',
+                items: [
+                    { key: 'CBM', label: 'Hacim (Metreküp)' },
+                    { key: 'KG', label: 'Ağırlık (Kilogram)' },
+                    { key: 'PAKET_ADEDI', label: 'Koli / Palet Adedi' },
+                    { key: 'W_M', label: 'W/M Katsayısı' },
+                    { key: 'CFS_POL', label: 'Çıkış CFS Deposu' },
+                    { key: 'CFS_POD', label: 'Varış CFS Deposu' }
+                ]
+            },
+            air: {
+                title: 'Hava Yolu Özel Değişkenleri',
+                items: [
+                    { key: 'KG', label: 'Ağırlık (Brüt)' },
+                    { key: 'HACIMSEL_AGIRLIK', label: 'Hacimsel Ağırlık' },
+                    { key: 'CHARGEABLE_WEIGHT', label: 'Faturalandırılabilir Ağırlık' },
+                    { key: 'BOYUT', label: 'Koli Boyutları (EnxBoyxYük)' },
+                    { key: 'PAKET_ADEDI', label: 'Koli Adedi' },
+                    { key: 'UCUŞ_GÜZERGAHI', label: 'Uçuş Parkuru (örn: IST-JFK)' }
+                ]
+            },
+            road: {
+                title: 'Kara Yolu Özel Değişkenleri',
+                items: [
+                    { key: 'ARAÇ_TİPİ', label: 'Araç Tipi (Tır, Mega...)' },
+                    { key: 'LDM', label: 'Yükleme Metresi (LDM)' },
+                    { key: 'KG', label: 'Ağırlık (KG)' },
+                    { key: 'GÜMRÜK_NOKTASI', label: 'Gümrük Geçiş Kapısı' },
+                    { key: 'GÜZERGAH', label: 'Kalkış/Varış Şehirleri' },
+                    { key: 'ARAÇ_ADEDI', label: 'Gerekli Araç Sayısı' }
+                ]
+            }
+        };
+
+        // Zorunlu alanlar listesi (Taşıma modlarına göre)
+        const MANDATORY_CONFIG = {
+            fcl: ['POL', 'POD', 'KONTEYNER_TİPİ', 'ADET', 'YÜKLEME_TARİHİ', 'INCOTERM', 'YÜK_CİNSİ'],
+            lcl: ['POL', 'POD', 'CBM', 'KG', 'PAKET_ADEDI', 'YÜKLEME_TARİHİ', 'INCOTERM', 'YÜK_CİNSİ'],
+            air: ['POL', 'POD', 'KG', 'HACIMSEL_AGIRLIK', 'BOYUT', 'PAKET_ADEDI', 'YÜKLEME_TARİHİ', 'INCOTERM', 'YÜK_CİNSİ'],
+            road: ['POL', 'POD', 'ARAÇ_TİPİ', 'KG', 'YÜKLEME_TARİHİ', 'INCOTERM', 'YÜK_CİNSİ']
+        };
+
+        // Önizleme Değerleri (Gerçekçi Mock Veriler)
+        const MOCK_PREVIEW_VALUES = {
+            'POL': 'Şangay',
+            'POD': 'Ambarlı',
+            'TAŞIYICI_ADI': 'MSC',
+            'MÜŞTERİ_ADI': 'Arçelik',
+            'MÜŞTERİ_MAİL': 'info@arcelik.com',
+            'KONTEYNER_TİPİ': '40HC',
+            'ADET': '2',
+            'YÜKLEME_TARİHİ': '15 Temmuz 2026',
+            'INCOTERM': 'FOB',
+            'YÜK_CİNSİ': 'Genel Kargo',
+            'NAVLUN_FİYATI': '1850',
+            'GEÇERLİLİK_SÜRESİ': '30 Haziran 2026',
+            'BEKLENEN_FİYAT': '1600',
+            'FARK': '250',
+            'ŞİRKET_ADI': 'Pruva Lojistik',
+            'İMZA': 'Ahmet Yılmaz / Pricing',
+            
+            // LCL Ek
+            'CBM': '12',
+            'KG': '4500',
+            'PAKET_ADEDI': '8',
+            'W_M': '12',
+            'CFS_POL': 'Şangay CFS Deposu',
+            'CFS_POD': 'Ambarlı CFS Deposu',
+
+            // Hava Ek
+            'HACIMSEL_AGIRLIK': '1500',
+            'CHARGEABLE_WEIGHT': '4500',
+            'BOYUT': '120 x 80 x 160',
+            'UCUŞ_GÜZERGAHI': 'PVG → IST',
+
+            // Kara Ek
+            'ARAÇ_TİPİ': 'TIR (Tır-Mega)',
+            'LDM': '4.2',
+            'GÜMRÜK_NOKTASI': 'Kapıkule Gümrük',
+            'GÜZERGAH': 'İstanbul → Münih',
+            'ARAÇ_ADEDI': '1',
+
+            // Ortak / AI
+            'TARİH': '27 Mayıs 2026',
+            'BÖLGE': 'Uzak Doğu - Türkiye Güzergahı',
+            'EKSİK_BİLGİLER': '• Konteyner Tipi (Örn: 40HC)\n• Yükleme Tarihi (Planlanan)',
+            'MEVCUT_BİLGİLER': 'Çıkış: Şangay, Varış: Ambarlı, Incoterm: FOB, Yük Cinsi: Genel Kargo',
+            'ARMATÖR': 'MSC Lojistik'
+        };
+
+        // ─────────────────────────────────────────────────────────────
+        // 4. DURUM YÖNETİMİ (State Management)
+        // ─────────────────────────────────────────────────────────────
+        let state = {
+            currentMode: 'fcl',            // fcl, lcl, air, road
+            activeTemplateKey: '',         // fcl-request vb.
+            previewMode: false,            // Önizleme açık mı?
+            templates: {},                 // LocalStorage entegreli şablonlar
+            carriers: [],                  // LocalStorage entegreli taşıyıcılar
+            activeStarsForm: 5,            // Taşıyıcı ekleme formu yıldız sayısı
+            rules: {                       // Eksik Bilgi Kuralları
+                autoInquiry: true,
+                maxRounds: 3,
+                disabledMandatories: []    // Kullanıcının devredışı bıraktığı zorunlu alanlar
+            }
+        };
+
+        // ─────────────────────────────────────────────────────────────
+        // 5. BAŞLANGIÇ ÇALIŞTIRICISI (App Initializer)
+        // ─────────────────────────────────────────────────────────────
+        window.addEventListener('DOMContentLoaded', () => {
+            initTheme();
+            loadStateFromStorage();
+            switchMode(state.currentMode);
+            renderCarriers();
+            initVariablesDropdown();
+            
+            // Pencereye tıklanırsa değişken dropdown menüsünü kapat
+            window.addEventListener('click', (e) => {
+                const dropdown = document.getElementById('variables-dropdown');
+                if (dropdown && !e.target.closest('.dropdown-wrapper')) {
+                    dropdown.classList.remove('show');
+                }
+            });
+        });
+
+        // Tema Başlangıç Ayarı
+        function initTheme() {
+            const savedTheme = localStorage.getItem('pruva_theme') || 'light';
+            if (savedTheme === 'dark') {
+                document.body.classList.add('dark-mode');
+                document.getElementById('theme-sun').style.display = 'block';
+                document.getElementById('theme-moon').style.display = 'none';
+            } else {
+                document.body.classList.remove('dark-mode');
+                document.getElementById('theme-sun').style.display = 'none';
+                document.getElementById('theme-moon').style.display = 'block';
+            }
+            
+            document.getElementById('theme-toggle').addEventListener('click', () => {
+                const isDark = document.body.classList.toggle('dark-mode');
+                localStorage.setItem('pruva_theme', isDark ? 'dark' : 'light');
+                
+                document.getElementById('theme-sun').style.display = isDark ? 'block' : 'none';
+                document.getElementById('theme-moon').style.display = isDark ? 'none' : 'block';
+            });
+        }
+
+        // State Verilerini LocalStorage / Defaultlardan Yükle
+        function loadStateFromStorage() {
+            // Şablon Yükleme
+            const storedTemplates = localStorage.getItem('pruva_ai_templates');
+            if (storedTemplates) {
+                state.templates = JSON.parse(storedTemplates);
+            } else {
+                state.templates = JSON.parse(JSON.stringify(DEFAULT_TEMPLATES));
+            }
+
+            // Taşıyıcı Yükleme
+            const storedCarriers = localStorage.getItem('pruva_ai_carriers');
+            if (storedCarriers) {
+                state.carriers = JSON.parse(storedCarriers);
+            } else {
+                state.carriers = JSON.parse(JSON.stringify(DEFAULT_CARRIERS));
+                saveCarriersToStorage();
+            }
+
+            // Kural Ayarları Yükleme
+            const storedRules = localStorage.getItem('pruva_ai_rules');
+            if (storedRules) {
+                state.rules = JSON.parse(storedRules);
+                document.getElementById('rule-auto-inquiry').checked = state.rules.autoInquiry;
+                document.getElementById('rule-max-rounds').value = state.rules.maxRounds;
+            } else {
+                document.getElementById('rule-auto-inquiry').checked = state.rules.autoInquiry;
+                document.getElementById('rule-max-rounds').value = state.rules.maxRounds;
+            }
+        }
+
+        // Taşıyıcıları Kaydet
+        function saveCarriersToStorage() {
+            localStorage.setItem('pruva_ai_carriers', JSON.stringify(state.carriers));
+        }
+
+        // Şablonları Kaydet
+        function saveTemplatesToStorage() {
+            localStorage.setItem('pruva_ai_templates', JSON.stringify(state.templates));
+        }
+
+        // ─────────────────────────────────────────────────────────────
+        // 6. ŞABLON İŞLEMLERİ VE NAVİGASYON
+        // ─────────────────────────────────────────────────────────────
+        
+        // Taşıma Modu Değiştir (FCL, LCL, Hava, Kara Sekmeleri)
+        function switchMode(mode) {
+            state.currentMode = mode;
+            
+            // Aktif Sekme Görsel Ayarları
+            document.querySelectorAll('.mode-tab').forEach(tab => {
+                tab.classList.remove('active');
+                if (tab.getAttribute('data-mode') === mode) {
+                    tab.classList.add('active');
+                }
+            });
+
+            // Şablonları Listele
+            renderTemplatesList();
+            renderMandatoryRulesForm();
+            initVariablesDropdown();
+
+            // Mod Değiştiğinde İlk Şablonu Seç
+            const firstTemplateKey = `${mode}-request`;
+            selectTemplate(firstTemplateKey);
+        }
+
+        // Şablon Listesini Arayüze Bas
+        function renderTemplatesList() {
+            const listContainer = document.getElementById('templates-list-container');
+            listContainer.innerHTML = '';
+
+            const modeKeys = {
+                fcl: ['fcl-request', 'fcl-offer', 'fcl-negotiation', 'fcl-followup'],
+                lcl: ['lcl-request', 'lcl-offer', 'lcl-negotiation', 'lcl-followup'],
+                air: ['air-request', 'air-offer', 'air-negotiation', 'air-followup'],
+                road: ['road-request', 'road-offer', 'road-negotiation', 'road-followup']
+            };
+
+            const keys = modeKeys[state.currentMode] || [];
+            
+            keys.forEach(key => {
+                const tpl = state.templates[key];
+                if (!tpl) return;
+
+                const card = document.createElement('div');
+                card.className = `template-card ${state.activeTemplateKey === key ? 'active' : ''}`;
+                card.id = `card-${key}`;
+                card.onclick = () => selectTemplate(key);
+                
+                // Renk ayarı
+                let modeColor = 'var(--color-fcl)';
+                if (state.currentMode === 'lcl') modeColor = 'var(--color-lcl)';
+                if (state.currentMode === 'air') modeColor = 'var(--color-air)';
+                if (state.currentMode === 'road') modeColor = 'var(--color-road)';
+                card.style.setProperty('--active-color', modeColor);
+
+                card.innerHTML = `
+                    <h4>${tpl.name}</h4>
+                    <p id="desc-${key}">${tpl.body.substring(0, 45).replace(/\n/g, ' ')}...</p>
+                `;
+                listContainer.appendChild(card);
+            });
+        }
+
+        // Arayüzde Şablon Seçildiğinde Detayları Yükle
+        function selectTemplate(key) {
+            state.activeTemplateKey = key;
+            state.previewMode = false; // Önizlemeyi kapatıp editör moduna döndür
+
+            // Kartlardaki "active" sınıflarını temizle
+            document.querySelectorAll('.template-card').forEach(card => card.classList.remove('active'));
+            
+            // Seçilen kartı aktif et
+            const activeCard = document.getElementById(`card-${key}`);
+            if (activeCard) {
+                activeCard.classList.add('active');
+            }
+
+            // Editör Panelini Göster / Önizlemeyi Gizle
+            document.getElementById('editor-body-panel').style.display = 'flex';
+            document.getElementById('preview-body-panel').classList.remove('show');
+            
+            // Önizleme Butonu İkonunu/Metnini Düzenle
+            const pBtn = document.getElementById('preview-toggle-btn');
+            pBtn.innerHTML = `
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                <span>Önizleme</span>
+            `;
+
+            // Verileri Form Alanlarına Doldur
+            const tpl = state.templates[key];
+            if (tpl) {
+                document.getElementById('current-template-title').textContent = tpl.name;
+                document.getElementById('current-template-subtitle').textContent = `Şablon Kodu: ${key.toUpperCase()}`;
+                document.getElementById('template-subject').value = tpl.subject;
+                document.getElementById('template-body').value = tpl.body;
+            }
+
+            // Analizi ve Dropdown'u Yenile
+            analyzeVariables();
+            initVariablesDropdown();
+        }
+
+        // Şablonu LocalStorage'a Kaydet
+        function saveCurrentTemplate() {
+            const key = state.activeTemplateKey;
+            const subject = document.getElementById('template-subject').value;
+            const body = document.getElementById('template-body').value;
+
+            if (state.templates[key]) {
+                state.templates[key].subject = subject;
+                state.templates[key].body = body;
+                
+                // Şablon listesi küçük önizleme açıklamasını güncelle
+                const desc = document.getElementById(`desc-${key}`);
+                if (desc) {
+                    desc.textContent = body.substring(0, 45).replace(/\n/g, ' ') + '...';
+                }
+
+                saveTemplatesToStorage();
+                
+                // Başarı Bildirimi (Küçük şık bir alert)
+                showToastNotification('Şablon başarıyla kaydedildi!', 'success');
+            }
+        }
+
+        // Şablonu Default Değerine Döndür
+        function resetCurrentTemplate() {
+            const key = state.activeTemplateKey;
+            const defaultTpl = DEFAULT_TEMPLATES[key];
+
+            if (defaultTpl) {
+                // Form alanlarını güncelle
+                document.getElementById('template-subject').value = defaultTpl.subject;
+                document.getElementById('template-body').value = defaultTpl.body;
+
+                // State nesnesini güncelle
+                state.templates[key] = JSON.parse(JSON.stringify(defaultTpl));
+
+                // LocalStorage'dan ilgili anahtarı temizlemek için tüm şablonları localStorage'a tekrar yazarız
+                // (Eğer default değerindeyse, local kaydından kaldırmak istersek nesneyi default haline çekip kaydederiz)
+                saveTemplatesToStorage();
+
+                // Küçük açıklama
+                const desc = document.getElementById(`desc-${key}`);
+                if (desc) {
+                    desc.textContent = defaultTpl.body.substring(0, 45).replace(/\n/g, ' ') + '...';
+                }
+
+                analyzeVariables();
+                showToastNotification('Şablon varsayılan ayarlara sıfırlandı.', 'info');
+            }
+        }
+
+        // ─────────────────────────────────────────────────────────────
+        // 7. DEĞİŞKEN EKLEME DROPDOWN MANTIĞI
+        // ─────────────────────────────────────────────────────────────
+        
+        // Değişken Dropdown Menüsünü Göster / Gizle
+        function toggleVariablesDropdown(event) {
+            event.stopPropagation();
+            const dropdown = document.getElementById('variables-dropdown');
+            dropdown.classList.toggle('show');
+        }
+
+        // Dropdown İçindeki Değişkenleri Kategorilere Göre Yükle
+        function initVariablesDropdown() {
+            const container = document.getElementById('dropdown-variables-container');
+            container.innerHTML = '';
+
+            // 1. Genel / Ortak Değişkenler
+            const commonSection = createDropdownSection(VARIABLES_CONFIG.common.title, VARIABLES_CONFIG.common.items, 'Genel');
+            container.appendChild(commonSection);
+
+            // 2. Mod Özel Değişkenleri (FCL, LCL, Hava, Kara)
+            const activeModeConfig = VARIABLES_CONFIG[state.currentMode];
+            if (activeModeConfig) {
+                const modeSection = createDropdownSection(activeModeConfig.title, activeModeConfig.items, 'Lojistik');
+                container.appendChild(modeSection);
+            }
+        }
+
+        // Kategori Bölümü Oluşturucu
+        function createDropdownSection(title, items, categoryName) {
+            const sect = document.createElement('div');
+            sect.className = 'dropdown-section';
+            
+            sect.innerHTML = `
+                <div class="dropdown-section-title">${title}</div>
+                <div class="dropdown-items"></div>
+            `;
+
+            const itemsContainer = sect.querySelector('.dropdown-items');
+
+            items.forEach(item => {
+                const btn = document.createElement('button');
+                btn.className = 'dropdown-item';
+                btn.type = 'button';
+                btn.onclick = () => insertVariable(`{{${item.key}}}`);
+                btn.innerHTML = `
+                    <span>${item.label}</span>
+                    <code>{{${item.key}}}</code>
+                `;
+                itemsContainer.appendChild(btn);
+            });
+
+            return sect;
+        }
+
+        // Textarea İçindeki İmleç Pozisyonuna Değişken Ekle
+        function insertVariable(variableText) {
+            const textarea = document.getElementById('template-body');
+            const startPos = textarea.selectionStart;
+            const endPos = textarea.selectionEnd;
+            const originalText = textarea.value;
+
+            // İmlecin olduğu yere değişkeni ekle
+            textarea.value = originalText.substring(0, startPos) + variableText + originalText.substring(endPos);
+            
+            // İmleci eklenen değişkenin sonuna konumlandır
+            textarea.selectionStart = textarea.selectionEnd = startPos + variableText.length;
+            textarea.focus();
+
+            // Değişken analizini tetikle
+            analyzeVariables();
+            
+            // Dropdown'u kapat
+            document.getElementById('variables-dropdown').classList.remove('show');
+        }
+
+        // ─────────────────────────────────────────────────────────────
+        // 8. GERÇEK ZAMANLI DEĞİŞKEN ANALİZİ
+        // ─────────────────────────────────────────────────────────────
+        function analyzeVariables() {
+            const bodyText = document.getElementById('template-body').value;
+            const subjectText = document.getElementById('template-subject').value;
+            const combinedText = bodyText + ' ' + subjectText;
+
+            // Metin içindeki tüm {{DEGISKEN}} kalıplarını bul
+            const regex = /\{\{([^}]+)\}\}/g;
+            let foundVariables = [];
+            let match;
+            
+            while ((match = regex.exec(combinedText)) !== null) {
+                foundVariables.push(match[1].trim().toUpperCase());
+            }
+
+            // Benzersiz yap
+            foundVariables = [...new Set(foundVariables)];
+
+            // Arayüze Analiz Çiplerini Çiz
+            const chipsContainer = document.getElementById('variables-analysis-chips');
+            chipsContainer.innerHTML = '';
+
+            // Aktif moda ait zorunlu listeyi al
+            const activeMandatories = MANDATORY_CONFIG[state.currentMode] || [];
+            
+            // Ortak zorunlu alanlar var mı kontrolü
+            // (Ortak şablon olan Eksik Bilgi Sorgulama için zorunluluk durumu)
+            const isMissingInfoTemplate = (state.activeTemplateKey === 'common-missing');
+            
+            let missingMandatoriesCount = 0;
+
+            // 1. ZORUNLU DEĞİŞKENLERİ LİSTELE (En başta göster)
+            if (!isMissingInfoTemplate) {
+                activeMandatories.forEach(key => {
+                    // Kullanıcı bu alanı zorunlu olmaktan çıkardı mı?
+                    const isDisabled = state.rules.disabledMandatories.includes(key);
+                    const isPresent = foundVariables.includes(key);
+
+                    const chip = document.createElement('div');
+                    
+                    if (isDisabled) {
+                        // Devre dışıysa isteğe bağlı gibi göster
+                        chip.className = `chip optional ${isPresent ? 'valid' : ''}`;
+                        chip.innerHTML = `
+                            ${isPresent ? '✓' : '○'} ${key} (Pasif)
+                        `;
+                    } else {
+                        // Zorunluysa yeşil/kırmızı göster
+                        if (isPresent) {
+                            chip.className = 'chip valid';
+                            chip.innerHTML = `✓ ${key}`;
+                        } else {
+                            chip.className = 'chip invalid';
+                            chip.innerHTML = `✗ ${key}`;
+                            missingMandatoriesCount++;
+                        }
+                    }
+                    chipsContainer.appendChild(chip);
+                });
+            } else {
+                // Eksik bilgi sorgulama şablonuna özel zorunlular
+                const commonMandatory = ['MÜŞTERİ_ADI', 'EKSİK_BİLGİLER', 'MEVCUT_BİLGİLER', 'İMZA'];
+                commonMandatory.forEach(key => {
+                    const isPresent = foundVariables.includes(key);
+                    if (isPresent) {
+                        chipsContainer.innerHTML += `<div class="chip valid">✓ ${key}</div>`;
+                    } else {
+                        chipsContainer.innerHTML += `<div class="chip invalid">✗ ${key}</div>`;
+                        missingMandatoriesCount++;
+                    }
+                });
+            }
+
+            // 2. BULUNAN DİĞER (İSTEĞE BAĞLI) DEĞİŞKENLERİ LİSTELE
+            foundVariables.forEach(key => {
+                // Zaten zorunlular içinde çizildiyse tekrar çizme
+                if (!isMissingInfoTemplate && activeMandatories.includes(key)) return;
+                if (isMissingInfoTemplate && ['MÜŞTERİ_ADI', 'EKSİK_BİLGİLER', 'MEVCUT_BİLGİLER', 'İMZA'].includes(key)) return;
+
+                const chip = document.createElement('div');
+                chip.className = 'chip optional valid';
+                chip.innerHTML = `✓ ${key}`;
+                chipsContainer.appendChild(chip);
+            });
+
+            // Analiz Özet Bilgisi
+            const summarySpan = document.getElementById('analysis-summary');
+            if (missingMandatoriesCount > 0) {
+                summarySpan.textContent = `${missingMandatoriesCount} Zorunlu Alan Eksik`;
+                summarySpan.style.color = 'var(--danger)';
+            } else {
+                summarySpan.textContent = 'Tüm Zorunlu Alanlar Tamam';
+                summarySpan.style.color = 'var(--success)';
+            }
+        }
+
+        // ─────────────────────────────────────────────────────────────
+        // 9. ÖNİZLEME MODU (Preview Renderer)
+        // ─────────────────────────────────────────────────────────────
+        function togglePreviewMode() {
+            state.previewMode = !state.previewMode;
+
+            const editPanel = document.getElementById('editor-body-panel');
+            const previewPanel = document.getElementById('preview-body-panel');
+            const pBtn = document.getElementById('preview-toggle-btn');
+
+            if (state.previewMode) {
+                // Önizlemeyi Göster
+                editPanel.style.display = 'none';
+                previewPanel.classList.add('show');
+                
+                pBtn.innerHTML = `
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+                    <span>Editör</span>
+                `;
+
+                // Önizleme Değerlerini Yerleştir
+                renderMailPreview();
+            } else {
+                // Editöre Geri Dön
+                editPanel.style.display = 'flex';
+                previewPanel.classList.remove('show');
+
+                pBtn.innerHTML = `
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                    <span>Önizleme</span>
+                `;
+            }
+        }
+
+        // Şablon Metnini Gerçekçi Verilerle Doldurup Önizleme Kartına Bas
+        function renderMailPreview() {
+            const subjectTemplate = document.getElementById('template-subject').value;
+            const bodyTemplate = document.getElementById('template-body').value;
+
+            // Alıcı E-posta adresini belirle (Taşıyıcılardan bir örnek al)
+            let toEmail = 'musteri@sirket.com';
+            
+            // Eğer şablon bir rate request (taşıyıcıya giden) ise ilk aktif taşıyıcının mailini yaz
+            if (state.activeTemplateKey.includes('request') || state.activeTemplateKey.includes('negotiation') || state.activeTemplateKey.includes('followup')) {
+                const matchedCarrier = state.carriers.find(c => c.template === state.activeTemplateKey && c.active);
+                toEmail = matchedCarrier ? matchedCarrier.email : 'pricing@partner-lines.com';
+            } else if (state.activeTemplateKey.includes('offer')) {
+                toEmail = 'import@arcelik.com';
+            }
+
+            // Konu & Gövdeyi Render Et
+            let renderedSubject = subjectTemplate;
+            let renderedBody = bodyTemplate;
+
+            // regex ile tüm değişkenleri değiştir
+            for (const [key, value] of Object.entries(MOCK_PREVIEW_VALUES)) {
+                const placeholder = new RegExp(`\\{\\{\\s*${key}\\s*\\}\\}`, 'g');
+                renderedSubject = renderedSubject.replace(placeholder, value);
+                renderedBody = renderedBody.replace(placeholder, value);
+            }
+
+            // Kalan bilinmeyen değişkenler varsa temizle
+            renderedSubject = renderedSubject.replace(/\{\{\s*([A-Za-z0-9_]+)\s*\}\}/g, '[$1]');
+            renderedBody = renderedBody.replace(/\{\{\s*([A-Za-z0-9_]+)\s*\}\}/g, '[$1]');
+
+            document.getElementById('preview-to').textContent = toEmail;
+            document.getElementById('preview-subject').textContent = renderedSubject;
+            document.getElementById('preview-content').textContent = renderedBody;
+        }
+
+        // ─────────────────────────────────────────────────────────────
+        // 10. EKSİK BİLGİ AYARLARI VE KURALLAR (Sağ Panel)
+        // ─────────────────────────────────────────────────────────────
+        
+        // Sağ Panel Zorunlu Seçenekler Formunu Çiz
+        function renderMandatoryRulesForm() {
+            const container = document.getElementById('mandatory-rules-checkboxes');
+            container.innerHTML = '';
+
+            const list = MANDATORY_CONFIG[state.currentMode] || [];
+
+            list.forEach(key => {
+                const label = document.createElement('label');
+                label.className = 'checkbox-label';
+                
+                const isChecked = !state.rules.disabledMandatories.includes(key);
+
+                label.innerHTML = `
+                    <input type="checkbox" value="${key}" ${isChecked ? 'checked' : ''} onchange="toggleMandatoryRule(this)">
+                    <span>${key}</span>
+                `;
+                container.appendChild(label);
+            });
+        }
+
+        // Zorunlu alan ayarını aç/kapat
+        function toggleMandatoryRule(checkbox) {
+            const key = checkbox.value;
+            if (checkbox.checked) {
+                // Aktif ise devredışı listesinden çıkar
+                state.rules.disabledMandatories = state.rules.disabledMandatories.filter(x => x !== key);
+            } else {
+                // Pasif ise devredışı listesine ekle
+                if (!state.rules.disabledMandatories.includes(key)) {
+                    state.rules.disabledMandatories.push(key);
+                }
+            }
+            saveRuleSettings();
+            analyzeVariables(); // Real-time analizi yenile
+        }
+
+        // Maksimum Sorgulama ve Otomatik Sorgulama Kaydı
+        function saveRuleSettings() {
+            state.rules.autoInquiry = document.getElementById('rule-auto-inquiry').checked;
+            state.rules.maxRounds = parseInt(document.getElementById('rule-max-rounds').value) || 3;
+
+            localStorage.setItem('pruva_ai_rules', JSON.stringify(state.rules));
+        }
+
+        // ─────────────────────────────────────────────────────────────
+        // 11. TAŞIYICI VE ACENTE YÖNETİMİ (Sağ Panel & Ekleme Modalı)
+        // ─────────────────────────────────────────────────────────────
+        
+        // Taşıyıcıları Gruplandırarak Listele
+        function renderCarriers() {
+            const container = document.getElementById('carriers-list-container');
+            container.innerHTML = '';
+
+            // Kategoriler
+            const groups = {
+                armator: [],
+                nvocc: [],
+                acente: [],
+                hava: [],
+                kara: []
+            };
+
+            state.carriers.forEach(c => {
+                if (groups[c.category]) {
+                    groups[c.category].push(c);
+                }
+            });
+
+            // Her kategoriyi çiz
+            for (const [key, list] of Object.entries(groups)) {
+                if (list.length === 0) continue;
+
+                const groupDiv = document.createElement('div');
+                groupDiv.className = 'carrier-group';
+                groupDiv.innerHTML = `<div class="carrier-group-title">${CATEGORIES[key]}</div>`;
+
+                list.forEach(carrier => {
+                    const card = document.createElement('div');
+                    card.className = `carrier-card ${carrier.active ? '' : 'passive'}`;
+                    card.style.opacity = carrier.active ? '1' : '0.6';
+
+                    // Yıldızları oluştur
+                    let starsHtml = '';
+                    for (let i = 1; i <= 5; i++) {
+                        starsHtml += `<span style="color: ${i <= carrier.rating ? 'var(--accent)' : 'var(--text-muted)'}">&#9733;</span>`;
+                    }
+
+                    card.innerHTML = `
+                        <div class="carrier-top">
+                            <div class="carrier-info">
+                                <h4>
+                                    <span>${carrier.name}</span>
+                                </h4>
+                                <div class="carrier-email">${carrier.email}</div>
+                            </div>
+                            <div class="carrier-actions">
+                                <label class="form-switch" title="Aktif/Pasif">
+                                    <input type="checkbox" ${carrier.active ? 'checked' : ''} onchange="toggleCarrierActive(${carrier.id}, this.checked)">
+                                    <span class="switch-slider"></span>
+                                </label>
+                                <button class="delete-btn" onclick="deleteCarrier(${carrier.id})" title="Sil">
+                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="carrier-meta">
+                            <span class="carrier-routes" title="${carrier.regions.join(', ')}">${carrier.regions.join(', ')}</span>
+                            <div class="carrier-stars">${starsHtml}</div>
+                        </div>
+                    `;
+                    groupDiv.appendChild(card);
+                });
+
+                container.appendChild(groupDiv);
+            }
+        }
+
+        // Taşıyıcı Durumunu Aktif / Pasif Yap
+        function toggleCarrierActive(id, checked) {
+            const idx = state.carriers.findIndex(c => c.id === id);
+            if (idx !== -1) {
+                state.carriers[idx].active = checked;
+                saveCarriersToStorage();
+                renderCarriers();
+            }
+        }
+
+        // Taşıyıcıyı Sil
+        function deleteCarrier(id) {
+            if (confirm('Bu taşıyıcıyı listeden silmek istediğinize emin misiniz?')) {
+                state.carriers = state.carriers.filter(c => c.id !== id);
+                saveCarriersToStorage();
+                renderCarriers();
+                showToastNotification('Taşıyıcı silindi.', 'danger');
+            }
+        }
+
+        // Yeni Taşıyıcı Ekleme Modalı Aç
+        function openAddCarrierModal() {
+            // Şablon listesi dropdown'unu doldur
+            const tplSelect = document.getElementById('carrier-form-template');
+            tplSelect.innerHTML = '';
+            
+            for (const [key, value] of Object.entries(state.templates)) {
+                tplSelect.innerHTML += `<option value="${key}">${value.name} (${key.split('-')[0].toUpperCase()})</option>`;
+            }
+
+            // Formu sıfırla
+            document.getElementById('carrier-form-name').value = '';
+            document.getElementById('carrier-form-email').value = '';
+            document.getElementById('carrier-form-category').selectedIndex = 0;
+            setFormStars(5);
+            
+            // Checkboxları sıfırla
+            document.querySelectorAll('input[name="carrier-regions"]').forEach(cb => cb.checked = false);
+
+            document.getElementById('add-carrier-modal').classList.add('show');
+        }
+
+        // Modal Kapat
+        function closeAddCarrierModal() {
+            document.getElementById('add-carrier-modal').classList.remove('show');
+        }
+
+        // Yıldız Seçimi Form Değeri Ayarla
+        function setFormStars(rating) {
+            state.activeStarsForm = rating;
+            const stars = document.querySelectorAll('#carrier-form-stars span');
+            stars.forEach(star => {
+                const val = parseInt(star.getAttribute('data-star'));
+                if (val <= rating) {
+                    star.classList.add('selected');
+                } else {
+                    star.classList.remove('selected');
+                }
+            });
+        }
+
+        // Yeni Taşıyıcıyı Kaydet
+        function saveNewCarrier() {
+            const name = document.getElementById('carrier-form-name').value.trim();
+            const email = document.getElementById('carrier-form-email').value.trim();
+            const category = document.getElementById('carrier-form-category').value;
+            const template = document.getElementById('carrier-form-template').value;
+            
+            // Seçilen bölgeleri al
+            const checkedRegions = [];
+            document.querySelectorAll('input[name="carrier-regions"]:checked').forEach(cb => {
+                checkedRegions.push(cb.value);
+            });
+
+            // Kontroller
+            if (!name) {
+                alert('Lütfen firma adını girin.');
+                return;
+            }
+            if (!email || !email.includes('@')) {
+                alert('Lütfen geçerli bir e-posta adresi girin.');
+                return;
+            }
+            if (checkedRegions.length === 0) {
+                alert('Lütfen en az bir etkin güzergah bölgesi seçin.');
+                return;
+            }
+
+            const newId = state.carriers.length > 0 ? Math.max(...state.carriers.map(c => c.id)) + 1 : 1;
+
+            const carrier = {
+                id: newId,
+                name: name,
+                email: email,
+                category: category,
+                regions: checkedRegions,
+                rating: state.activeStarsForm,
+                template: template,
+                active: true
+            };
+
+            state.carriers.push(carrier);
+            saveCarriersToStorage();
+            renderCarriers();
+            closeAddCarrierModal();
+            showToastNotification(`${name} başarıyla taşıyıcı listesine eklendi!`, 'success');
+        }
+
+        // ─────────────────────────────────────────────────────────────
+        // 12. YARDIMCI BİLEŞENLER (Toast Notifications vb.)
+        // ─────────────────────────────────────────────────────────────
+        function showToastNotification(message, type = 'success') {
+            // Küçük, şık bir toast uyarısı oluşturur ve 3 saniye sonra kaldırır
+            const toast = document.createElement('div');
+            toast.style.position = 'fixed';
+            toast.style.bottom = '56px';
+            toast.style.right = '24px';
+            toast.style.padding = '12px 24px';
+            toast.style.borderRadius = 'var(--radius-md)';
+            toast.style.backgroundColor = 'var(--bg-surface)';
+            toast.style.color = 'var(--text-primary)';
+            toast.style.boxShadow = 'var(--shadow-premium)';
+            toast.style.border = '1px solid var(--border)';
+            toast.style.zIndex = '9999';
+            toast.style.fontSize = '0.8rem';
+            toast.style.fontWeight = '600';
+            toast.style.display = 'flex';
+            toast.style.alignItems = 'center';
+            toast.style.gap = '8px';
+            toast.style.animation = 'slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1)';
+            
+            // Renk ve ikon eşleştirmesi
+            let icon = '✓';
+            let color = 'var(--success)';
+            if (type === 'danger') {
+                icon = '✗';
+                color = 'var(--danger)';
+            } else if (type === 'info') {
+                icon = 'ℹ';
+                color = 'var(--info)';
+            }
+
+            toast.innerHTML = `<span style="color: ${color}; font-weight: 800; font-size: 1rem;">${icon}</span> ${message}`;
+            
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(10px)';
+                toast.style.transition = 'all 0.3s ease';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

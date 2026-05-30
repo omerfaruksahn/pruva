@@ -1,0 +1,317 @@
+export const VIEW_INIT_MAP = {
+    'post-ad': (app) => {
+        const destinations = window.logisticsKnowledge.getAutocompleteData();
+        window.utils.dom.initAutocomplete('origin-input', 'origin-results', destinations);
+        window.utils.dom.initAutocomplete('destination-input', 'destination-results', destinations);
+        window.utils.dom.initAutocomplete('gt-initial', 'gr-initial', window.logisticsKnowledge.goodsCategories);
+        if (window.postAdManager) window.postAdManager.updateGlobalDetailsVisibility();
+    },
+
+    'marketplace': (app) => {
+        const destinations = window.logisticsKnowledge.getAutocompleteData();
+        window.utils.dom.initAutocomplete('market-origin-input', 'market-origin-results', destinations);
+        window.utils.dom.initAutocomplete('market-dest-input', 'market-dest-results', destinations);
+    },
+
+    'navlun-hesaplama': (app) => {
+        const params = app.state.activeRouteParams;
+        if (!params) return;
+
+        const parts = params.split('-');
+        if (parts.length < 2) return;
+
+        const origin = parts[0];
+        const destInput = parts[1];
+
+        let dest = 'europe';
+        if (['shanghai', 'singapore', 'asia'].includes(destInput.toLowerCase())) {
+            dest = 'asia';
+        } else if (['newyork', 'new-york', 'houston', 'usa', 'america'].includes(destInput.toLowerCase())) {
+            dest = 'usa';
+        } else if (['rotterdam', 'hamburg', 'europe'].includes(destInput.toLowerCase())) {
+            dest = 'europe';
+        } else if (['genova', 'alexandria', 'med', 'akdeniz'].includes(destInput.toLowerCase())) {
+            dest = 'med';
+        }
+
+        const originEl = document.getElementById('rate-origin');
+        const destEl = document.getElementById('rate-dest');
+
+        if (originEl) originEl.value = origin;
+        if (destEl) destEl.value = dest;
+
+        if (typeof window.estimateNavlunTool === 'function') {
+            window.estimateNavlunTool();
+        }
+    },
+
+    'login': (app) => {
+        const form = document.getElementById('login-form');
+        if (!form) return;
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('login-email')?.value.trim();
+            const pass = document.getElementById('login-password')?.value;
+            if (email && pass) app.auth.login(email, pass);
+        });
+
+        const forgotLink = form.querySelector('a[href="#"]');
+        if (forgotLink) {
+            forgotLink.addEventListener('click', async (e) => {
+                e.preventDefault();
+                const email = document.getElementById('login-email')?.value.trim();
+                if (!email) {
+                    if (window.notificationManager) window.notificationManager.showToast('Lütfen önce e-posta adresinizi girin.', 'warning');
+                    return;
+                }
+                try {
+                    const { sendPasswordResetEmail } = await import('firebase/auth');
+                    await sendPasswordResetEmail(window.fbAuth, email);
+                    if (window.notificationManager) window.notificationManager.showToast('Şifre sıfırlama linki e-posta adresinize gönderildi.', 'success');
+                } catch(err) {
+                    let cleanErr = err.message || '';
+                    cleanErr = cleanErr.replace(/firebase:/gi, '').replace(/error/gi, '').replace(/\(auth\/[a-z-]+\)/gi, '').replace(/\./g, '').trim();
+                    const msg = err.code === 'auth/user-not-found' ? 'Bu e-posta adresi kayıtlı değil.' : 'Bir hata oluştu: ' + cleanErr;
+                    if (window.notificationManager) window.notificationManager.showToast(msg, 'error');
+                }
+            });
+        }
+    },
+
+    'register': (app) => {
+        const form = document.getElementById('register-form');
+        if (!form) return;
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+            data.terms = form.querySelector('input[name="terms"]')?.checked;
+
+            const toast = (msg, type) => {
+                if (window.notificationManager) window.notificationManager.showToast(msg, type);
+                else alert(msg);
+            };
+
+            if (!data.terms) {
+                toast('Lütfen Kullanım Koşulları ve KVKK metnini kabul edin.', 'warning');
+                return;
+            }
+
+            if (data.password !== data.passwordConfirm) {
+                toast('Şifreler birbiriyle eşleşmiyor. Lütfen tekrar kontrol edin.', 'error');
+                form.querySelector('input[name="password"]').focus();
+                return;
+            }
+
+            const pwdStrong = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{12,}$/.test(data.password);
+            if (!pwdStrong) {
+                toast('Şifre en az 12 karakter olmalı, en az 1 büyük harf, 1 küçük harf ve 1 rakam içermelidir.', 'error');
+                form.querySelector('input[name="password"]').focus();
+                return;
+            }
+
+            const taxNum = data.taxNumber?.replace(/\s/g, '');
+            if (!/^\d{10,11}$/.test(taxNum)) {
+                toast('Vergi Numarası (VKN) 10 haneli, TCKN 11 haneli ve sadece rakamlardan oluşmalıdır.', 'error');
+                form.querySelector('input[name="taxNumber"]').focus();
+                return;
+            }
+            data.taxNumber = taxNum;
+
+            const phoneNum = data.phone?.replace(/\s|-/g, '');
+            if (!/^(\+90|0)?5\d{9}$/.test(phoneNum)) {
+                toast('Geçerli bir Türkiye telefon numarası girin. Örn: 05XX XXX XX XX', 'error');
+                form.querySelector('input[name="phone"]').focus();
+                return;
+            }
+
+            if (!data.companyName || data.companyName.trim().length < 3) {
+                toast('Şirket adı en az 3 karakter olmalıdır.', 'error');
+                return;
+            }
+
+            if (!data.address || data.address.trim().length < 10) {
+                toast('Lütfen geçerli bir firma adresi girin (en az 10 karakter).', 'error');
+                form.querySelector('textarea[name="address"]').focus();
+                return;
+            }
+
+            app.auth.register(data);
+        });
+    },
+
+    'reset-password': (app) => {
+        const form = document.getElementById('reset-password-form');
+        if (!form) return;
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const oobCode = document.getElementById('reset-oob-code')?.value;
+            const newPassword = document.getElementById('reset-password')?.value;
+            const confirmPassword = document.getElementById('reset-password-confirm')?.value;
+
+            const toast = (msg, type) => {
+                if (window.notificationManager) window.notificationManager.showToast(msg, type);
+                else alert(msg);
+            };
+
+            if (!oobCode) {
+                toast('Geçersiz veya süresi dolmuş işlem kodu.', 'error');
+                return;
+            }
+
+            if (!newPassword || !confirmPassword) {
+                toast('Lütfen tüm alanları doldurun.', 'warning');
+                return;
+            }
+
+            const pwdStrong = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{12,}$/.test(newPassword);
+            if (!pwdStrong) {
+                toast('Yeni şifreniz en az 12 karakter olmalı, en az 1 büyük harf, 1 küçük harf ve 1 rakam içermelidir.', 'error');
+                return;
+            }
+
+            if (newPassword !== confirmPassword) {
+                toast('Şifreler birbiriyle eşleşmiyor.', 'error');
+                return;
+            }
+
+            const submitBtn = form.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Güncelleniyor...';
+            }
+
+            try {
+                const { confirmPasswordReset } = await import('firebase/auth');
+                if (!window.fbAuth) throw new Error('Firebase Auth hazır değil.');
+
+                await confirmPasswordReset(window.fbAuth, oobCode, newPassword);
+
+                const card = form.closest('.auth-card');
+                if (card) {
+                    card.innerHTML = `
+                        <div class="auth-header" style="text-align: center;">
+                            <div style="font-size: 3.5rem; color: #52c41a; margin-bottom: 15px;">✓</div>
+                            <h2 class="auth-title" style="color: #52c41a;">Şifreniz Güncellendi</h2>
+                            <p class="auth-subtitle">Yeni şifreniz başarıyla kaydedildi.</p>
+                        </div>
+                        <p style="color: var(--text-secondary); margin-bottom: 25px; font-size: 0.95rem; line-height: 1.5; text-align: center;">
+                            Hesap güvenliğiniz güncellenmiştir. Artık yeni şifrenizi kullanarak platforma giriş yapabilirsiniz.
+                        </p>
+                        <button class="btn-primary auth-submit-btn" onclick="window.app.router.navigate('login')" style="margin-top: 0;">Giriş Yap</button>
+                    `;
+                }
+
+                toast('Şifreniz başarıyla güncellendi.', 'success');
+            } catch (err) {
+                console.error('Password reset confirmation error:', err);
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Şifreyi Güncelle';
+                }
+
+                let msg = 'Şifre güncellenirken bir hata oluştu.';
+                if (err.code === 'auth/expired-action-code') {
+                    msg = 'Şifre sıfırlama bağlantısının süresi dolmuş. Lütfen yeni bir talep gönderin.';
+                } else if (err.code === 'auth/invalid-action-code') {
+                    msg = 'Geçersiz şifre sıfırlama bağlantısı.';
+                } else if (err.code === 'auth/weak-password') {
+                    msg = 'Şifre çok zayıf.';
+                }
+                toast(msg, 'error');
+            }
+        });
+    },
+
+    'membership': (app) => {
+        if (window.membershipManager) window.membershipManager.init();
+    },
+
+    'education': (app) => {
+        window.utils.edu.updateProgress();
+        setTimeout(() => {
+            const activeItem = document.querySelector('.nav-item-flat.active');
+            if (activeItem) {
+                activeItem.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+            }
+        }, 100);
+
+        const playerMain = document.querySelector('.player-main-flat');
+        if (playerMain) {
+            let startX = 0;
+            let startY = 0;
+            const threshold = 70;
+            const restraint = 80;
+
+            playerMain.addEventListener('touchstart', (e) => {
+                const touch = e.touches[0];
+                startX = touch.clientX;
+                startY = touch.clientY;
+            }, { passive: true });
+
+            playerMain.addEventListener('touchend', (e) => {
+                const touch = e.changedTouches[0];
+                const diffX = touch.clientX - startX;
+                const diffY = touch.clientY - startY;
+
+                if (Math.abs(diffX) >= threshold && Math.abs(diffY) <= restraint) {
+                    const currentIndex = app.state.currentEduModuleIndex || 0;
+                    const { chapters } = window.educationContent;
+                    const totalChapters = chapters?.length || 0;
+
+                    if (diffX < 0) {
+                        if (currentIndex < totalChapters - 1) {
+                            playerMain.classList.add('slide-out-left');
+                            setTimeout(() => {
+                                window.utils.setEduModule(currentIndex + 1);
+                            }, 180);
+                        }
+                    } else {
+                        if (currentIndex > 0) {
+                            playerMain.classList.add('slide-out-right');
+                            setTimeout(() => {
+                                window.utils.setEduModule(currentIndex - 1);
+                            }, 180);
+                        }
+                    }
+                }
+            }, { passive: true });
+        }
+    },
+
+    'inbox': (app) => {
+        if (typeof window.inboxInit === 'function') {
+            window.inboxInit(app);
+        }
+    },
+
+    'pruva-ai': (app) => {
+        if (app.managers.pruvaAi) {
+            app.managers.pruvaAi.init();
+            app.managers.pruvaAi.startEmailPolling();
+        }
+    },
+
+    'pricing-settings': (app) => {
+        if (window.pricingSettingsViewInit) {
+            window.pricingSettingsViewInit(app);
+        }
+    },
+
+    'pricing-reports': (app) => {
+        if (window.pricingReportsViewInit) {
+            window.pricingReportsViewInit(app);
+        }
+    },
+    'pricing-actions': (app) => {
+        if (window.pricingActionsViewInit) {
+            window.pricingActionsViewInit(app);
+        }
+    },
+    'pricing-customers': (app) => {
+        if (window.pricingCustomersViewInit) {
+            window.pricingCustomersViewInit(app);
+        }
+    },
+};

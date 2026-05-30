@@ -1,0 +1,267 @@
+/* Membership View - Global SaaS Design */
+.view-membership {
+    background-image: 
+        radial-gradient(circle at 50% 0%, rgba(59, 130, 246, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 100% 0%, rgba(234, 179, 8, 0.05) 0%, transparent 30%);
+    min-height: 100vh;
+    padding-bottom: 4rem;
+}
+
+.membership-hero {
+    text-align: center;
+    padding: 4rem 1rem 2rem;
+    position: relative;
+}
+
+.membership-hero h1 {
+    font-size: 3.5rem;
+    font-weight: 800;
+    letter-spacing: -1.5px;
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, var(--text-primary) 0%, var(--text-muted) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.membership-hero p {
+    font-size: 1.15rem;
+    color: var(--text-secondary);
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.6;
+}
+
+/* Status Badge */
+.membership-status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    padding: 6px 16px;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    color: var(--text-secondary);
+}
+
+.membership-status-pill.active {
+    background: rgba(234, 179, 8, 0.1);
+    border-color: rgba(234, 179, 8, 0.2);
+    color: #ca8a04;
+}
+
+.membership-status-pill .indicator {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--text-muted);
+}
+.membership-status-pill.active .indicator {
+    background: #ca8a04;
+    box-shadow: 0 0 8px #ca8a04;
+}
+
+/* Premium Card */
+.membership-card-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 1rem;
+    padding: 0 1rem;
+}
+
+.premium-saas-card {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 3rem 2.5rem;
+    max-width: 440px;
+    width: 100%;
+    position: relative;
+    box-shadow: 
+        0 4px 6px -1px rgba(0, 0, 0, 0.05),
+        0 24px 48px -12px rgba(0, 0, 0, 0.08);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.premium-saas-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 4px;
+    background: linear-gradient(90deg, #ca8a04, #eab308, #fde047);
+    border-top-left-radius: 24px;
+    border-top-right-radius: 24px;
+}
+
+.premium-saas-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 
+        0 20px 25px -5px rgba(0, 0, 0, 0.05),
+        0 48px 64px -12px rgba(0, 0, 0, 0.1);
+}
+
+.premium-saas-card.is-active {
+    border-color: rgba(234, 179, 8, 0.3);
+    box-shadow: 0 0 0 1px rgba(234, 179, 8, 0.3), 0 24px 48px rgba(234, 179, 8, 0.08);
+}
+
+.premium-badge-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 16px;
+    background: rgba(234, 179, 8, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+    color: #ca8a04;
+}
+
+.premium-price-block {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+    margin-bottom: 0.5rem;
+}
+
+.premium-price-block .currency {
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.premium-price-block .amount {
+    font-size: 3.5rem;
+    font-weight: 800;
+    letter-spacing: -2px;
+    color: var(--text-primary);
+}
+
+.premium-price-block .period {
+    font-size: 1rem;
+    color: var(--text-muted);
+    font-weight: 500;
+    margin-left: 4px;
+}
+
+.premium-features-list {
+    margin: 2rem 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    border-top: 1px solid var(--border);
+    padding-top: 2rem;
+}
+
+.premium-features-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+.premium-features-list li i {
+    color: #10b981;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.btn-premium-subscribe {
+    width: 100%;
+    padding: 1rem;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    background: var(--text-primary);
+    color: var(--bg-body);
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn-premium-subscribe:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+    opacity: 0.9;
+}
+
+.btn-premium-subscribe:disabled {
+    background: var(--bg-elevated);
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+    cursor: default;
+    box-shadow: none;
+    transform: none;
+}
+
+/* History Section */
+.membership-history-section {
+    max-width: 800px;
+    margin: 4rem auto 0;
+    padding: 0 1rem;
+}
+
+.membership-history-section h3 {
+    font-size: 1.25rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-primary);
+}
+
+.history-table-glass {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+.history-table-glass table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.history-table-glass th {
+    background: rgba(0,0,0,0.02);
+    padding: 1rem;
+    text-align: left;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.history-table-glass td {
+    padding: 1.25rem 1rem;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-primary);
+    font-size: 0.95rem;
+}
+
+.history-table-glass tr:last-child td {
+    border-bottom: none;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .membership-hero h1 {
+        font-size: 2.5rem;
+    }
+    .premium-saas-card {
+        padding: 2rem 1.5rem;
+    }
+}

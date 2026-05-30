@@ -1,0 +1,226 @@
+nav {
+    background: var(--bg-nav);
+    backdrop-filter: var(--glass);
+    height: var(--nav-height);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 5%;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    border-bottom: 1px solid var(--border);
+}
+
+.logo {
+    font-size: 1.6rem;
+    font-weight: 800;
+    letter-spacing: -1px;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.logo:hover {
+    opacity: 0.8;
+}
+
+.nav-links {
+    display: flex;
+    gap: 2rem;
+}
+
+.nav-links a {
+    text-decoration: none;
+    color: var(--text-secondary);
+    font-weight: 500;
+    font-size: 0.95rem;
+    transition: var(--transition);
+    cursor: pointer;
+    padding: 0.5rem 0;
+}
+
+.nav-links a:hover {
+    color: var(--text-primary);
+}
+
+.nav-links a.active {
+    color: var(--secondary);
+    position: relative;
+}
+
+.nav-links a.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--secondary);
+    border-radius: var(--radius-full);
+}
+
+.nav-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+#user-profile-nav {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    background: var(--bg-page);
+    border-radius: var(--radius-full);
+    border: 1px solid var(--border);
+    transition: var(--transition);
+    cursor: pointer;
+}
+
+#user-profile-nav:hover {
+    border-color: var(--secondary);
+    background: var(--bg-surface);
+}
+
+.user-avatar {
+    width: 28px;
+    height: 28px;
+    background: var(--secondary);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.75rem;
+}
+
+.user-name {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.membership-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-full);
+    cursor: pointer;
+    transition: var(--transition);
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: var(--text-primary);
+}
+
+.membership-badge:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+    border-color: var(--secondary);
+}
+
+.membership-badge.premium {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: white;
+    border-color: #ca8a04;
+}
+
+.status-icon {
+    font-size: 1rem;
+}
+
+
+.notification-wrapper {
+    position: relative;
+    cursor: pointer;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-full);
+    transition: var(--transition);
+    color: var(--text-secondary);
+}
+
+.notification-wrapper:hover {
+    background: var(--border-light);
+    color: var(--text-primary);
+}
+
+@media (max-width: 992px) {
+    .nav-links { gap: 1rem; }
+    .nav-links a { font-size: 0.9rem; }
+}
+
+@media (max-width: 768px) {
+    .nav-links { display: none; }
+    .nav-right { gap: 8px; }
+    .user-name { display: none; }
+}
+
+
+/* Profile Dropdown Styles */
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border-radius: var(--radius-md);
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.dropdown-item i {
+    width: 18px;
+    height: 18px;
+    opacity: 0.8;
+    color: var(--text-muted);
+}
+
+.dropdown-item:hover {
+    background: var(--bg-page);
+    color: var(--secondary);
+}
+
+.dropdown-item:hover i {
+    opacity: 1;
+    color: var(--secondary);
+    transform: translateX(2px);
+}
+
+.dropdown-item.logout {
+    margin-top: 4px;
+}
+
+.dropdown-item.logout:hover {
+    background: #fff1f0;
+    color: var(--danger);
+}
+
+.dropdown-item.logout:hover i {
+    color: var(--danger);
+}
+
+#profile-dropdown {
+    animation: dropdownFadeIn 0.2s ease-out;
+    transform-origin: top right;
+}
+
+@keyframes dropdownFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}

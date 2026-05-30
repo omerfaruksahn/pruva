@@ -1,0 +1,93 @@
+Created At: 2026-05-24T20:43:08Z
+Completed At: 2026-05-24T20:43:08Z
+File Path: `file:///c:/Users/%C3%96mer/.gemini/antigravity/scratch/my-first-react-site/js/router.js`
+Total Lines: 886
+Total Bytes: 35215
+Showing lines 801 to 886
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+801:             'post-ad': ['loader', 'admin'],
+802:             'loader-dashboard': ['loader', 'admin'],
+803:             'carrier-dashboard': ['carrier', 'admin'],
+804:             'settings': ['loader', 'carrier', 'admin'],
+805:             'membership': ['loader', 'carrier', 'admin'],
+806:             'inbox': ['loader', 'carrier', 'admin']
+807:         };
+808: 
+809:         if (roleGuards[view] && !roleGuards[view].includes(role)) {
+810:             if (window.notificationManager) {
+811:                 window.notificationManager.showToast('Bu sayfaya erişim yetkiniz bulunmamaktadır.', 'error');
+812:             } else {
+813:                 alert('Bu sayfaya erişim yetkiniz bulunmamaktadır.');
+814:             }
+815:             return false;
+816:         }
+817: 
+818:         return true;
+819:     }
+820: 
+821:     _captureFocus() {
+822:         const el = document.activeElement;
+823:         return {
+824:             id: el?.id || null,
+825:             selectionStart: el?.selectionStart ?? null
+826:         };
+827:     }
+828: 
+829:     _restoreFocus({ id, selectionStart }) {
+830:         if (!id) return;
+831:         const el = document.getElementById(id);
+832:         if (!el) return;
+833:         el.focus();
+834:         if (selectionStart !== null && ['text', 'search', 'tel', 'url'].includes(el.type)) {
+835:             el.setSelectionRange(selectionStart, selectionStart);
+836:         }
+837:     }
+838: 
+839:     _updateProfileDisplay() {
+840:         const user = this.app.store.getCurrentUser();
+841:         const profileName = docume
+<truncated 172 bytes>
+ame.textContent = this.app.state.currentUser || 'Misafir';
+845:         if (profileAvatar) {
+846:             profileAvatar.innerHTML = user?.avatar 
+847:                 ? `<img src="${user.avatar}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">` 
+848:                 : (this.app.state.currentUser || 'M').charAt(0).toUpperCase();
+849:         }
+850:     }
+851: 
+852:     _updateMembershipDisplay() {
+853:         const membershipStatusEl = document.getElementById('nav-membership-status');
+854:         const membershipBadgeEl = document.getElementById('membership-nav-badge');
+855:         if (!membershipStatusEl || !membershipBadgeEl) return;
+856: 
+857:         const subType = this.app.state.subscriptionType || 'none';
+858:         const expiresAt = this.app.state.subscriptionExpiresAt;
+859:         
+860:         let daysLeft = 0;
+861:         if (expiresAt) {
+862:             daysLeft = Math.ceil((new Date(expiresAt) - new Date()) / (1000 * 60 * 60 * 24));
+863:         }
+864: 
+865:         const activeSub = (subType !== 'none' && daysLeft > 0) ? subType : 'none';
+866: 
+867:         // Logo
+868:         const logoTextEl = document.querySelector('.logo span');
+869:         if (logoTextEl) {
+870:             const logoMap = { premium: 'PREMIUM' };
+871:             logoTextEl.textContent = logoMap[activeSub] || 'PRUVA';
+872:         }
+873: 
+874:         // Badge
+875:         membershipBadgeEl.classList.remove('premium', 'silver');
+876:         const badgeMap = { premium: ['premium', 'PREMIUM'] };
+877:         const badge = badgeMap[activeSub];
+878:         if (badge) {
+879:             membershipBadgeEl.classList.add(badge[0]);
+880:             membershipStatusEl.textContent = badge[1];
+881:         } else {
+882:             membershipStatusEl.textContent = 'Üyelik';
+883:         }
+884:     }
+885: };
+886: 
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.

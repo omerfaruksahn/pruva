@@ -1,0 +1,87 @@
+:root {
+    /* Brand Colors (Refined SaaS HSL Palette) */
+    --primary-h: 222;
+    --primary-s: 47%;
+    --primary-l: 11%;
+    --primary: hsl(var(--primary-h), var(--primary-s), var(--primary-l)); /* Sleek slate-900 */
+    
+    --primary-light-h: 217;
+    --primary-light-s: 33%;
+    --primary-light-l: 17%;
+    --primary-light: hsl(var(--primary-light-h), var(--primary-light-s), var(--primary-light-l)); /* Slate 800 */
+    
+    --secondary-h: 221;
+    --secondary-s: 83%;
+    --secondary-l: 53%;
+    --secondary: hsl(var(--secondary-h), var(--secondary-s), var(--secondary-l)); /* Indigo/Blue */
+    --secondary-hover: hsl(var(--secondary-h), var(--secondary-s), 45%);
+    
+    --accent-h: 199;
+    --accent-s: 89%;
+    --accent-l: 48%;
+    --accent: hsl(var(--accent-h), var(--accent-s), var(--accent-l)); /* Cyan 500 */
+    
+    --primary-gradient: linear-gradient(135deg, hsl(221, 83%, 53%) 0%, hsl(199, 89%, 48%) 100%);
+    --premium-glow: radial-gradient(circle at top right, rgba(59, 130, 246, 0.08), transparent 60%);
+    
+    /* Semantic Colors */
+    --success: #10b981;    /* Emerald */
+    --warning: #f59e0b;    /* Amber */
+    --danger: #ef4444;     /* Crimson */
+    --info: #3b82f6;       /* Blue */
+    
+    /* Neutrals (Light Mode) */
+    --bg-page: #f8fafc;       /* Slate 50 */
+    --bg-surface: #ffffff;
+    --bg-elevated: #f1f5f9;   /* Slate 100 */
+    --bg-nav: rgba(255, 255, 255, 0.75);
+    
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-muted: #94a3b8;
+    --border: #e2e8f0;        /* Slate 200 */
+    --border-light: #f1f5f9;  /* Slate 100 */
+    --border-dim: #e2e8f0;
+    
+    /* Premium Shadows & Blurs */
+    --shadow-sm: 0 1px 2px 0 rgba(15, 23, 42, 0.05);
+    --shadow-md: 0 4px 12px -2px rgba(15, 23, 42, 0.08), 0 2px 6px -1px rgba(15, 23, 42, 0.04);
+    --shadow-lg: 0 16px 32px -4px rgba(15, 23, 42, 0.1), 0 8px 16px -2px rgba(15, 23, 42, 0.05);
+    --shadow-premium: 0 20px 40px -10px rgba(15, 23, 42, 0.15), 0 0 0 1px rgba(15, 23, 42, 0.02);
+    
+    --glass: blur(16px) saturate(180%);
+    --glass-border: rgba(255, 255, 255, 0.2);
+    
+    /* Layout */
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 20px;
+    --radius-full: 9999px;
+    
+    --container-max: 1200px;
+    --nav-height: 72px;
+    
+    --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+body.dark-mode {
+    --primary: #f8fafc;
+    --primary-light: #e2e8f0;
+    --bg-page: #030712;       /* Deepest Slate/Grey 950 */
+    --bg-surface: #0b0f19;    /* Lighter elegant slate */
+    --bg-elevated: #161e2e;   /* Elevate card */
+    --bg-nav: rgba(3, 7, 18, 0.8);
+    
+    --text-primary: #f9fafb;
+    --text-secondary: #9ca3af;
+    --text-muted: #6b7280;
+    --border: #1f2937;        /* Zinc 800 */
+    --border-light: #111827;
+    --border-dim: #1f2937;
+    
+    --glass-border: rgba(255, 255, 255, 0.04);
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.5);
+    --shadow-md: 0 4px 12px -2px rgba(0, 0, 0, 0.4), 0 2px 6px -1px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 16px 32px -4px rgba(0, 0, 0, 0.6), 0 8px 16px -2px rgba(0, 0, 0, 0.5);
+    --shadow-premium: 0 24px 48px -8px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.03);
+}

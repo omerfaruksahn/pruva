@@ -1,0 +1,82 @@
+Created At: 2026-05-24T20:43:04Z
+Completed At: 2026-05-24T20:43:04Z
+File Path: `file:///c:/Users/%C3%96mer/.gemini/antigravity/scratch/my-first-react-site/js/views/settings.js`
+Total Lines: 629
+Total Bytes: 34632
+Showing lines 1 to 629
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+1: window.settingsView = (state) => {
+2:     const user = window.app.store.getCurrentUser() || {
+3:         name: state.currentUser,
+4:         email: '',
+5:         phone: '',
+6:         role: state.userRole,
+7:         joinDate: new Date().toISOString().split('T')[0],
+8:         taxNumber: '',
+9:         status: 'active'
+10:     };
+11: 
+12:     function getDeviceDetails() {
+13:         const ua = navigator.userAgent;
+14:         let browser = "Tarayıcı";
+15:         let os = "İşletim Sistemi";
+16:         let icon = "monitor";
+17: 
+18:         if (/windows/i.test(ua)) os = "Windows";
+19:         else if (/macintosh|mac os x/i.test(ua)) os = "macOS";
+20:         else if (/iphone|ipad|ipod/i.test(ua)) { os = "iOS"; icon = "smartphone"; }
+21:         else if (/android/i.test(ua)) { os = "Android"; icon = "smartphone"; }
+22:         else if (/linux/i.test(ua)) os = "Linux";
+23: 
+24:         if (/chrome|crios/i.test(ua) && !/edge|edg/i.test(ua) && !/opr|opera/i.test(ua)) {
+25:             browser = "Chrome";
+26:             if (icon !== 'smartphone') icon = "chrome";
+27:         }
+28:         else if (/safari/i.test(ua) && !/chrome|crios/i.test(ua)) browser = "Safari";
+29:         else if (/firefox|fxios/i.test(ua)) browser = "Firefox";
+30:         else if (/edge|edg/i.test(ua)) browser = "Edge";
+31:         else if (/opr|opera/i.test(ua)) browser = "Opera";
+32: 
+33:         return {
+34:             name: `${browser} (${os})`,
+35:             icon: icon
+36:         };
+37:     }
+38: 
+39:     function loadSessionGeoDetails() {
+40:         const 
+<truncated 34134 bytes>
+                         <i data-lucide="chevron-right" class="menu-chevron"></i>
+598:                     </div>
+599:                     
+600:                     <div class="settings-menu-group-header" style="margin-top: 15px;">Kurumsal Ayarlar</div>
+601:                     <div class="settings-menu-item" data-tab="company" onclick="window.switchSettingsTab('company')">
+602:                         <i data-lucide="building"></i> Şirket Detayları
+603:                         <i data-lucide="chevron-right" class="menu-chevron"></i>
+604:                     </div>
+605:                     <div class="settings-menu-item" data-tab="notifications" onclick="window.switchSettingsTab('notifications')">
+606:                         <i data-lucide="bell"></i> Bildirimler
+607:                         <i data-lucide="chevron-right" class="menu-chevron"></i>
+608:                     </div>
+609:                     <div class="settings-menu-item" data-tab="membership" onclick="window.switchSettingsTab('membership')">
+610:                         <i data-lucide="credit-card"></i> Üyelik ve Planlar
+611:                         <i data-lucide="chevron-right" class="menu-chevron"></i>
+612:                     </div>
+613:                     
+614:                     <div class="settings-menu-item danger" onclick="window.app.auth.logout()" style="margin-top: 20px; border-top: 1px solid var(--border); border-radius: 0;">
+615:                         <i data-lucide="log-out"></i> Çıkış Yap
+616:                         <i data-lucide="chevron-right" class="menu-chevron"></i>
+617:                     </div>
+618:                 </div>
+619:             </aside>
+620: 
+621:             <!-- Main Content -->
+622:             <main class="settings-main" id="settings-dynamic-content" style="transition: all 0.3s ease;">
+623:                 ${renderProfileTab(user)}
+624:             </main>
+625:         </div>
+626:     </div>
+627:     `;
+628: };
+629: 
+The above content shows the entire, complete file contents of the requested file.

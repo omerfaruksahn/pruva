@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+
+  <!-- 1. Home Page (Anasayfa) -->
+  <url>
+    <loc>https://pruvahub.com/</loc>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://pruvahub.com/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://pruvahub.com/en" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://pruvahub.com/" />
+    <changefreq>daily</changefreq>
+    <priority>1.00</priority>
+  </url>
+  <url>
+    <loc>https://pruvahub.com/en</loc>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://pruvahub.com/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://pruvahub.com/en" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://pruvahub.com/" />
+    <changefreq>daily</changefreq>
+    <priority>1.00</priority>
+  </url>
+
+  <!-- 2. Marketplace (Pazaryeri) -->
+  <url>
+    <loc>https://pruvahub.com/marketplace</loc>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://pruvahub.com/marketplace" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://pruvahub.com/en/marketplace" />
+    <changefreq>always</changefreq>
+    <priority>0.90</priority>
+  </url>
+  <url>
+    <loc>https://pruvahub.com/en/marketplace</loc>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://pruvahub.com/marketplace" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://pruvahub.com/en/marketplace" />
+    <changefreq>always</changefreq>
+    <priority>0.90</priority>
+  </url>
+
+  <!-- 3. Education (Akademi) -->
+  <url>
+    <loc>https://pruvahub.com/education</loc>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://pruvahub.com/education" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://pruvahub.com/en/education" />
+    <changefreq>weekly</changefreq>
+    <priority>0.80</priority>
+  </url>
+  <url>
+    <loc>https://pruvahub.com/en/education</loc>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://pruvahub.com/education" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://pruvahub.com/en/education" />
+    <changefreq>weekly</changefreq>
+    <priority>0.80</priority>
+  </url>
+
+  <!-- 4. Lojistik Hizmetleri (Logistics Services) -->
+  <url>
+    <loc>https://pruvahub.com/lojistik-hizmetleri</loc>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://pruvahub.com/lojistik-hizmetleri" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://pruvahub.com/en/logistics-services" />
+    <changefreq>monthly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://pruvahub.com/en/logistics-services</loc>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://pruvahub.com/lojistik-hizmetleri" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://pruvahub.com/en/logistics-services" />
+    <changefreq>monthly</changefreq>
+    <priority>0.85</priority>
+  </url>
+
+  <!-- 5. İthalat & İhracat (Import & Export) -->
+  <url>
+    <loc>https://pruvahub.com/ithalat-ihracat</loc>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://pruvahub.com/ithalat-ihracat" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://pruvahub.com/en/import-export" />
+    <changefreq>monthly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://pruvahub.com/en/import-export</loc>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://pruvahub.com/ithalat-ihracat" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://pruvahub.com/en/import-export" />
+    <changefreq>monthly</changefreq>
+    <priority>0.85</priority>
+  </url>
+
+  <!-- 6. Konteyner Taşımacılığı (Container Transport) -->
+  <url>
+    <loc>https://pruvahub.com/konteyner-tasimaciligi</loc>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://pruvahub.com/konteyner-tasimaciligi" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://pruvahub.com/en/container-transport" />
+    <changefreq>monthly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://pruvahub.com/en/container-transport</loc>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://pruvahub.com/konteyner-tasimaciligi" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://pruvahub.com/en/container-transport" />
+    <changefreq>monthly</changefreq>
+    <priority>0.85</priority>
+  </url>
+
+  <!-- 7. Navlun Hesaplama (Freight Calculator) -->
+  <url>
+    <loc>https://pruvahub.com/navlun-hesaplama</loc>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://pruvahub.com/navlun-hesaplama" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://pruvahub.com/en/freight-calculator" />
+    <changefreq>monthly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://pruvahub.com/en/freight-calculator</loc>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://pruvahub.com/navlun-hesaplama" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://pruvahub.com/en/freight-calculator" />
+    <changefreq>monthly</changefreq>
+    <priority>0.85</priority>
+  </url>
+
+</urlset>

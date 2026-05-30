@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#3b82f6">
+    
+    <!-- Evrensel Arama Motoru Optimizasyonu (SEO) -->
+    <title>Pruva | Güvenilir Dijital Lojistik Pazaryeri - Yük, Tır & Konteyner Navlun</title>
+    <meta name="description" content="Türkiye'nin lider dijital lojistik platformu. İthalat, ihracat yükleriniz ve tır nakliyeleri için Ambarlı ve tüm limanlarda en uygun konteyner navlun tekliflerini alın, nakliyeci, armatör and forwarder firmalarıyla anında eşleşin.">
+    <meta name="keywords" content="navlun, yük, ithalat, ihracat, armatör, forwarder, nakliyeci, lojistik, konteyner, ambarlı, konşimento, denizcilik, tır">
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://pruvahub.com/">
+    <meta property="og:title" content="Pruva | Güvenilir Dijital Lojistik Pazaryeri">
+    <meta property="og:description" content="İthalat, ihracat yükleriniz ve tır nakliyeleri için limanlarda en uygun konteyner navlun tekliflerini alın.">
+    <meta property="og:image" content="https://pruvahub.com/images/og-image.jpg">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://pruvahub.com/">
+    <meta property="twitter:title" content="Pruva | Güvenilir Dijital Lojistik Pazaryeri">
+    <meta property="twitter:description" content="İthalat, ihracat yükleriniz ve tır nakliyeleri için limanlarda en uygun konteyner navlun tekliflerini alın.">
+    <meta property="twitter:image" content="https://pruvahub.com/images/og-image.jpg">
+
+    <!-- Çok Dilli Bölgesel Hreflang Alternatifleri -->
+    <link rel="alternate" hreflang="tr" href="https://pruvahub.com/">
+    <link rel="alternate" hreflang="en" href="https://pruvahub.com/en">
+    <link rel="alternate" hreflang="x-default" href="https://pruvahub.com/">
+    
+    <!-- Fonts (preconnect for speed) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+
+    <!-- 
+        CSS ve JS artık Vite tarafından bundle ediliyor.
+        Tüm import'lar js/main.js içinde.
+        Manuel script/link tag'ı eklemeye gerek yok!
+    -->
+    <!-- Cropper.js -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+</head>
+<body>
+
+    <nav>
+        <a class="logo" href="/" style="display: flex; align-items: center; gap: 8px; text-decoration: none;">
+            <i data-lucide="handshake" style="width: 24px; height: 24px; color: var(--text-primary);"></i>
+            <span style="color: var(--text-primary); font-weight: 800; letter-spacing: -0.5px;">PRUVA</span>
+        </a>
+        <div class="nav-links">
+            <a href="/">Home</a>
+            <a href="/marketplace">Marketplace</a>
+            <a href="/dashboard">Dashboard</a>
+        </div>
+        <div class="nav-right">
+            <!-- Dinamik olarak auth.js tarafından doldurulur -->
+        </div>
+    </nav>
+
+    <!-- Mobile Nav Overlay -->
+    <div class="mobile-nav-overlay" id="mobile-nav-overlay" onclick="window.toggleMobileNav()"></div>
+    
+    <!-- Mobile Nav Drawer -->
+    <div class="mobile-nav-drawer" id="mobile-nav-drawer">
+        <a href="/">
+            <i data-lucide="home"></i> Anasayfa
+        </a>
+        <a href="/marketplace">
+            <i data-lucide="shopping-bag"></i> Pazaryeri
+        </a>
+        <a href="/dashboard">
+            <i data-lucide="layout-dashboard"></i> Dashboard
+        </a>
+        <a href="/education">
+            <i data-lucide="graduation-cap"></i> Eğitim
+        </a>
+        <a href="/settings">
+            <i data-lucide="settings"></i> Ayarlar
+        </a>
+        <div class="mobile-nav-divider"></div>
+        <a href="/membership">
+            <i data-lucide="star"></i> Üyelik
+        </a>
+        <a id="mobile-logout-link" onclick="window.app.auth.logout();" style="color: #ff4d4f; display: none;">
+            <i data-lucide="log-out"></i> Çıkış Yap
+        </a>
+        <a id="mobile-login-link" href="/login" style="display: none;">
+            <i data-lucide="log-in"></i> Giriş Yap
+        </a>
+        <a id="mobile-register-link" href="/register" style="display: none; color: var(--primary);">
+            <i data-lucide="user-plus"></i> Kayıt Ol
+        </a>
+
+        <a class="mobile-post-btn" id="mobile-nav-post-btn" href="/post-ad" style="display: block; text-decoration: none; text-align: center; line-height: 40px;">
+            Yeni İlan Ver
+        </a>
+    </div>
+
+    <div id="app-content">
+        <!-- İçerik JavaScript ile buraya yüklenecek -->
+    </div>
+
+    <!-- Modal Kapları -->
+    <div id="modal-container"></div>
+
+    <!-- Footer -->
+    <footer id="app-footer">
+        <div class="footer-inner">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <div class="footer-logo">PRUVA</div>
+                    <p class="footer-desc">Türkiye'nin en hızlı dijital lojistik pazaryeri. Yükünüzü güvenle, hızla, en iyi fiyatla taşıyoruz.</p>
+                </div>
+                <div class="footer-col">
+                    <h4>Platform</h4>
+                    <a href="/marketplace">Marketplace</a>
+                    <a href="/post-ad">Post Load</a>
+                    <a href="/dashboard">Dashboard</a>
+                </div>
+                <div class="footer-col">
+                    <h4>Lojistik & Araçlar</h4>
+                    <a href="/lojistik-hizmetleri">Lojistik Hizmetleri</a>
+                    <a href="/navlun-hesaplama">Navlun Hesaplama</a>
+                    <a href="/konteyner-tasimaciligi">Konteyner Taşımacılığı</a>
+                    <a href="/ithalat-ihracat">İthalat & İhracat</a>
+                </div>
+                <div class="footer-col">
+                    <h4>İletişim</h4>
+                    <p style="font-size: 0.85rem; color: #8899aa;">support@pruvahub.com</p>
+                    <p style="font-size: 0.85rem; color: #8899aa;">+90 (212) 000 00 00</p>
+                    <div class="footer-social">
+                        <span title="LinkedIn"><i data-lucide="briefcase" style="width: 18px; height: 18px;"></i></span>
+                        <span title="Twitter"><i data-lucide="message-circle" style="width: 18px; height: 18px;"></i></span>
+                        <span title="Instagram"><i data-lucide="camera" style="width: 18px; height: 18px;"></i></span>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>© 2026 Pruva Lojistik. Tüm hakları saklıdır.</span>
+                <span>v2.0 — Made with ❤️ in İstanbul</span>
+            </div>
+        </div>
+    </footer>
+
+
+
+    <!-- Firebase Phone Auth Recaptcha Container -->
+    <div id="recaptcha-container"></div>
+    <!-- Vite Entry Point — Tek script! -->
+    <script type="module" src="/js/main_v2.js"></script>
+</body>
+</html>
