@@ -285,17 +285,26 @@ window.Router = class Router {
         const el = document.activeElement;
         return {
             id: el?.id || null,
-            selectionStart: el?.selectionStart ?? null
+            selectionStart: el?.selectionStart ?? null,
+            value: (el && ['INPUT', 'TEXTAREA'].includes(el.tagName)) ? el.value : null
         };
     }
 
-    _restoreFocus({ id, selectionStart }) {
+    _restoreFocus({ id, selectionStart, value }) {
         if (!id) return;
         const el = document.getElementById(id);
         if (!el) return;
+        if (value !== null && ['INPUT', 'TEXTAREA'].includes(el.tagName)) {
+            // Restore typed value if the re-rendered element is currently different
+            if (el.value !== value) {
+                el.value = value;
+            }
+        }
         el.focus();
-        if (selectionStart !== null && ['text', 'search', 'tel', 'url'].includes(el.type)) {
-            el.setSelectionRange(selectionStart, selectionStart);
+        if (selectionStart !== null && ['text', 'search', 'tel', 'url'].includes(el.type || el.tagName.toLowerCase())) {
+            try {
+                el.setSelectionRange(selectionStart, selectionStart);
+            } catch (e) {}
         }
     }
 
