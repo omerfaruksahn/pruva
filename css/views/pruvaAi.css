@@ -1128,7 +1128,9 @@ input:checked + .switch-slider:before {
     display: grid;
     grid-template-columns: 320px 1fr;
     gap: 0;
-    height: 650px;
+    height: calc(100vh - 150px);
+    min-height: 450px;
+    max-height: 650px;
     background-color: var(--bg-surface);
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
