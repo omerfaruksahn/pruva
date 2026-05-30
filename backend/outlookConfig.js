@@ -1,5 +1,6 @@
 const msal = require('@azure/msal-node');
-require('dotenv').config();
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '.env') });
 
 const clientExists = process.env.OUTLOOK_CLIENT_ID && process.env.OUTLOOK_CLIENT_SECRET;
 
