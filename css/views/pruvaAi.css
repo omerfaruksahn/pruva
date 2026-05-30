@@ -1733,3 +1733,35 @@ input:checked + .switch-slider:before {
 .drawer-notes-save:hover {
   opacity: 0.9;
 }
+
+/* ==========================================================================
+   PRUVA PREMIUM VIEWPORT & LAYOUT ADJUSTMENTS (PREVENTING CUTOFFS & PAGE SCROLL)
+   ========================================================================== */
+
+/* 1. Hide the large footer on AI-centric views to give them a premium full-app feel */
+body.view-pruva-ai #app-footer,
+body.view-pricing-actions #app-footer,
+body.view-pricing-customers #app-footer,
+body.view-pricing-settings #app-footer,
+body.view-pricing-reports #app-footer {
+    display: none !important;
+}
+
+/* 2. Prevent page-level scroll on desktop to keep the layout locked in the viewport */
+@media (min-width: 1025px) {
+    body.view-pruva-ai,
+    body.view-pricing-actions,
+    body.view-pricing-customers,
+    body.view-pricing-settings,
+    body.view-pricing-reports {
+        overflow: hidden !important;
+        height: 100vh !important;
+    }
+
+    /* 3. Let the chat layout expand dynamically to fill the available screen height */
+    .pruva-chat-layout {
+        height: calc(100vh - 160px) !important;
+        max-height: none !important;
+    }
+}
+
