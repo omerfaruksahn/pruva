@@ -39,3 +39,32 @@ window.CONFIG = Object.freeze({
     // Instant views (no skeleton loading)
     INSTANT_VIEWS: ['home', 'membership', 'dashboard'],
 });
+
+
+// ─────────────────────────────────────────────
+// Global API Interceptor (Vite to Render Router)
+// ─────────────────────────────────────────────
+// Intercepts all relative `/api` fetches and redirects them to the live production server.
+const originalFetch = window.fetch;
+window.fetch = function (input, init) {
+    if (typeof input === 'string' && input.startsWith('/api')) {
+        const apiUrl = window.CONFIG.API_URL;
+        if (apiUrl && apiUrl !== '/api') {
+            const targetUrl = input.replace('/api', apiUrl);
+            return originalFetch(targetUrl, init);
+        }
+    }
+    return originalFetch(input, init);
+};
+
+// Intercepts all `window.open` relative `/api` popups (e.g. Outlook OAuth login)
+const originalOpen = window.open;
+window.open = function (url, target, features) {
+    if (typeof url === 'string' && url.startsWith('/api')) {
+        const apiUrl = window.CONFIG.API_URL;
+        if (apiUrl && apiUrl !== '/api') {
+            url = url.replace('/api', apiUrl);
+        }
+    }
+    return originalOpen(url, target, features);
+};
