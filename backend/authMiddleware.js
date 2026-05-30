@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const admin = require('./firebaseAdmin');
+const db = require('./db');
 
 module.exports = async function(req, res, next) {
     // x-auth-token veya Authorization: Bearer <token> başlığından token'ı al
@@ -19,9 +20,21 @@ module.exports = async function(req, res, next) {
     if (admin && admin.apps.length > 0) {
         try {
             const decodedToken = await admin.auth().verifyIdToken(token);
-            if (decodedToken) {
-                // Firebase UID'sini req.user.id olarak ata (DB işlemleri için geriye dönük uyumlu)
-                req.user = { id: decodedToken.uid };
+            if (decodedToken && decodedToken.email) {
+                // Postgres users tablosundan email ile kullanıcıyı al veya otomatik oluştur
+                let userRes = await db.query('SELECT id FROM users WHERE email = $1', [decodedToken.email]);
+                
+                if (userRes.rows.length === 0) {
+                    console.log(`[AUTH MIDDLEWARE] Firebase kullanıcısı Postgres'te yok, oluşturuluyor: ${decodedToken.email}`);
+                    const insertRes = await db.query(
+                        'INSERT INTO users (email, password, role, is_verified) VALUES ($1, $2, $3, true) RETURNING id',
+                        [decodedToken.email, 'firebase_auth_external', 'shipper']
+                    );
+                    userRes = insertRes;
+                }
+                
+                // Postgres integer id'sini req.user.id olarak ata (ilişkisel veritabanı kısıtları için zorunludur)
+                req.user = { id: userRes.rows[0].id, email: decodedToken.email };
                 return next();
             }
         } catch (firebaseErr) {

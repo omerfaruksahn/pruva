@@ -24,8 +24,19 @@ router.get('/login', async (req, res) => {
         if (admin && admin.apps.length > 0) {
             try {
                 const decodedToken = await admin.auth().verifyIdToken(token);
-                userId = decodedToken.uid;
-                verified = true;
+                if (decodedToken && decodedToken.email) {
+                    let userRes = await db.query('SELECT id FROM users WHERE email = $1', [decodedToken.email]);
+                    if (userRes.rows.length === 0) {
+                        console.log(`[OUTLOOK LOGIN] Firebase kullanıcısı Postgres'te yok, oluşturuluyor: ${decodedToken.email}`);
+                        const insertRes = await db.query(
+                            'INSERT INTO users (email, password, role, is_verified) VALUES ($1, $2, $3, true) RETURNING id',
+                            [decodedToken.email, 'firebase_auth_external', 'shipper']
+                        );
+                        userRes = insertRes;
+                    }
+                    userId = userRes.rows[0].id;
+                    verified = true;
+                }
             } catch (firebaseErr) {
                 console.warn('[OUTLOOK ROUTE] Firebase token doğrulama başarısız:', firebaseErr.message);
             }
