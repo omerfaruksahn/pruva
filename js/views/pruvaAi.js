@@ -8,17 +8,13 @@ window.pruvaAiView = (state) => {
     // 1. Durum / Konuşmalar State Yükle
     let conversations = state.pricingConversations;
     
-    // Eğer Outlook bağlıysa mock dataları zorlama, boş başlasın; bağlı değilse keşif için mock dataları göster
-    if (state.outlookConnected) {
-        if (!conversations) {
-            conversations = [];
-            state.pricingConversations = [];
-        }
-    } else {
-        const hasCarriers = conversations && conversations.some(c => c.id === 21 || c.id === 22);
-        if (!conversations || !hasCarriers) {
-            conversations = window.pruvaAiManager.initializeDefaultConversations(state);
-        }
+    // Kullanıcının talebi doğrultusunda sahte (mock) mailler tamamen kaldırılmıştır.
+    // Sayfa her durumda temiz ve boş başlayacaktır. Canlı mailler taranınca dolacaktır.
+    const hasMock = conversations && conversations.some(c => c.id === 11 || c.id === 12 || c.id === 13 || c.id === 14 || c.id === 21 || c.id === 22);
+    if (!conversations || hasMock) {
+        conversations = [];
+        state.pricingConversations = [];
+        localStorage.setItem('pruva_pricing_conversations', JSON.stringify([]));
     }
 
     const activeConvId = state.activeConversationId || null;

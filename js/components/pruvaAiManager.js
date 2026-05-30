@@ -1391,91 +1391,7 @@ window.PruvaAiManager = class PruvaAiManager {
     // =========================================================================
 
     initializeDefaultConversations(state) {
-        const defaultConversations = [
-            {
-                id: 11,
-                company: 'Arçelik A.Ş.',
-                logoLetter: 'A',
-                logoBg: '#3b82f6',
-                lastMessage: 'Rate Request – Şangay / İstanbul – 40HC x2',
-                time: '09:30',
-                status: 'RATES_REQUESTED',
-                messages: [
-                    { sender: 'Arçelik A.Ş.', time: '29.05.2026 09:30', type: 'incoming', text: 'Selam kanka, Şangay\'dan İstanbul\'a 2x40HC FOB Temmuz yüklemesi için armatörlerden spot rate toplayabilir miyiz? Acil lazım.' },
-                    { sender: 'Pruva AI', time: '29.05.2026 09:32', type: 'ai_action', text: 'AI: MSC ve Maersk\'e Far East rate request taslağı hazırlandı ✓' },
-                    { sender: 'Pruva AI', time: '29.05.2026 09:33', type: 'ai_suggestion', text: 'MSC ve Maersk\'e Far East rate request atıyorum. Onaylıyor musun?', action: 'SEND_RATE_REQUEST', carriers: ['MSC', 'Maersk'] }
-                ]
-            },
-            {
-                id: 12,
-                company: 'Vestel Elektronik',
-                logoLetter: 'V',
-                logoBg: '#8b5cf6',
-                lastMessage: 'Navlun Talebi – Ek Bilgi Gerekli',
-                time: '10:15',
-                status: 'MISSING_INFO_SENT',
-                messages: [
-                    { sender: 'Vestel Elektronik', time: '29.05.2026 10:15', type: 'incoming', text: 'Frankfurt - İstanbul acil hava kargo sevkiyatımız var. Fiyat verir misiniz?' },
-                    { sender: 'Pruva AI', time: '29.05.2026 10:16', type: 'ai_suggestion', text: 'Vestel\'e koli boyutları ve chargeable weight bilgisini talep eden eksik bilgi sorgulama maili gönderiyorum. Onaylıyor musun?', action: 'SEND_MISSING_INFO' }
-                ]
-            },
-            {
-                id: 13,
-                company: 'BSH Ev Aletleri',
-                logoLetter: 'B',
-                logoBg: '#f97316',
-                lastMessage: 'Hamburg\'dan İzmir\'e TIR fiyat teklifi iletildi.',
-                time: 'Dün',
-                status: 'OFFER_SENT',
-                messages: [
-                    { sender: 'BSH Ev Aletleri', time: '28.05.2026 14:00', type: 'incoming', text: 'Hamburg - İzmir karayolu komple tır teklifinizi bekliyoruz.' },
-                    { sender: 'Pruva AI', time: '28.05.2026 14:05', type: 'ai_action', text: 'AI: Ekol Lojistik ve Mars Lojistik\'e rate soruldu ✓' },
-                    { sender: 'Ekol Lojistik', time: '28.05.2026 15:00', type: 'incoming', text: 'Hamburg - İzmir komple tır için spot navlun fiyatımız EUR 1.650 all-in.' },
-                    { sender: 'Pruva AI', time: '28.05.2026 15:10', type: 'ai_suggestion', text: 'Ekol\'den gelen EUR 1.650 fiyata +12% marj ekleyerek BSH\'a $1.850 teklif veriyorum. Onaylıyor musun?', action: 'SEND_OFFER' },
-                    { sender: 'Pruva AI (Giden Mail)', time: '28.05.2026 15:30', type: 'outgoing', text: 'BSH Ev Aletleri\'ne Hamburg → İzmir komple tır navlun teklifimiz ($1.850) gönderildi.' }
-                ]
-            },
-            {
-                id: 14,
-                company: 'Tüpraş',
-                logoLetter: 'T',
-                logoBg: '#14b8a6',
-                lastMessage: 'Tüpraş sevkiyatı başarıyla rezerve edildi.',
-                time: '27 May',
-                status: 'COMPLETED',
-                messages: [
-                    { sender: 'Tüpraş', time: '27.05.2026 11:00', type: 'incoming', text: 'Rotterdam\'dan Mersin\'e 5 CBM kimyasal yükümüz var.' },
-                    { sender: 'Pruva AI (Giden Mail)', time: '27.05.2026 13:00', type: 'outgoing', text: 'Tüpraş\'a Rotterdam → Mersin LCL navlun teklifimiz ($450) iletildi ve rezerve edildi.' },
-                    { sender: 'Pruva AI', time: '27.05.2026 13:05', type: 'ai_action', text: 'AI: Tüpraş sevkiyatı başarıyla rezerve edildi ve tamamlandı ✓' }
-                ]
-            },
-            {
-                id: 21,
-                company: 'MSC Lojistik (Taşıyıcı)',
-                logoLetter: 'M',
-                logoBg: '#1e3a8a',
-                lastMessage: 'İzmir - Hamburg 3x20DC için spot rate iletildi.',
-                time: '12:05',
-                status: 'COMPLETED',
-                messages: [
-                    { sender: 'Pruva AI (Giden Mail)', time: '29.05.2026 11:30', type: 'outgoing', text: 'MSC Pricing ekibine İzmir → Hamburg 3x20DC spot navlun talebimiz iletildi.' },
-                    { sender: 'MSC Lojistik', time: '29.05.2026 12:05', type: 'incoming', text: 'Merhabalar Ahmet Bey, ilgili talep için spot navlun fiyatımız USD 1.450 all-in\'dir. Transit süre 18 gün.' }
-                ]
-            },
-            {
-                id: 22,
-                company: 'Maersk Line (Taşıyıcı)',
-                logoLetter: 'M',
-                logoBg: '#0284c7',
-                lastMessage: 'Şangay - Ambarlı LCL rate sorgusu yanıtlandı.',
-                time: 'Dün',
-                status: 'COMPLETED',
-                messages: [
-                    { sender: 'Pruva AI (Giden Mail)', time: '28.05.2026 15:00', type: 'outgoing', text: 'Maersk Line acentesine Şangay → Ambarlı LCL fiyat talebi iletildi.' },
-                    { sender: 'Maersk Line', time: '28.05.2026 17:30', type: 'incoming', text: 'Fiyatımız USD 45/CBM all-in olarak belirlenmiştir. Lokaller alıcıya aittir.' }
-                ]
-            }
-        ];
+        const defaultConversations = [];
         state.pricingConversations = defaultConversations;
         localStorage.setItem('pruva_pricing_conversations', JSON.stringify(defaultConversations));
         return defaultConversations;
@@ -1884,7 +1800,7 @@ window.PruvaAiManager = class PruvaAiManager {
                 const convRes = await fetch('/api/pricing/conversations', { headers });
                 if (convRes.ok) {
                     const apiConversations = await convRes.json();
-                    if (apiConversations.length > 0) {
+                    if (apiConversations.length > 0 || this.app.state.outlookConnected) {
                         this.app.state.pricingConversations = apiConversations;
                         localStorage.setItem('pruva_pricing_conversations', JSON.stringify(apiConversations));
                         this.app.commit();

@@ -678,6 +678,18 @@ router.get('/conversations', auth, async (req, res) => {
   try {
     const userId = req.user.id;
     
+    // Otomatik olarak kullanıcının ürettiği sahte (mock) mailleri veritabanından temizle (Self-healing)
+    try {
+      if (userId) {
+        await db.query("DELETE FROM pricing_actions WHERE rfq_id IN (SELECT id FROM pricing_rfqs WHERE outlook_message_id LIKE 'mock-msg-id-%' AND user_id = $1)", [userId]);
+        await db.query("DELETE FROM pricing_rates WHERE rfq_id IN (SELECT id FROM pricing_rfqs WHERE outlook_message_id LIKE 'mock-msg-id-%' AND user_id = $1)", [userId]);
+        await db.query("DELETE FROM pricing_carrier_performance WHERE rfq_id IN (SELECT id FROM pricing_rfqs WHERE outlook_message_id LIKE 'mock-msg-id-%' AND user_id = $1)", [userId]);
+        await db.query("DELETE FROM pricing_rfqs WHERE outlook_message_id LIKE 'mock-msg-id-%' AND user_id = $1", [userId]);
+      }
+    } catch (dbErr) {
+      console.warn('[DB CLEANUP WARNING] Sahte e-postalar temizlenemedi:', dbErr.message);
+    }
+    
     // RFQ'lardan konuşmaları oluştur — her sender_email bir konuşma
     const result = await db.query(`
       SELECT 
