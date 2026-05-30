@@ -1655,7 +1655,7 @@ window.PruvaAiManager = class PruvaAiManager {
         conversations[convIdx].lastMessage = actionMsg;
         conversations[convIdx].status = newStatus;
 
-        // Gerçek mail gönderimi (Faz 7)
+        // Gerçek mail gönderimi (Faz 7) ve Veri Tabanı Durum Güncellemesi
         try {
             const firebaseUser = window.fbAuth?.currentUser;
             const token = firebaseUser ? await firebaseUser.getIdToken() : '';
@@ -1665,6 +1665,7 @@ window.PruvaAiManager = class PruvaAiManager {
             const finalSubject = suggestedMail.subject || suggestionMsg.text || 'Pruva AI Navlun Bildirimi';
             const finalBody = suggestedMail.body || suggestionMsg.suggestedMessage || actionMsg;
 
+            // 1. Canlı e-posta gönderimi (Resend/Outlook)
             await fetch('/api/pricing/send-email', {
                 method: 'POST',
                 headers: {
@@ -1677,8 +1678,25 @@ window.PruvaAiManager = class PruvaAiManager {
                     body: finalBody
                 })
             });
+
+            // 2. Eğer database aksiyon ID'si varsa, backend'e onaylandığını bildirip durumu COMPLETED yap
+            const actionId = suggestionMsg.actionId;
+            if (actionId) {
+                await fetch(`/api/pricing/actions/${actionId}/approve`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        edited_subject: finalSubject,
+                        edited_body: finalBody,
+                        selected_carriers: []
+                    })
+                });
+            }
         } catch (e) {
-            console.warn('[PRUVA AI] E-posta gönderimi başarısız:', e.message);
+            console.warn('[PRUVA AI] E-posta gönderimi veya DB onayı başarısız:', e.message);
         }
 
         // Local sync
@@ -1686,19 +1704,29 @@ window.PruvaAiManager = class PruvaAiManager {
         this.app.commit();
         this.showToast('AI aksiyonu başarıyla onaylandı ve gönderildi!', 'success');
 
+        // Veri tabanından en güncel ve temiz halini çek
+        try {
+            await this.loadState();
+        } catch (loadErr) {
+            console.warn('[PRUVA AI] Güncel konuşma geçmişi yüklenemedi:', loadErr.message);
+        }
+
         setTimeout(() => {
             const el = document.getElementById('chat-timeline-area');
             if (el) el.scrollTop = el.scrollHeight;
         }, 50);
     }
 
-    rejectSuggestion(convId, msgIndex) {
+    async rejectSuggestion(convId, msgIndex) {
         let conversations = this.app.state.pricingConversations;
         if (!conversations) return;
 
         const parsedId = isNaN(convId) ? convId : Number(convId);
         const convIdx = conversations.findIndex(c => c.id === parsedId);
         if (convIdx === -1) return;
+
+        const suggestionMsg = conversations[convIdx].messages[msgIndex];
+        const actionId = suggestionMsg ? suggestionMsg.actionId : null;
 
         conversations[convIdx].messages.splice(msgIndex, 1);
         conversations[convIdx].lastMessage = 'Öneri reddedildi.';
@@ -1707,6 +1735,26 @@ window.PruvaAiManager = class PruvaAiManager {
         localStorage.setItem('pruva_pricing_conversations', JSON.stringify(conversations));
         this.app.commit();
         this.showToast('AI önerisi reddedildi.', 'danger');
+
+        if (actionId) {
+            try {
+                const firebaseUser = window.fbAuth?.currentUser;
+                const token = firebaseUser ? await firebaseUser.getIdToken() : '';
+                
+                await fetch(`/api/pricing/actions/${actionId}/reject`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                // Veri tabanından en güncel halini çek
+                await this.loadState();
+            } catch (err) {
+                console.warn('[PRUVA AI] Backend aksiyon reddi başarısız:', err.message);
+            }
+        }
     }
 
     toggleDetailsDrawer() {
