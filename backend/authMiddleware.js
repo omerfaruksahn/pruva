@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
+const admin = require('./firebaseAdmin');
 
-module.exports = function(req, res, next) {
+module.exports = async function(req, res, next) {
     // x-auth-token veya Authorization: Bearer <token> başlığından token'ı al
     let token = req.header('x-auth-token');
     
@@ -14,13 +15,28 @@ module.exports = function(req, res, next) {
         return res.status(401).json({ message: 'Token bulunamadı, yetki reddedildi.' });
     }
 
+    // 1. Firebase Admin SDK ile Firebase ID Token doğrulamayı dene
+    if (admin && admin.apps.length > 0) {
+        try {
+            const decodedToken = await admin.auth().verifyIdToken(token);
+            if (decodedToken) {
+                // Firebase UID'sini req.user.id olarak ata (DB işlemleri için geriye dönük uyumlu)
+                req.user = { id: decodedToken.uid };
+                return next();
+            }
+        } catch (firebaseErr) {
+            // Hata detayını warn olarak loglayalım fakat hemen reddetmeyip standart JWT'ye geçelim
+            console.warn('[AUTH MIDDLEWARE] Firebase token doğrulama başarısız:', firebaseErr.message);
+        }
+    }
+
     try {
-        // 1. Standart JWT doğrulamayı dene
+        // 2. Standart JWT doğrulamayı dene (Local dev, API testleri vb.)
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         req.user = decoded.user;
         next();
     } catch (err) {
-        // 2. Dummy data mode aktifse Firebase tokenlarını veya test tokenlarını çöz ve hata verme
+        // 3. Dummy data mode aktifse Firebase tokenlarını veya test tokenlarını çöz ve hata verme
         if (process.env.USE_DUMMY_DATA === 'true') {
             try {
                 const decoded = jwt.decode(token);
@@ -39,6 +55,6 @@ module.exports = function(req, res, next) {
             return next();
         }
 
-        res.status(401).json({ message: 'Token geçersiz.' });
+        res.status(401).json({ message: 'Token geçersiz veya süresi dolmuş.' });
     }
 };

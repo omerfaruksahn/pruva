@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const { cca, scopes, redirectUri } = require('../outlookConfig');
 const db = require('../db');
 const auth = require('../authMiddleware');
+const admin = require('../firebaseAdmin');
 
 // @route   GET api/outlook/login
 // @desc    OAuth2 Login akışını başlatır (Frontend token'ı query parametresi olarak alır)
@@ -17,15 +18,32 @@ router.get('/login', async (req, res) => {
     try {
         // Token'ı doğrula ve kullanıcı ID'sini al
         let userId;
-        try {
-            const decoded = jwt.verify(token, process.env.JWT_SECRET);
-            userId = decoded.user.id;
-        } catch (verifyErr) {
-            if (process.env.USE_DUMMY_DATA === 'true') {
-                const decoded = jwt.decode(token);
-                userId = decoded ? (decoded.user_id || decoded.sub || (decoded.user && decoded.user.id) || 1) : 1;
-            } else {
-                throw verifyErr;
+        let verified = false;
+
+        // 1. Firebase Token doğrulamayı dene
+        if (admin && admin.apps.length > 0) {
+            try {
+                const decodedToken = await admin.auth().verifyIdToken(token);
+                userId = decodedToken.uid;
+                verified = true;
+            } catch (firebaseErr) {
+                console.warn('[OUTLOOK ROUTE] Firebase token doğrulama başarısız:', firebaseErr.message);
+            }
+        }
+
+        // 2. Standart JWT veya fallback doğrulamayı dene
+        if (!verified) {
+            try {
+                const decoded = jwt.verify(token, process.env.JWT_SECRET);
+                userId = decoded.user.id;
+                verified = true;
+            } catch (verifyErr) {
+                if (process.env.USE_DUMMY_DATA === 'true') {
+                    const decoded = jwt.decode(token);
+                    userId = decoded ? (decoded.user_id || decoded.sub || (decoded.user && decoded.user.id) || 1) : 1;
+                } else {
+                    throw verifyErr;
+                }
             }
         }
 
