@@ -1665,8 +1665,10 @@ window.PruvaAiManager = class PruvaAiManager {
             const finalSubject = suggestedMail.subject || suggestionMsg.text || 'Pruva AI Navlun Bildirimi';
             const finalBody = suggestedMail.body || suggestionMsg.suggestedMessage || actionMsg;
 
+            console.log("[PRUVA AI DEBUG] Sending email to:", finalTo, "Subject:", finalSubject);
+
             // 1. Canlı e-posta gönderimi (Resend/Outlook)
-            await fetch('/api/pricing/send-email', {
+            const emailRes = await fetch('/api/pricing/send-email', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -1678,11 +1680,14 @@ window.PruvaAiManager = class PruvaAiManager {
                     body: finalBody
                 })
             });
+            console.log("[PRUVA AI DEBUG] Send-email response status:", emailRes.status);
 
             // 2. Eğer database aksiyon ID'si varsa, backend'e onaylandığını bildirip durumu COMPLETED yap
             const actionId = suggestionMsg.actionId;
+            console.log("[PRUVA AI DEBUG] Action ID:", actionId, "Full message object:", suggestionMsg);
+
             if (actionId) {
-                await fetch(`/api/pricing/actions/${actionId}/approve`, {
+                const approveRes = await fetch(`/api/pricing/actions/${actionId}/approve`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -1694,6 +1699,11 @@ window.PruvaAiManager = class PruvaAiManager {
                         selected_carriers: []
                     })
                 });
+                
+                const approveText = await approveRes.text();
+                console.log(`[PRUVA AI DEBUG] DB approve status: ${approveRes.status}, Response: ${approveText}`);
+            } else {
+                console.warn("[PRUVA AI DEBUG] No actionId found on this recommendation card.");
             }
         } catch (e) {
             console.warn('[PRUVA AI] E-posta gönderimi veya DB onayı başarısız:', e.message);
