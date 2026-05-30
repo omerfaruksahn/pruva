@@ -1420,6 +1420,10 @@ window.PruvaAiManager = class PruvaAiManager {
         this.app.commit();
     }
 
+    updateCommandInput(val) {
+        this.app.state.chatCommandInputValue = val;
+    }
+
     async sendInput() {
         const input = document.getElementById('chat-command-input');
         if (!input) return;
@@ -1427,6 +1431,7 @@ window.PruvaAiManager = class PruvaAiManager {
         if (!text) return;
 
         input.value = '';
+        this.app.state.chatCommandInputValue = '';
 
         let conversations = this.app.state.pricingConversations;
         if (!conversations || conversations.length === 0) {

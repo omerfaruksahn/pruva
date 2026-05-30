@@ -342,7 +342,7 @@ window.pruvaAiView = (state) => {
 
                 <!-- HER ZAMAN ALTA SABİT KOMUT INPUT KUTUSU -->
                 <div class="chat-input-wrapper">
-                    <input type="text" class="chat-input-field" id="chat-command-input" placeholder="Bir komut girin... (örn: 'Arçelik'ten RFQ geldi, Çin'den 2x40HC FOB Temmuz' veya 'Hamburg'dan İzmir'e TIR fiyatı sor')" onkeydown="if(event.key === 'Enter') window.pruvaAiManager.sendInput()">
+                    <input type="text" class="chat-input-field" id="chat-command-input" placeholder="Bir komut girin... (örn: 'Arçelik'ten RFQ geldi, Çin'den 2x40HC FOB Temmuz' veya 'Hamburg'dan İzmir'e TIR fiyatı sor')" value="${state.chatCommandInputValue || ''}" oninput="window.pruvaAiManager.updateCommandInput(this.value)" onkeydown="if(event.key === 'Enter') window.pruvaAiManager.sendInput()">
                     <button class="chat-send-btn" onclick="window.pruvaAiManager.sendInput()" title="Komut Gönder">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
                     </button>
