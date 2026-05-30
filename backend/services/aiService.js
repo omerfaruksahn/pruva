@@ -50,7 +50,7 @@ async function analyzeCommand(userMessage, context = {}) {
     }
     
     const model = genAI.getGenerativeModel({ 
-      model: process.env.AI_MODEL || 'gemini-2.5-flash' 
+      model: process.env.AI_MODEL || 'gemini-1.5-pro' 
     });
     
     const contextStr = context.company 
@@ -118,7 +118,7 @@ function fallbackAnalysis(text) {
 async function analyzeEmail(emailBody, emailSubject = '') {
   try {
     if (!genAI) return null;
-    const model = genAI.getGenerativeModel({ model: process.env.AI_MODEL || 'gemini-2.5-flash' });
+    const model = genAI.getGenerativeModel({ model: process.env.AI_MODEL || 'gemini-1.5-pro' });
     const prompt = `Sen lojistik maillerini analiz edip yapılandırılmış veri çıkaran bir Pricing AI asistanısın.\n\nAşağıdaki emaili analiz et ve şu JSON formatında yanıt ver:\n{\n  "category": "RFQ|RATE_RESPONSE|NEGOTIATION|FOLLOWUP|OTHER",\n  "transport_mode": "DENIZ_FCL|DENIZ_LCL|HAVA|KARA|null",\n  "extracted_data": {\n    "pol": "yükleme limanı/şehri",\n    "pod": "varış limanı/şehri",\n    "container_type": "20DC|40HC|etc veya null",\n    "quantity": "adet veya null",\n    "incoterm": "FOB|EXW|CIF|etc veya null",\n    "loading_date": "tarih veya null",\n    "cargo_type": "yük cinsi veya null",\n    "weight_kg": "ağırlık veya null",\n    "price": "fiyat veya null",\n    "currency": "USD|EUR|TRY veya null",\n    "carrier_name": "taşıyıcı adı veya null",\n    "transit_time": "transit süre veya null"\n  },\n  "missing_fields": ["eksik alanlar listesi"],\n  "action": "SEND_RATE_REQUEST|SEND_OFFER|SEND_MISSING_INFO|null",\n  "summary": "Kısa Türkçe özet"\n}\n\nKONU: ${emailSubject}\nİÇERİK: ${emailBody}\n\nSadece JSON döndür:`;
     const result = await model.generateContent(prompt);
     const responseText = result.response.text();
