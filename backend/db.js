@@ -24,6 +24,11 @@ if (!USE_DUMMY_DATA) {
     pool.on('connect', () => {
         console.log('PostgreSQL veritabanına bağlandı.');
     });
+
+    // Otomatik Migration: pricing_actions tablosuna attachments sütununu ekle (yoksa)
+    pool.query(`ALTER TABLE pricing_actions ADD COLUMN IF NOT EXISTS attachments JSONB DEFAULT '[]'::jsonb;`)
+        .then(() => console.log('[DB] attachments sütunu kontrol edildi/eklendi.'))
+        .catch(err => console.error('[DB MIGRATION ERROR]', err.message));
 } else {
     console.log('[DUMMY MODE] Sunucu dummy verilerle çalışıyor...');
 }
