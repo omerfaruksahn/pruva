@@ -1583,11 +1583,58 @@ window.PruvaAiManager = class PruvaAiManager {
         }
     }
 
+    async handleFileSelect(event) {
+        const files = event.target.files;
+        if (!files || files.length === 0) return;
+        
+        if (!this.app.state.pendingAttachments) {
+            this.app.state.pendingAttachments = [];
+        }
+        
+        for (let i = 0; i < files.length; i++) {
+            this.app.state.pendingAttachments.push(files[i]);
+        }
+        
+        event.target.value = ''; // Reset input
+        this.app.commit();
+    }
+
+    removePendingAttachment(index) {
+        if (!this.app.state.pendingAttachments) return;
+        this.app.state.pendingAttachments.splice(index, 1);
+        this.app.commit();
+    }
+
+    async uploadFile(file) {
+        const formData = new FormData();
+        formData.append('file', file);
+        
+        const firebaseUser = window.fbAuth?.currentUser;
+        const token = firebaseUser ? await firebaseUser.getIdToken() : '';
+        
+        const response = await fetch('/api/ai/upload', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            },
+            body: formData
+        });
+        
+        if (!response.ok) {
+            const err = await response.json();
+            throw new Error(err.error || 'Dosya yükleme başarısız');
+        }
+        
+        return await response.json();
+    }
+
     async sendInput() {
         const input = document.getElementById('chat-command-input');
         if (!input) return;
         const text = input.value.trim();
-        if (!text) return;
+        const pendingFiles = this.app.state.pendingAttachments || [];
+        
+        if (!text && pendingFiles.length === 0) return;
 
         input.value = '';
         this.app.state.chatCommandInputValue = '';
@@ -1634,6 +1681,29 @@ window.PruvaAiManager = class PruvaAiManager {
         conversations[convIdx].lastMessage = text;
         conversations[convIdx].time = 'Şimdi';
         
+        // Dosyaları yükle
+        let uploadedAttachments = [];
+        if (pendingFiles.length > 0) {
+            this.app.state.aiLoading = true;
+            this.app.commit();
+            try {
+                for (const file of pendingFiles) {
+                    const res = await this.uploadFile(file);
+                    if (res.success && res.file) {
+                        uploadedAttachments.push(res.file);
+                    }
+                }
+            } catch (err) {
+                console.error('Dosya yükleme hatası:', err);
+                this.showToast('Dosyalar yüklenemedi: ' + err.message, 'danger');
+                this.app.state.aiLoading = false;
+                this.app.commit();
+                return;
+            }
+            // Yükleme bitince temizle
+            this.app.state.pendingAttachments = [];
+        }
+
         this.app.state.aiLoading = true;
         this.app.commit();
         this.scrollToBottom();
@@ -1643,21 +1713,26 @@ window.PruvaAiManager = class PruvaAiManager {
             const firebaseUser = window.fbAuth?.currentUser;
             const token = firebaseUser ? await firebaseUser.getIdToken() : '';
             
+            const payload = {
+                message: text || 'Ekli dosyayı incele',
+                context: {
+                    conversationId: activeConvId,
+                    email: conversations[convIdx].email,
+                    company: conversations[convIdx].company,
+                    status: conversations[convIdx].status
+                }
+            };
+            if (uploadedAttachments.length > 0) {
+                payload.attachments = uploadedAttachments;
+            }
+
             const response = await fetch('/api/ai/analyze', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({
-                    message: text,
-                    context: {
-                        conversationId: activeConvId,
-                        email: conversations[convIdx].email,
-                        company: conversations[convIdx].company,
-                        status: conversations[convIdx].status
-                    }
-                })
+                body: JSON.stringify(payload)
             });
 
             if (response.ok) {

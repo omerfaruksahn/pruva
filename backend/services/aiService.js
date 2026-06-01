@@ -45,7 +45,7 @@ YANIT FORMATI (Her zaman bu JSON formatında yanıt ver):
 - Emin olmadığın alanları null yap
 - confidence 0.8'den düşükse action'ı GENERAL yap`;
 
-async function analyzeCommand(userMessage, context = {}) {
+async function analyzeCommand(userMessage, context = {}, fileParts = []) {
   try {
     if (!genAI) {
       throw new Error('GEMINI_API_KEY bulunamadı. Yapay zeka kullanılamıyor.');
@@ -70,8 +70,10 @@ async function analyzeCommand(userMessage, context = {}) {
     
     const prompt = `${SYSTEM_PROMPT}\n${contextStr}${historyStr}\n${carriersStr}\n\nKULLANICI MESAJI: "${userMessage}"\n\nJSON yanıtını ver:`;
     
+    const parts = [{ text: prompt }, ...fileParts];
+
     const result = await model.generateContent({
-      contents: [{ role: "user", parts: [{ text: prompt }] }],
+      contents: [{ role: "user", parts }],
       generationConfig: {
         responseMimeType: "application/json"
       }

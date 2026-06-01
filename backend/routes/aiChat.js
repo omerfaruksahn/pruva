@@ -3,6 +3,15 @@ const router = express.Router();
 const auth = require('../authMiddleware');
 const { analyzeCommand } = require('../services/aiService');
 const db = require('../db');
+const multer = require('multer');
+const { createClient } = require('@supabase/supabase-js');
+const fs = require('fs');
+const path = require('path');
+
+const upload = multer({ dest: 'uploads/' });
+const supabase = process.env.SUPABASE_URL && process.env.SUPABASE_KEY 
+  ? createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY)
+  : null;
 
 // @route   POST api/ai/analyze
 // @desc    Kullanıcı komutunu analiz eder ve AI önerisi üretir
@@ -84,9 +93,9 @@ router.post('/analyze', auth, async (req, res) => {
       // Kullanıcının komutunu pricing_actions tablosunda saklayalım
       if (rfqId) {
         await client.query(
-          `INSERT INTO pricing_actions (user_id, rfq_id, action_type, title, description, suggested_mail, carriers_to_contact, status)
-           VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
-          [req.user.id, rfqId, 'USER_MESSAGE', 'Kullanıcı Mesajı', message, null, null, 'COMPLETED']
+          `INSERT INTO pricing_actions (user_id, rfq_id, action_type, title, description, suggested_mail, carriers_to_contact, status, attachments)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+          [req.user.id, rfqId, 'USER_MESSAGE', 'Kullanıcı Mesajı', message, null, null, 'COMPLETED', req.body.attachments ? JSON.stringify(req.body.attachments) : '[]']
         );
       }
     }
@@ -117,9 +126,28 @@ router.post('/analyze', auth, async (req, res) => {
       });
     }
 
+    // Ekli dosyaları Supabase'den çekip Gemini için base64 (inlineData) formatına dönüştürelim
+    let fileParts = [];
+    if (req.body.attachments && Array.isArray(req.body.attachments) && supabase) {
+      for (const att of req.body.attachments) {
+        if (att.path) {
+          const { data, error } = await supabase.storage.from('pruva_files').download(att.path);
+          if (data && !error) {
+            const buffer = await data.arrayBuffer();
+            fileParts.push({
+              inlineData: {
+                data: Buffer.from(buffer).toString('base64'),
+                mimeType: att.type || 'application/pdf'
+              }
+            });
+          }
+        }
+      }
+    }
+
     // 3) Yapay zeka analizi çağır
     const enrichedContext = { ...context, carriers, userId: req.user.id, history };
-    const result = await analyzeCommand(message, enrichedContext);
+    const result = await analyzeCommand(message, enrichedContext, fileParts);
     console.log(`[AI] User: "${message.substring(0, 50)}" → Action: ${result.action} (${result.confidence})`);
     
     // 4) Yapay zekanın cevabını veya aksiyon önerisini veritabanına kaydet
@@ -166,6 +194,56 @@ router.post('/analyze', auth, async (req, res) => {
     res.status(500).json({ success: false, action: 'GENERAL', summary: 'Bir hata oluştu, lütfen tekrar deneyin.', confidence: 0 });
   } finally {
     client.release();
+  }
+});
+
+// @route   POST api/ai/upload
+// @desc    Dosya yükler ve Supabase Storage'a atar
+router.post('/upload', auth, upload.single('file'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'Dosya yüklenmedi.' });
+    }
+
+    if (!supabase) {
+      return res.status(500).json({ error: 'Supabase yapılandırılmamış. Lütfen .env dosyasında SUPABASE_URL ve SUPABASE_KEY tanımlayın.' });
+    }
+
+    const file = req.file;
+    const fileExtension = path.extname(file.originalname);
+    const fileName = `${req.user.id}_${Date.now()}${fileExtension}`;
+    const filePath = file.path;
+
+    // Supabase'e yükle
+    const fileBuffer = fs.readFileSync(filePath);
+    const { data, error } = await supabase.storage
+      .from('pruva_files')
+      .upload(`chat_attachments/${fileName}`, fileBuffer, {
+        contentType: file.mimetype,
+        upsert: false
+      });
+
+    // Temp dosyayı sil
+    fs.unlinkSync(filePath);
+
+    if (error) {
+      console.error('[SUPABASE UPLOAD ERROR]', error);
+      return res.status(500).json({ error: 'Dosya yükleme başarısız: ' + error.message });
+    }
+
+    res.json({
+      success: true,
+      file: {
+        name: file.originalname,
+        path: `chat_attachments/${fileName}`,
+        type: file.mimetype,
+        size: file.size
+      }
+    });
+
+  } catch (error) {
+    console.error('[UPLOAD ERROR]', error);
+    res.status(500).json({ error: 'Sunucu hatası oluştu.' });
   }
 });
 
@@ -267,7 +345,7 @@ router.get('/conversations', auth, async (req, res) => {
       ORDER BY a.created_at ASC
     `, [userId]);
     
-    actions.rows.forEach(action => {
+    for (const action of actions.rows) {
       const isCopilot = action.sender_email === 'copilot@pruva.ai';
       const key = isCopilot ? 'copilot' : action.rfq_id;
       
@@ -284,6 +362,20 @@ router.get('/conversations', auth, async (req, res) => {
           sender = 'Pruva AI';
         }
 
+        let processedAttachments = [];
+        if (action.attachments && Array.isArray(action.attachments)) {
+          for (const att of action.attachments) {
+            let signedUrl = att.path;
+            if (supabase && att.path) {
+              const { data, error } = await supabase.storage.from('pruva_files').createSignedUrl(att.path, 60 * 60); // 1 saat geçerli
+              if (data && !error) {
+                signedUrl = data.signedUrl;
+              }
+            }
+            processedAttachments.push({ ...att, signedUrl });
+          }
+        }
+
         conv.messages.push({
           sender: sender,
           time: new Date(action.created_at).toLocaleString('tr-TR'),
@@ -292,10 +384,11 @@ router.get('/conversations', auth, async (req, res) => {
           text: action.description || action.body || action.preview || action.subject,
           action: action.action_type || action.type,
           actionId: action.id,
-          suggestedMail: action.suggested_mail
+          suggestedMail: action.suggested_mail,
+          attachments: processedAttachments
         });
       }
-    });
+    }
 
     // Pinned Co-pilot kanalının her zaman var olmasını ve en tepede selamlama mesajıyla başlamasını garantileyelim
     if (!convMap['copilot']) {

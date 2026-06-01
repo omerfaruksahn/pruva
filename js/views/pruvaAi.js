@@ -343,6 +343,17 @@ window.pruvaAiView = (state) => {
                                                         <strong style="color: var(--text-primary); min-width: 45px;">Konu:</strong> 
                                                         <span>${escapeHTML(suggestedMail.subject || 'Konu Yok')}</span>
                                                     </div>
+                                                    <div class="chat-bubble-text" style="${msg.action === 'SEND_CUSTOM_EMAIL' ? 'font-family: monospace; white-space: pre-wrap; background: rgba(0,0,0,0.02); padding: 8px; border-radius: 4px; border: 1px dashed var(--border); margin-top: 6px;' : ''}">${msg.text}</div>
+                                                    ${msg.attachments && msg.attachments.length > 0 ? `
+                                                        <div class="chat-attachments-list" style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px;">
+                                                            ${msg.attachments.map(att => `
+                                                                <a href="${att.signedUrl || '#'}" target="_blank" class="chat-attachment-chip" style="display: flex; align-items: center; gap: 6px; padding: 6px 10px; background: rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.08); border-radius: var(--radius-sm); font-size: 0.75rem; color: var(--text-primary); text-decoration: none; transition: background 0.2s;">
+                                                                    <span style="font-size: 1rem;">📎</span>
+                                                                    <span style="max-width: 150px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${att.name || 'Ekli Dosya'}</span>
+                                                                </a>
+                                                            `).join('')}
+                                                        </div>
+                                                    ` : ''}
                                                     <div class="mail-body-preview" style="font-size: 0.78rem; background: rgba(0, 0, 0, 0.2); padding: 10px; border-radius: var(--radius-sm); max-height: 150px; overflow-y: auto; white-space: pre-wrap; font-family: monospace; color: var(--text-primary); border: 1px solid rgba(255,255,255,0.03); line-height: 1.4;">${escapeHTML(suggestedMail.body || msg.suggestedMessage || '')}</div>
                                                 </div>
                                             ` : ''}
@@ -382,14 +393,26 @@ window.pruvaAiView = (state) => {
                 `}
 
                 <!-- HER ZAMAN ALTA SABİT KOMUT INPUT KUTUSU -->
-                <div class="chat-input-wrapper saas-input-wrapper">
-                    <button class="chat-attach-btn" title="Dosya Ekle">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
-                    </button>
-                    <input type="text" class="chat-input-field saas-input-field" id="chat-command-input" placeholder="Bir komut girin... (örn: 'Arçelik'ten RFQ geldi, FOB Temmuz')" value="${state.chatCommandInputValue || ''}" oninput="window.pruvaAiManager.updateCommandInput(this.value)" onkeydown="if(event.key === 'Enter') window.pruvaAiManager.sendInput()">
-                    <button class="chat-send-btn saas-send-btn" onclick="window.pruvaAiManager.sendInput()" title="Komut Gönder">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-                    </button>
+                <div class="chat-input-wrapper saas-input-wrapper" style="flex-direction: column; align-items: stretch; gap: 8px; padding: 12px;">
+                    <div id="chat-attachment-preview" style="display: ${state.pendingAttachments && state.pendingAttachments.length > 0 ? 'flex' : 'none'}; flex-wrap: wrap; gap: 8px;">
+                        ${(state.pendingAttachments || []).map((att, i) => `
+                            <div class="pending-attachment-chip" style="display: flex; align-items: center; gap: 6px; padding: 4px 8px; background: #e0e7ff; border: 1px solid #c7d2fe; border-radius: var(--radius-sm); font-size: 0.75rem; color: #4338ca;">
+                                <span>📎</span>
+                                <span style="max-width: 120px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${att.name}</span>
+                                <button onclick="window.pruvaAiManager.removePendingAttachment(${i})" style="background: none; border: none; cursor: pointer; color: #ef4444; font-weight: bold;">✕</button>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <input type="file" id="chat-file-input" style="display: none;" multiple onchange="window.pruvaAiManager.handleFileSelect(event)">
+                        <button class="chat-attach-btn" title="Dosya Ekle" onclick="document.getElementById('chat-file-input').click()">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
+                        </button>
+                        <input type="text" class="chat-input-field saas-input-field" id="chat-command-input" placeholder="Bir komut girin... (örn: 'Arçelik'ten RFQ geldi, FOB Temmuz')" value="${state.chatCommandInputValue || ''}" oninput="window.pruvaAiManager.updateCommandInput(this.value)" onkeydown="if(event.key === 'Enter') window.pruvaAiManager.sendInput()" style="flex: 1;">
+                        <button class="chat-send-btn saas-send-btn" onclick="window.pruvaAiManager.sendInput()" title="Komut Gönder">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                        </button>
+                    </div>
                 </div>
 
             </div>
