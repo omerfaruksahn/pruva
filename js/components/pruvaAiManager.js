@@ -1739,18 +1739,23 @@ window.PruvaAiManager = class PruvaAiManager {
                 // Sunucudan güncel mesajları veri tabanından canlı olarak çekelim ve UI'ı tazeleyelim
                 await this.loadState();
             } else {
-                throw new Error('API Hatası');
+                let errorData;
+                try {
+                    errorData = await response.json();
+                } catch(e) {}
+                const errorMsg = errorData && errorData.summary ? errorData.summary : 'Bilinmeyen API Hatası';
+                throw new Error(errorMsg);
             }
         } catch (err) {
             console.warn('[PRUVA AI] API AI analiz başarısız:', err.message);
-            this.showToast('Komut işlenemedi. Sunucuya ulaşılamıyor.', 'danger');
+            this.showToast('Komut işlenemedi. ' + err.message, 'danger');
             
             // Eğer mesaj hata verirse, son eklenen kullanıcı mesajını UI'da hata olarak işaretle (veya bilgilendir)
             conversations[convIdx].messages.push({
                 sender: 'Sistem',
                 time: `Bugün ${timeStr}`,
                 type: 'incoming',
-                text: '❌ Hata: Yapay zeka servisinden yanıt alınamadı. (API Kota Sınırı Aşılmış Olabilir / 429 Too Many Requests)'
+                text: '❌ Hata: ' + err.message
             });
         } finally {
             this.app.state.aiLoading = false;

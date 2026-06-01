@@ -20,21 +20,22 @@ module.exports = async function(req, res, next) {
     if (admin && admin.apps.length > 0) {
         try {
             const decodedToken = await admin.auth().verifyIdToken(token);
-            if (decodedToken && decodedToken.email) {
-                // Postgres users tablosundan email ile kullanıcıyı al veya otomatik oluştur
-                let userRes = await db.query('SELECT id FROM users WHERE email = $1', [decodedToken.email]);
+            if (decodedToken && (decodedToken.email || decodedToken.phone_number)) {
+                const userIdentifier = decodedToken.email || decodedToken.phone_number;
+                // Postgres users tablosundan email veya phone_number ile kullanıcıyı al veya otomatik oluştur
+                let userRes = await db.query('SELECT id FROM users WHERE email = $1', [userIdentifier]);
                 
                 if (userRes.rows.length === 0) {
-                    console.log(`[AUTH MIDDLEWARE] Firebase kullanıcısı Postgres'te yok, oluşturuluyor: ${decodedToken.email}`);
+                    console.log(`[AUTH MIDDLEWARE] Firebase kullanıcısı Postgres'te yok, oluşturuluyor: ${userIdentifier}`);
                     const insertRes = await db.query(
                         'INSERT INTO users (email, password, role, is_verified) VALUES ($1, $2, $3, true) RETURNING id',
-                        [decodedToken.email, 'firebase_auth_external', 'shipper']
+                        [userIdentifier, 'firebase_auth_external', 'shipper']
                     );
                     userRes = insertRes;
                 }
                 
                 // Postgres integer id'sini req.user.id olarak ata (ilişkisel veritabanı kısıtları için zorunludur)
-                req.user = { id: userRes.rows[0].id, email: decodedToken.email };
+                req.user = { id: userRes.rows[0].id, email: userIdentifier };
                 return next();
             }
         } catch (firebaseErr) {
