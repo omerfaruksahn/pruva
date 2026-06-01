@@ -191,7 +191,7 @@ router.post('/analyze', auth, async (req, res) => {
   } catch (error) {
     await client.query('ROLLBACK');
     console.error('AI analyze error:', error);
-    res.status(500).json({ success: false, action: 'GENERAL', summary: 'Bir hata oluştu, lütfen tekrar deneyin.', confidence: 0 });
+    res.status(500).json({ success: false, action: 'GENERAL', summary: 'Bir hata oluştu: ' + error.message, confidence: 0 });
   } finally {
     client.release();
   }
