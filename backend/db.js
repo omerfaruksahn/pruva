@@ -6,13 +6,20 @@ const USE_DUMMY_DATA = process.env.USE_DUMMY_DATA === 'true';
 
 let pool;
 if (!USE_DUMMY_DATA) {
-    pool = new Pool({
-        user: process.env.DB_USER,
-        host: process.env.DB_HOST,
-        database: process.env.DB_NAME,
-        password: process.env.DB_PASSWORD,
-        port: process.env.DB_PORT,
-    });
+    pool = new Pool(
+        process.env.DATABASE_URL
+            ? {
+                connectionString: process.env.DATABASE_URL,
+                ssl: { rejectUnauthorized: false }
+              }
+            : {
+                user: process.env.DB_USER,
+                host: process.env.DB_HOST,
+                database: process.env.DB_NAME,
+                password: process.env.DB_PASSWORD,
+                port: process.env.DB_PORT,
+              }
+    );
 
     pool.on('connect', () => {
         console.log('PostgreSQL veritabanına bağlandı.');
@@ -213,9 +220,22 @@ module.exports = {
             return { rows: [] };
         }
         if (query.includes('from pricing_actions')) {
-            const userId = params[0];
-            const match = dummyData.pricing_actions.filter(a => a.user_id === userId);
-            return { rows: match };
+            let match = [];
+            if (query.includes('where id = $1') || query.includes('where a.id = $1')) {
+                const actionId = params && params[0];
+                match = dummyData.pricing_actions.filter(a => String(a.id) === String(actionId));
+            } else {
+                const userId = params && params[0];
+                match = dummyData.pricing_actions.filter(a => !userId || String(a.user_id) === String(userId));
+            }
+            const rows = match.map(action => {
+                const rfq = dummyData.pricing_rfqs.find(r => String(r.id) === String(action.rfq_id));
+                return {
+                    ...action,
+                    sender_email: rfq ? rfq.sender_email : null
+                };
+            });
+            return { rows };
         }
         if (query.includes('insert into pricing_actions')) {
             const id = Date.now() + Math.floor(Math.random() * 1000);
@@ -456,7 +476,85 @@ module.exports = {
             dummyData.pricing_margins = dummyData.pricing_margins.filter(m => !(m.id == id && m.user_id == userId));
             return { rows: [] };
         }
+
+        // --- RATE SHEETS MOCK INTERCEPTORS ---
+        if (query.includes('from rate_sheets')) {
+            const userId = params && params[0];
+            const results = dummyData.rate_sheets.filter(s => !userId || String(s.user_id) === String(userId));
+            return { rows: results };
+        }
+        if (query.includes('insert into rate_sheets')) {
+            const id = Date.now() + Math.floor(Math.random() * 1000);
+            const newSheet = {
+                id,
+                user_id: params[0],
+                carrier_name: params[1],
+                valid_from: params[2] || new Date(),
+                valid_until: params[3],
+                status: params[4] || 'ACTIVE',
+                filename: params[5],
+                created_at: new Date()
+            };
+            dummyData.rate_sheets.push(newSheet);
+            return { rows: [{ id }] };
+        }
+        if (query.includes('insert into rate_sheet_items')) {
+            const id = Date.now() + Math.floor(Math.random() * 1000);
+            const newItem = {
+                id,
+                sheet_id: params[0],
+                user_id: params[1],
+                pol: params[2],
+                pod: params[3],
+                container_type: params[4],
+                price: parseFloat(params[5]),
+                currency: params[6] || 'USD',
+                includes: Array.isArray(params[7]) ? params[7] : (typeof params[7] === 'string' ? JSON.parse(params[7]) : []),
+                transit_days: params[8] ? parseInt(params[8]) : null,
+                valid_until: params[9],
+                created_at: new Date()
+            };
+            dummyData.rate_sheet_items.push(newItem);
+            return { rows: [{ id }] };
+        }
+        if (query.includes('from rate_sheet_items')) {
+            let results = dummyData.rate_sheet_items;
+            const polParam = params && params[0];
+            const podParam = params && params[1];
+            
+            if (polParam) {
+                results = results.filter(item => item.pol.toLowerCase() === polParam.toLowerCase());
+            }
+            if (podParam) {
+                results = results.filter(item => item.pod.toLowerCase() === podParam.toLowerCase());
+            }
+            
+            const rows = results.map(item => {
+                const sheet = dummyData.rate_sheets.find(s => s.id === item.sheet_id);
+                return {
+                    ...item,
+                    carrier_name: sheet ? sheet.carrier_name : 'Unknown'
+                };
+            });
+            return { rows };
+        }
+        if (query.includes('delete from rate_sheets')) {
+            const id = parseInt(params[0]);
+            dummyData.rate_sheets = dummyData.rate_sheets.filter(s => s.id !== id);
+            dummyData.rate_sheet_items = dummyData.rate_sheet_items.filter(item => item.sheet_id !== id);
+            return { rows: [] };
+        }
  
         return { rows: [] };
     },
+    getClient: async () => {
+        if (!USE_DUMMY_DATA) {
+            return pool.connect();
+        }
+        // Dummy data için mock client dönüyoruz
+        return {
+            query: async (text, params) => module.exports.query(text, params),
+            release: () => {}
+        };
+    }
 };

@@ -69,7 +69,9 @@ const dummyData = {
         { id: 7, user_id: 1, pol: 'Şangay', pod: 'Ambarlı', transport_mode: 'DENIZ_FCL', container_type: '40HC', carrier_name: 'MSC', price: 1850.00, currency: 'USD', valid_until: '2026-06-30', created_at: '2026-06-15T10:00:00Z' },
         { id: 8, user_id: 1, pol: 'Şangay', pod: 'Ambarlı', transport_mode: 'DENIZ_FCL', container_type: '40HC', carrier_name: 'Maersk', price: 1900.00, currency: 'USD', valid_until: '2026-06-30', created_at: '2026-06-15T11:00:00Z' },
         { id: 9, user_id: 1, pol: 'Şangay', pod: 'Ambarlı', transport_mode: 'DENIZ_FCL', container_type: '40HC', carrier_name: 'Hapag-Lloyd', price: 1880.00, currency: 'USD', valid_until: '2026-06-30', created_at: '2026-06-16T09:30:00Z' }
-    ]
+    ],
+    rate_sheets: [],
+    rate_sheet_items: []
 };
 
 module.exports = dummyData;

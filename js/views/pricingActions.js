@@ -5,52 +5,7 @@
  * son gelen RFQ'ların izlendiği premium arayüz modülü.
  */
 
-// Mock Veri Setleri
-const defaultMockActions = [
-    {
-        id: 1,
-        type: 'SEND_RATE_REQUEST',
-        transport_mode: 'DENIZ_FCL',
-        from: 'Arçelik A.Ş.',
-        route: 'Şangay → İstanbul',
-        subject: 'Rate Request – Şangay / İstanbul – 40HC x2 – 15 Temmuz 2026',
-        preview: 'Sayın MSC, aşağıdaki yük için spot navlun fiyatı talep ediyoruz...',
-        body: 'Sayın Yetkili,\n\nAşağıdaki yük için spot navlun fiyatı talep ediyoruz:\n\nPOL: Şangay\nPOD: İstanbul\nKonteyner: 40HC x 2\nYükleme Tarihi: 15 Temmuz 2026\nIncoterm: FOB\nYük Cinsi: Genel Kargo\n\nAll-in fiyatınızı ve geçerlilik süresini iletmenizi rica ederiz.\n\nSaygılarımızla,\nPruva Pricing AI',
-        carriers: ['MSC', 'Maersk'],
-        status: 'PENDING'
-    },
-    {
-        id: 2,
-        type: 'SEND_MISSING_INFO',
-        transport_mode: 'HAVA',
-        from: 'Vestel Elektronik',
-        route: 'Frankfurt → İstanbul',
-        subject: 'Navlun Talebi – Ek Bilgi Gerekli',
-        preview: 'Sayın Vestel, talebinizi aldık. Fiyatlandırma için boyut ve chargeable weight bilgisine ihtiyacımız var...',
-        body: 'Sayın Vestel Lojistik Ekibi,\n\nFrankfurt → İstanbul hava kargo talebinizi aldık. Size en uygun ve doğru navlun çalışmasını sunabilmemiz için aşağıdaki eksik detayları iletmenizi rica ederiz:\n\n- Koli adetleri ve boyutları (En x Boy x Yükseklik)\n- Brüt ağırlık (Gross Weight) ve Hacimsel Ağırlık (Chargeable Weight)\n\nDetayları ilettiğinizde fiyatlandırma ekibimiz çalışmayı hemen tamamlayacaktır.\n\nTeşekkürler,\nPruva Pricing AI',
-        carriers: [],
-        status: 'PENDING'
-    },
-    {
-        id: 3,
-        type: 'SEND_OFFER',
-        transport_mode: 'DENIZ_FCL',
-        from: 'Arçelik A.Ş.',
-        route: 'Şangay → Ambarlı',
-        subject: 'Navlun Teklifi – Şangay / Ambarlı – 40HC x1',
-        preview: 'Sayın Arçelik, talebiniz için USD 1.950/konteyner all-in teklifimizi sunmaktayız...',
-        body: 'Sayın Arçelik İthalat Ekibi,\n\nTalebiniz doğrultusunda Şangay → Ambarlı limanı için hazırladığımız özel FCL navlun teklifimiz aşağıda yer almaktadır:\n\n- Navlun Bedeli: USD 1,950 / 40HC Konteyner (All-in)\n- Geçerlilik Süresi: 30 Haziran 2026\n- Taşıyıcı: MSC\n- Transit Süre: 28 Gün\n\nTeklifi onaylamak veya detayları görüşmek için bu e-postaya yanıt verebilirsiniz.\n\nSaygılarımızla,\nPruva Lojistik Ekibi',
-        carriers: [],
-        status: 'PENDING'
-    }
-];
-
-const defaultMockRFQs = [
-    { id: 11, date: '29.05.2026', company: 'Arçelik A.Ş.', route: 'Şangay → İstanbul', mode: 'Deniz FCL', status: 'RATES_REQUESTED' },
-    { id: 12, date: '29.05.2026', company: 'Vestel Elektronik', route: 'Frankfurt → İstanbul', mode: 'Hava', status: 'MISSING_INFO_SENT' },
-    { id: 13, date: '28.05.2026', company: 'BSH Ev Aletleri', route: 'Hamburg → İzmir', mode: 'Kara', status: 'OFFER_SENT' },
-    { id: 14, date: '27.05.2026', company: 'Tüpraş', route: 'Rotterdam → Mersin', mode: 'Deniz LCL', status: 'COMPLETED' }
-];
+// Mock veriler tamamen kaldırılmıştır. Artık boş state kullanılacak.
 
 // View Helper Fonksiyonları
 function getTransportModeIcon(mode) {
@@ -111,12 +66,11 @@ function getStatusBadgeClass(status) {
 // VIEW FUNCTION
 // ─────────────────────────────────────────────
 window.pricingActionsView = (state) => {
-    // State içerisinde veri yoksa mock verileri ilk kez ata
     if (!state.pricingActions) {
-        state.pricingActions = JSON.parse(JSON.stringify(defaultMockActions));
+        state.pricingActions = [];
     }
     if (!state.pricingRFQs) {
-        state.pricingRFQs = JSON.parse(JSON.stringify(defaultMockRFQs));
+        state.pricingRFQs = [];
     }
 
     const pendingActions = state.pricingActions.filter(a => a.status === 'PENDING');
@@ -125,8 +79,8 @@ window.pricingActionsView = (state) => {
     // Özet Sayıları hesapla
     const pendingCount = pendingActions.length;
     const missingCount = missingInfoRFQs.length;
-    const weeklyIncomingCount = 14 + (state.pricingRFQs.length - defaultMockRFQs.length);
-    const weeklySentOffers = 9 + state.pricingRFQs.filter(r => r.status === 'OFFER_SENT' || r.status === 'COMPLETED').length;
+    const weeklyIncomingCount = state.pricingRFQs.length;
+    const weeklySentOffers = state.pricingRFQs.filter(r => r.status === 'OFFER_SENT' || r.status === 'COMPLETED').length;
 
     return `
     <div class="pricing-actions-page-container">
@@ -436,22 +390,8 @@ window.pricingActionsViewInit = async (app) => {
                 throw new Error('API Hatası');
             }
         } catch (err) {
-            console.error('[PRICING ACTIONS] Reject error, falling back to local simulation:', err);
-            
-            // Fallback: Yerel Simülasyon
-            const actionIdx = app.state.pricingActions.findIndex(a => a.id === actionId);
-            if (actionIdx === -1) return;
-
-            const action = app.state.pricingActions[actionIdx];
-            action.status = 'CANCELLED';
-
-            const rfqIdx = app.state.pricingRFQs.findIndex(r => r.company === action.from && r.route === action.route && r.status !== 'COMPLETED');
-            if (rfqIdx !== -1) {
-                app.state.pricingRFQs[rfqIdx].status = 'CANCELLED';
-            }
-
-            showToast('Aksiyon reddedildi (Yerel mod).', 'warning');
-            app.commit();
+            console.error('[PRICING ACTIONS] API Error:', err);
+            showToast('Aksiyon reddedilemedi, sunucu hatası.', 'danger');
         }
     };
 
@@ -563,45 +503,9 @@ window.pricingActionsViewInit = async (app) => {
                 throw new Error('API Hatası');
             }
         } catch (err) {
-            console.error('[PRICING ACTIONS] Approve error, falling back to local simulation:', err);
-
-            // E-posta gönderimi simülasyonu (yerel fallback)
-            console.log(`\n==================================================`);
-            console.log(`[PRUVA AI] ONAYLANAN E-POSTA GÖNDERİLDİ (YEREL MOD)!`);
-            console.log(`Tipi: ${action.type}`);
-            console.log(`Kime: ${action.type === 'SEND_RATE_REQUEST' ? selectedCarriers.join(', ') : action.from}`);
-            console.log(`Konu: ${subject}`);
-            console.log(`İçerik:\n"""\n${body}\n"""`);
-            console.log(`==================================================\n`);
-
-            // Durumu güncelle
-            action.status = 'COMPLETED';
-
-            // İlgili RFQ'yu bul ve durumunu güncelle
-            const rfqIdx = app.state.pricingRFQs.findIndex(r => r.company === action.from && r.route === action.route && r.status !== 'COMPLETED');
-            if (rfqIdx !== -1) {
-                const rfq = app.state.pricingRFQs[rfqIdx];
-                if (action.type === 'SEND_RATE_REQUEST') {
-                    rfq.status = 'RATES_REQUESTED';
-                } else if (action.type === 'SEND_MISSING_INFO') {
-                    rfq.status = 'MISSING_INFO_SENT';
-                } else if (action.type === 'SEND_OFFER') {
-                    rfq.status = 'OFFER_SENT';
-                }
-            } else {
-                // Eğer rfq bulunamadıysa yeni bir tane ekle
-                app.state.pricingRFQs.push({
-                    date: new Date().toLocaleDateString('tr-TR'),
-                    company: action.from,
-                    route: action.route,
-                    mode: getTransportModeText(action.transport_mode),
-                    status: action.type === 'SEND_RATE_REQUEST' ? 'RATES_REQUESTED' : action.type === 'SEND_MISSING_INFO' ? 'MISSING_INFO_SENT' : 'OFFER_SENT'
-                });
-            }
-
+            console.error('[PRICING ACTIONS] Approve API Error:', err);
             window.pricingActionsViewInit.closeModal();
-            showToast('E-posta gönderildi ve aksiyon onaylandı (Yerel mod)!');
-            app.commit();
+            showToast('E-posta onaylanamadı, sunucu hatası.', 'danger');
         }
     };
  
@@ -675,18 +579,9 @@ window.pricingActionsViewInit = async (app) => {
                 throw new Error('API Hatası');
             }
         } catch (err) {
-            console.error('[PRICING ACTIONS] Lost deal save error, falling back to local:', err);
-            
-            const rfqIdx = app.state.pricingRFQs.findIndex(r => r.id === rfqId);
-            if (rfqIdx !== -1) {
-                app.state.pricingRFQs[rfqIdx].lost_reason = lostReason;
-                app.state.pricingRFQs[rfqIdx].competitor_price = competitorPrice;
-                app.state.pricingRFQs[rfqIdx].status = 'CANCELLED';
-            }
-            
+            console.error('[PRICING ACTIONS] Lost deal save API Error:', err);
             window.pricingActionsViewInit.closeLostModal();
-            showToast('Analiz kaydedildi (Yerel mod).', 'success');
-            app.commit();
+            showToast('Analiz kaydedilemedi, sunucu hatası.', 'danger');
         }
     };
 };

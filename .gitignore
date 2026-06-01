@@ -31,3 +31,8 @@ build/
 local-admin.html
 firebase-service-account.json
 admin-server.js
+
+# Database
+backend/data/
+backend/pg16/
+backend/msal_cache.json

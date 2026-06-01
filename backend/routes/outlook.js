@@ -196,13 +196,10 @@ router.post('/disconnect', auth, async (req, res) => {
 const mailScanner = require('../services/mailScanner');
 
 // @route   POST api/outlook/scan
-// @desc    E-postaları / Test maillerini tarar ve AI ile işler
+// @desc    E-postaları tarar ve AI ile işler
 router.post('/scan', auth, async (req, res) => {
     try {
-        const { mockMode } = req.body;
-        const isMock = mockMode === undefined ? true : !!mockMode;
-
-        const result = await mailScanner.scanEmails(req.user.id, isMock);
+        const result = await mailScanner.scanEmails(req.user.id);
         res.json(result);
     } catch (err) {
         console.error('[OUTLOOK SCAN ERR]', err);

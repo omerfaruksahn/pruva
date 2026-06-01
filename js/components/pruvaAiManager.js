@@ -181,6 +181,11 @@ window.PruvaAiManager = class PruvaAiManager {
         window.addEventListener('click', this._onWindowClick);
 
         // Scroll to the bottom of the active chat timeline on each initialization/re-render
+        if (this.pollingInterval) return;
+        this.scrollToBottom();
+    }
+
+    scrollToBottom() {
         setTimeout(() => {
             const el = document.getElementById('chat-timeline-area');
             if (el) el.scrollTop = el.scrollHeight;
@@ -188,17 +193,8 @@ window.PruvaAiManager = class PruvaAiManager {
     }
 
     async loadState() {
-        // Fallback to localStorage defaults in case of network issue
-        const storedTemplates = localStorage.getItem('pruva_ai_templates');
-        this.templates = storedTemplates ? JSON.parse(storedTemplates) : JSON.parse(JSON.stringify(this.DEFAULT_TEMPLATES));
-
-        const storedCarriers = localStorage.getItem('pruva_ai_carriers');
-        this.carriers = storedCarriers ? JSON.parse(storedCarriers) : JSON.parse(JSON.stringify(this.DEFAULT_CARRIERS));
-
-        const storedRules = localStorage.getItem('pruva_ai_rules');
-        if (storedRules) {
-            this.rules = JSON.parse(storedRules);
-        }
+        this.templates = JSON.parse(JSON.stringify(this.DEFAULT_TEMPLATES));
+        this.carriers = JSON.parse(JSON.stringify(this.DEFAULT_CARRIERS));
         
         const autoInqEl = document.getElementById('rule-auto-inquiry');
         const maxRoundsEl = document.getElementById('rule-max-rounds');
@@ -221,7 +217,6 @@ window.PruvaAiManager = class PruvaAiManager {
             if (tplRes.ok) {
                 const apiTemplates = await tplRes.json();
                 this.templates = apiTemplates;
-                this.saveTemplates(); // Local sync
                 this.renderTemplates();
                 this.selectTemplate(this.activeTemplateKey);
             }
@@ -231,7 +226,6 @@ window.PruvaAiManager = class PruvaAiManager {
             if (carrierRes.ok) {
                 const apiCarriers = await carrierRes.json();
                 this.carriers = apiCarriers;
-                this.saveCarriers(); // Local sync
                 this.renderCarriers();
             }
 
@@ -240,7 +234,6 @@ window.PruvaAiManager = class PruvaAiManager {
                 const marginsRes = await fetch('/api/pricing/margins', { headers });
                 if (marginsRes.ok) {
                     this.margins = await marginsRes.json();
-                    localStorage.setItem('pruva_ai_margins', JSON.stringify(this.margins));
                     this.renderMargins();
                 }
             } catch (err) {
@@ -262,12 +255,16 @@ window.PruvaAiManager = class PruvaAiManager {
 
             // 5. Konuşmaları (conversations) çek (Faz 3)
             try {
-                const convRes = await fetch('/api/pricing/conversations', { headers });
+                const convRes = await fetch('/api/ai/conversations', { headers });
                 if (convRes.ok) {
                     const apiConversations = await convRes.json();
-                    if (apiConversations.length > 0 || this.app.state.outlookConnected) {
+                    if (apiConversations.length > 0) {
                         this.app.state.pricingConversations = apiConversations;
-                        localStorage.setItem('pruva_pricing_conversations', JSON.stringify(apiConversations));
+                        needsCommit = true;
+                    }
+                    // Mevcut aktif konuşmayı koru
+                    if (this.app.state.activeConversationId === null) {
+                        this.app.state.activeConversationId = 'copilot';
                         needsCommit = true;
                     }
                 }
@@ -308,25 +305,22 @@ window.PruvaAiManager = class PruvaAiManager {
             }
 
             if (needsCommit) {
+                const currentId = this.app.state.activeConversationId;
+                this.app.state.activeConversationId = currentId;
                 this.app.commit();
             }
+            this.scrollToBottom();
 
         } catch (err) {
-            console.warn('[PRUVA AI MANAGER] API\'den veri çekilemedi, localStorage fallback devrede:', err.message);
+            console.warn('[PRUVA AI MANAGER] API\'den veri çekilemedi:', err.message);
         }
     }
 
-    saveTemplates() {
-        localStorage.setItem('pruva_ai_templates', JSON.stringify(this.templates));
-    }
+    saveTemplates() {}
 
-    saveCarriers() {
-        localStorage.setItem('pruva_ai_carriers', JSON.stringify(this.carriers));
-    }
+    saveCarriers() {}
 
-    saveRules() {
-        localStorage.setItem('pruva_ai_rules', JSON.stringify(this.rules));
-    }
+    saveRules() {}
 
     getMetrics() {
         return this.metrics;
@@ -1118,25 +1112,15 @@ window.PruvaAiManager = class PruvaAiManager {
                 throw new Error('API Hatası');
             }
         } catch (err) {
-            console.warn('[PRUVA AI MANAGER] API\'den rate geçmişi alınamadı, local mock devrede:', err.message);
-            const mockHistory = [
-                { id: 1, pol: 'Şangay', pod: 'Ambarlı', transport_mode: 'DENIZ_FCL', container_type: '40HC', carrier_name: 'MSC', price: 2100.00, currency: 'USD', valid_until: '2026-04-30', created_at: '2026-04-15T10:00:00Z' },
-                { id: 2, pol: 'Şangay', pod: 'Ambarlı', transport_mode: 'DENIZ_FCL', container_type: '40HC', carrier_name: 'Maersk', price: 2250.00, currency: 'USD', valid_until: '2026-04-30', created_at: '2026-04-15T11:00:00Z' },
-                { id: 3, pol: 'Şangay', pod: 'Ambarlı', transport_mode: 'DENIZ_FCL', container_type: '40HC', carrier_name: 'Hapag-Lloyd', price: 2200.00, currency: 'USD', valid_until: '2026-04-30', created_at: '2026-04-16T09:30:00Z' },
-                { id: 4, pol: 'Şangay', pod: 'Ambarlı', transport_mode: 'DENIZ_FCL', container_type: '40HC', carrier_name: 'MSC', price: 1950.00, currency: 'USD', valid_until: '2026-05-30', created_at: '2026-05-15T10:00:00Z' },
-                { id: 5, pol: 'Şangay', pod: 'Ambarlı', transport_mode: 'DENIZ_FCL', container_type: '40HC', carrier_name: 'Maersk', price: 2050.00, currency: 'USD', valid_until: '2026-05-30', created_at: '2026-05-15T11:00:00Z' },
-                { id: 6, pol: 'Şangay', pod: 'Ambarlı', transport_mode: 'DENIZ_FCL', container_type: '40HC', carrier_name: 'Hapag-Lloyd', price: 2000.00, currency: 'USD', valid_until: '2026-05-30', created_at: '2026-05-16T09:30:00Z' },
-                { id: 7, pol: 'Şangay', pod: 'Ambarlı', transport_mode: 'DENIZ_FCL', container_type: '40HC', carrier_name: 'MSC', price: 1850.00, currency: 'USD', valid_until: '2026-06-30', created_at: '2026-06-15T10:00:00Z' },
-                { id: 8, pol: 'Şangay', pod: 'Ambarlı', transport_mode: 'DENIZ_FCL', container_type: '40HC', carrier_name: 'Maersk', price: 1900.00, currency: 'USD', valid_until: '2026-06-30', created_at: '2026-06-15T11:00:00Z' },
-                { id: 9, pol: 'Şangay', pod: 'Ambarlı', transport_mode: 'DENIZ_FCL', container_type: '40HC', carrier_name: 'Hapag-Lloyd', price: 1880.00, currency: 'USD', valid_until: '2026-06-30', created_at: '2026-06-16T09:30:00Z' }
-            ];
-            
-            const filtered = mockHistory.filter(h => 
-                h.pol.toLowerCase() === pol.toLowerCase() && 
-                h.pod.toLowerCase() === pod.toLowerCase() && 
-                h.transport_mode.toLowerCase() === mode.toLowerCase()
-            );
-            this.renderRateHistoryTable(filtered);
+            console.warn('[PRUVA AI MANAGER] API\'den rate geçmişi alınamadı:', err.message);
+            const tbody = document.getElementById('history-table-body');
+            if (tbody) {
+                tbody.innerHTML = `
+                    <tr style="border-bottom: 1px solid var(--border);">
+                        <td colspan="5" style="padding: 20px; text-align: center; color: var(--danger);">Veriler alınırken bir hata oluştu. Sunucu bağlantısını kontrol edin.</td>
+                    </tr>
+                `;
+            }
         }
     }
 
@@ -1277,7 +1261,6 @@ window.PruvaAiManager = class PruvaAiManager {
         newMargin.id = tempId;
         if (!this.margins) this.margins = [];
         this.margins.push(newMargin);
-        localStorage.setItem('pruva_ai_margins', JSON.stringify(this.margins));
         this.renderMargins();
         
         const form = document.getElementById('margin-rule-form');
@@ -1309,7 +1292,6 @@ window.PruvaAiManager = class PruvaAiManager {
                 const idx = this.margins.findIndex(m => m.id === tempId);
                 if (idx !== -1) {
                     this.margins[idx].id = data.id;
-                    localStorage.setItem('pruva_ai_margins', JSON.stringify(this.margins));
                 }
                 this.renderMargins();
                 this.showToast('Margin kuralı başarıyla eklendi ve eşitlendi!', 'success');
@@ -1326,7 +1308,6 @@ window.PruvaAiManager = class PruvaAiManager {
         if (!confirm('Bu margin kuralını silmek istediğinize emin misiniz?')) return;
         
         this.margins = this.margins.filter(m => m.id !== id);
-        localStorage.setItem('pruva_ai_margins', JSON.stringify(this.margins));
         this.renderMargins();
 
         try {
@@ -1393,7 +1374,6 @@ window.PruvaAiManager = class PruvaAiManager {
     initializeDefaultConversations(state) {
         const defaultConversations = [];
         state.pricingConversations = defaultConversations;
-        localStorage.setItem('pruva_pricing_conversations', JSON.stringify(defaultConversations));
         return defaultConversations;
     }
 
@@ -1402,12 +1382,7 @@ window.PruvaAiManager = class PruvaAiManager {
         this.app.state.activeConversationId = parsedId;
         this.app.state.detailsDrawerOpen = false; // Close drawer when switching
         this.app.commit();
-        
-        // Scroll to the bottom of the timeline immediately
-        setTimeout(() => {
-            const el = document.getElementById('chat-timeline-area');
-            if (el) el.scrollTop = el.scrollHeight;
-        }, 50);
+        this.scrollToBottom();
     }
 
     searchConversations(query) {
@@ -1424,348 +1399,11 @@ window.PruvaAiManager = class PruvaAiManager {
         this.app.state.chatCommandInputValue = val;
     }
 
-    async sendInput() {
-        const input = document.getElementById('chat-command-input');
-        if (!input) return;
-        const text = input.value.trim();
-        if (!text) return;
 
-        input.value = '';
-        this.app.state.chatCommandInputValue = '';
 
-        let conversations = this.app.state.pricingConversations;
-        if (!conversations || conversations.length === 0) {
-            conversations = [];
-            this.app.state.pricingConversations = conversations;
-        }
+    // Kullanıcı komutları artık sadece backend üzerinden işlenecek.
+    // Sahte (Mock) yanıt üreten processCommand tamamen kaldırılmıştır.
 
-        let activeConvId = this.app.state.activeConversationId || 'copilot';
-        this.app.state.activeConversationId = activeConvId;
-        
-        // Eğer aktif konuşma listede yoksa, oluştur (Co-pilot veya diğer durumlar için)
-        let convIdx = conversations.findIndex(c => c.id === activeConvId);
-        if (convIdx === -1) {
-            const isCopilot = activeConvId === 'copilot';
-            const newConv = {
-                id: activeConvId,
-                company: isCopilot ? 'Pruva AI Co-pilot' : 'Canlı Yapay Zeka Asistanı',
-                email: isCopilot ? 'copilot@pruva.ai' : '',
-                logoLetter: isCopilot ? '🤖' : '⚡',
-                logoBg: isCopilot ? 'linear-gradient(135deg, #2563eb, #1d4ed8)' : 'linear-gradient(135deg, #2563eb, #3b82f6)',
-                lastMessage: text,
-                time: new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }),
-                status: 'PENDING',
-                messages: []
-            };
-            conversations.push(newConv);
-            this.app.state.pricingConversations = conversations;
-            localStorage.setItem('pruva_pricing_conversations', JSON.stringify(conversations));
-            convIdx = conversations.length - 1;
-        }
-
-        const timeStr = new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
-        
-        // Kullanıcı komutunu timeline'a anında geçici olarak ekle
-        conversations[convIdx].messages.push({
-            sender: 'Kullanıcı',
-            time: `Bugün ${timeStr}`,
-            type: 'outgoing',
-            text: text
-        });
-
-        conversations[convIdx].lastMessage = text;
-        conversations[convIdx].time = 'Şimdi';
-        
-        this.app.commit();
-
-        // Sona kaydır
-        setTimeout(() => {
-            const el = document.getElementById('chat-timeline-area');
-            if (el) el.scrollTop = el.scrollHeight;
-        }, 50);
-
-        // Gerçek veya Mock AI Analiz çağrısı
-        try {
-            const firebaseUser = window.fbAuth?.currentUser;
-            const token = firebaseUser ? await firebaseUser.getIdToken() : '';
-            
-            const response = await fetch('/api/ai/analyze', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({
-                    message: text,
-                    context: {
-                        conversationId: activeConvId,
-                        email: conversations[convIdx].email,
-                        company: conversations[convIdx].company,
-                        status: conversations[convIdx].status
-                    }
-                })
-            });
-
-            if (response.ok) {
-                // Sunucudan güncel mesajları veri tabanından canlı olarak çekelim ve UI'ı tazeleyelim
-                await this.loadState();
-            } else {
-                throw new Error('API Hatası');
-            }
-        } catch (err) {
-            console.warn('[PRUVA AI] API AI analiz başarısız, mock motoru çalıştırılıyor...', err.message);
-            this.processCommand(text, activeConvId);
-            return;
-        }
-
-        setTimeout(() => {
-            const el = document.getElementById('chat-timeline-area');
-            if (el) el.scrollTop = el.scrollHeight;
-        }, 50);
-    }
-
-    processCommand(text, convId) {
-        let conversations = this.app.state.pricingConversations;
-        if (!conversations) return;
-
-        const convIdx = conversations.findIndex(c => c.id === convId);
-        if (convIdx === -1) return;
-
-        const company = conversations[convIdx].company;
-        const timeStr = new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
-
-        let aiText = '';
-        let action = '';
-        let carriers = [];
-
-        const lowerText = text.toLowerCase();
-
-        if (lowerText.includes('fiyat sor') || lowerText.includes('rate iste') || lowerText.includes('rfq')) {
-            aiText = `MSC ve Maersk'e Far East rate request atıyorum. Onaylıyor musun?`;
-            action = 'SEND_RATE_REQUEST';
-            carriers = ['MSC', 'Maersk'];
-        } else if (lowerText.includes('teklif ver') || lowerText.includes('teklif gönder')) {
-            aiText = `${company} için hesapladığım $1.850 navlun teklifini müşteriye gönderiyorum. Onaylıyor musun?`;
-            action = 'SEND_OFFER';
-        } else if (lowerText.includes('eksik bilgi') || lowerText.includes('bilgi iste')) {
-            aiText = `${company} talebinde konteyner tipi ve planlanan tarih eksik. Eksik bilgi sorgulama maili gönderiyorum. Onaylıyor musun?`;
-            action = 'SEND_MISSING_INFO';
-        } else if (lowerText.includes('takip') || lowerText.includes('hatırlat')) {
-            aiText = `Taşıyıcıya hatırlatma e-postası (takip maili) gönderiyorum. Onaylıyor musun?`;
-            action = 'SEND_FOLLOWUP';
-            carriers = ['MSC'];
-        } else {
-            // Varsayılan asistan yanıtı
-            conversations[convIdx].messages.push({
-                sender: 'Pruva AI',
-                time: `Bugün ${timeStr}`,
-                type: 'incoming',
-                text: 'Anlaşıldı kanka. Komutunu aldım, Pruva AI motoru ile işledim. pricingSettings üzerinden şablon ve taşıyıcı listelerini kontrol edebilirsin.'
-            });
-            conversations[convIdx].lastMessage = 'Komut işlendi.';
-            this.app.commit();
-            
-            setTimeout(() => {
-                const el = document.getElementById('chat-timeline-area');
-                if (el) el.scrollTop = el.scrollHeight;
-            }, 50);
-            return;
-        }
-
-        // Timeline'a AI Suggestions kartı ekle
-        conversations[convIdx].messages.push({
-            sender: 'Pruva AI',
-            time: `Bugün ${timeStr}`,
-            type: 'AI_SUGGESTION',
-            text: aiText,
-            action: action,
-            carriers: carriers
-        });
-
-        conversations[convIdx].lastMessage = '🤖 Yapay Zeka Önerisi Hazır';
-        conversations[convIdx].status = 'PENDING';
-
-        // Local sync
-        localStorage.setItem('pruva_pricing_conversations', JSON.stringify(conversations));
-        this.app.commit();
-
-        setTimeout(() => {
-            const el = document.getElementById('chat-timeline-area');
-            if (el) el.scrollTop = el.scrollHeight;
-        }, 50);
-    }
-
-    async approveSuggestion(convId, msgIndex, action) {
-        let conversations = this.app.state.pricingConversations;
-        if (!conversations) return;
-
-        const parsedId = isNaN(convId) ? convId : Number(convId);
-        const convIdx = conversations.findIndex(c => c.id === parsedId);
-        if (convIdx === -1) return;
-
-        const timeStr = new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
-
-        // Öneri kartını sil
-        const suggestionMsg = conversations[convIdx].messages[msgIndex];
-        conversations[convIdx].messages.splice(msgIndex, 1);
-
-        let actionMsg = '';
-        let newStatus = 'COMPLETED';
-
-        let emailTo = 'pricing@pruvahub.com';
-        if (conversations[convIdx].email) {
-            emailTo = conversations[convIdx].email;
-        }
-
-        if (action === 'SEND_CUSTOM_EMAIL') {
-            actionMsg = 'Giden Mail (Pruva AI) - Özel e-posta başarıyla iletildi.';
-            newStatus = 'COMPLETED';
-        } else if (action === 'SEND_RATE_REQUEST') {
-            actionMsg = 'Giden Mail (Pruva AI) - MSC ve Maersk\'e spot navlun talebi iletildi.';
-            newStatus = 'RATES_REQUESTED';
-            emailTo = 'quotes@maersk.com';
-        } else if (action === 'SEND_OFFER') {
-            actionMsg = 'Giden Mail (Pruva AI) - Müşteriye özel navlun teklifi iletildi.';
-            newStatus = 'OFFER_SENT';
-        } else if (action === 'SEND_MISSING_INFO') {
-            actionMsg = 'Giden Mail (Pruva AI) - Eksik bilgi talep e-postası müşteriye iletildi.';
-            newStatus = 'MISSING_INFO_SENT';
-        } else if (action === 'SEND_FOLLOWUP') {
-            actionMsg = 'Giden Mail (Pruva AI) - Taşıyıcıya hatırlatma e-postası (takip maili) gönderildi.';
-            newStatus = 'RATES_REQUESTED';
-        } else {
-            actionMsg = 'İşlem onaylandı.';
-        }
-
-        // Timeline'a sistem notu ve giden maili ekle
-        conversations[convIdx].messages.push({
-            sender: 'Pruva AI (Sistem)',
-            time: `Bugün ${timeStr}`,
-            type: 'ai_action',
-            text: `AI: Aksiyon başarıyla onaylandı ✓`
-        });
-
-        conversations[convIdx].messages.push({
-            sender: 'Pruva AI (Giden Mail)',
-            time: `Bugün ${timeStr}`,
-            type: 'outgoing',
-            text: suggestionMsg.suggestedMessage || actionMsg
-        });
-
-        conversations[convIdx].lastMessage = actionMsg;
-        conversations[convIdx].status = newStatus;
-
-        // Gerçek mail gönderimi (Faz 7) ve Veri Tabanı Durum Güncellemesi
-        try {
-            const firebaseUser = window.fbAuth?.currentUser;
-            const token = firebaseUser ? await firebaseUser.getIdToken() : '';
-            
-            const suggestedMail = suggestionMsg.suggestedMail || {};
-            const finalTo = suggestedMail.to || emailTo;
-            const finalSubject = suggestedMail.subject || suggestionMsg.text || 'Pruva AI Navlun Bildirimi';
-            const finalBody = suggestedMail.body || suggestionMsg.suggestedMessage || actionMsg;
-
-            console.log("[PRUVA AI DEBUG] Sending email to:", finalTo, "Subject:", finalSubject);
-
-            // 1. Canlı e-posta gönderimi (Resend/Outlook)
-            const emailRes = await fetch('/api/pricing/send-email', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({
-                    to: finalTo,
-                    subject: finalSubject,
-                    body: finalBody
-                })
-            });
-            console.log("[PRUVA AI DEBUG] Send-email response status:", emailRes.status);
-
-            // 2. Eğer database aksiyon ID'si varsa, backend'e onaylandığını bildirip durumu COMPLETED yap
-            const actionId = suggestionMsg.actionId;
-            console.log("[PRUVA AI DEBUG] Action ID:", actionId, "Full message object:", suggestionMsg);
-
-            if (actionId) {
-                const approveRes = await fetch(`/api/pricing/actions/${actionId}/approve`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify({
-                        edited_subject: finalSubject,
-                        edited_body: finalBody,
-                        selected_carriers: []
-                    })
-                });
-                
-                const approveText = await approveRes.text();
-                console.log(`[PRUVA AI DEBUG] DB approve status: ${approveRes.status}, Response: ${approveText}`);
-            } else {
-                console.warn("[PRUVA AI DEBUG] No actionId found on this recommendation card.");
-            }
-        } catch (e) {
-            console.warn('[PRUVA AI] E-posta gönderimi veya DB onayı başarısız:', e.message);
-        }
-
-        // Local sync
-        localStorage.setItem('pruva_pricing_conversations', JSON.stringify(conversations));
-        this.app.commit();
-        this.showToast('AI aksiyonu başarıyla onaylandı ve gönderildi!', 'success');
-
-        // Veri tabanından en güncel ve temiz halini çek
-        try {
-            await this.loadState();
-        } catch (loadErr) {
-            console.warn('[PRUVA AI] Güncel konuşma geçmişi yüklenemedi:', loadErr.message);
-        }
-
-        setTimeout(() => {
-            const el = document.getElementById('chat-timeline-area');
-            if (el) el.scrollTop = el.scrollHeight;
-        }, 50);
-    }
-
-    async rejectSuggestion(convId, msgIndex) {
-        let conversations = this.app.state.pricingConversations;
-        if (!conversations) return;
-
-        const parsedId = isNaN(convId) ? convId : Number(convId);
-        const convIdx = conversations.findIndex(c => c.id === parsedId);
-        if (convIdx === -1) return;
-
-        const suggestionMsg = conversations[convIdx].messages[msgIndex];
-        const actionId = suggestionMsg ? suggestionMsg.actionId : null;
-
-        conversations[convIdx].messages.splice(msgIndex, 1);
-        conversations[convIdx].lastMessage = 'Öneri reddedildi.';
-        conversations[convIdx].status = 'COMPLETED';
-
-        localStorage.setItem('pruva_pricing_conversations', JSON.stringify(conversations));
-        this.app.commit();
-        this.showToast('AI önerisi reddedildi.', 'danger');
-
-        if (actionId) {
-            try {
-                const firebaseUser = window.fbAuth?.currentUser;
-                const token = firebaseUser ? await firebaseUser.getIdToken() : '';
-                
-                await fetch(`/api/pricing/actions/${actionId}/reject`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-                
-                // Veri tabanından en güncel halini çek
-                await this.loadState();
-            } catch (err) {
-                console.warn('[PRUVA AI] Backend aksiyon reddi başarısız:', err.message);
-            }
-        }
-    }
 
     toggleDetailsDrawer() {
         this.app.state.detailsDrawerOpen = !this.app.state.detailsDrawerOpen;
@@ -1804,18 +1442,13 @@ window.PruvaAiManager = class PruvaAiManager {
         const conv = convs.find(c => c.id === convId);
         if (conv) {
             conv.notes = textarea.value;
-            localStorage.setItem('pruva_pricing_conversations', JSON.stringify(convs));
             this.showToast('Not kaydedildi ✅', 'success');
         }
     }
 
     // Gerçek Zamanlı E-posta Polling'i Başlat (Faz 8)
     startEmailPolling() {
-        if (this.pollingInterval) return;
-        console.log('[PRUVA AI] Polling başlatılıyor...');
-        this.pollingInterval = setInterval(() => {
-            this.triggerMailScan(true); // silent scan every 20s
-        }, 20000);
+        return; // Polling geçici olarak devre dışı
     }
 
     // Polling'i Durdur
@@ -1830,19 +1463,23 @@ window.PruvaAiManager = class PruvaAiManager {
 
     // E-posta tarama isteği tetikleme
     async triggerMailScan(silent = false) {
+        if (!this.app.state.outlookConnected) {
+            if (!silent) this.showToast('Mail taraması için Outlook hesabınızı bağlamalısınız.', 'warning');
+            return;
+        }
+
         if (!silent) this.showToast('E-postalar taranıyor... 📥', 'info');
         try {
             const firebaseUser = window.fbAuth?.currentUser;
             const token = firebaseUser ? await firebaseUser.getIdToken() : '';
             
-            const mockMode = !this.app.state.outlookConnected;
             const response = await fetch('/api/outlook/scan', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({ mockMode: mockMode })
+                body: JSON.stringify({ mockMode: false })
             });
 
             if (response.ok) {
@@ -1851,73 +1488,19 @@ window.PruvaAiManager = class PruvaAiManager {
                 
                 // Konuşmaları yeniden yükle
                 const headers = { 'Authorization': `Bearer ${token}` };
-                const convRes = await fetch('/api/pricing/conversations', { headers });
+                const convRes = await fetch('/api/ai/conversations', { headers });
                 if (convRes.ok) {
                     const apiConversations = await convRes.json();
-                    if (apiConversations.length > 0 || this.app.state.outlookConnected) {
-                        this.app.state.pricingConversations = apiConversations;
-                        localStorage.setItem('pruva_pricing_conversations', JSON.stringify(apiConversations));
-                        this.app.commit();
-                    }
+                    this.app.state.pricingConversations = apiConversations;
+                    this.app.commit();
                 }
+            } else {
+                throw new Error('Tarama işlemi sunucuda başarısız oldu.');
             }
         } catch (e) {
-            console.warn('[PRUVA AI] API bulunamadi, MOCK veri uretiliyor...', e);
-            if (!silent) this.showToast('Backend yok, Mock e-posta uretiliyor...', 'warning');
-            this.simulateNewMockEmail();
+            console.warn('[PRUVA AI] Tarama başlatılamadı:', e);
+            if (!silent) this.showToast('E-posta tarama hatası: Sunucu bağlantısı kurulamadı.', 'danger');
         }
-    
-    }
-
-    
-    
-
-    simulateNewMockEmail() {
-        console.log('[PRUVA AI] Mock e-posta simülasyonu tetiklendi.');
-        
-        const mockRFQs = this.app.state.pricingRFQs || [];
-        const newRfqId = 100 + mockRFQs.length + 1;
-        const newRfq = {
-            id: newRfqId,
-            date: new Date().toLocaleDateString('tr-TR'),
-            company: 'Vestel Dış Ticaret',
-            sender_name: 'Ahmet Yılmaz',
-            sender_email: 'ahmet.yilmaz@vestel.com.tr',
-            route: 'İzmir → Hamburg',
-            pol: 'İzmir',
-            pod: 'Hamburg',
-            mode: 'Deniz FCL',
-            transport_mode: 'DENIZ_FCL',
-            status: 'PENDING',
-            subject: 'Vestel Hamburg Yükleme Talebi – 20DC x3',
-            body: 'Selamlar, İzmir Alsancak limanından Hamburg limanına gidecek olan 3 adet 20DC genel kargo yükümüz için spot navlun teklifi rica ederiz. Yükleme tarihi: 12 Temmuz. Teşekkürler.',
-            received_at: new Date().toISOString()
-        };
-
-        mockRFQs.push(newRfq);
-        this.app.state.pricingRFQs = mockRFQs;
-
-        const mockActions = this.app.state.pricingActions || [];
-        const newActionId = mockActions.length + 1;
-        const newAction = {
-            id: newActionId,
-            rfq_id: newRfqId,
-            type: 'SEND_RATE_REQUEST',
-            transport_mode: 'DENIZ_FCL',
-            from: 'Vestel Dış Ticaret',
-            route: 'İzmir → Hamburg',
-            subject: 'Rate Request – İzmir / Hamburg – 20DC x3 – 12 Temmuz 2026',
-            preview: 'Sayın MSC / Maersk, İzmir Hamburg 3x20DC yükümüz için spot fiyat talep...',
-            body: 'Sayın Yetkili,\n\nAşağıdaki yük için spot navlun fiyatı talep ediyoruz:\n\nPOL: İzmir\nPOD: Hamburg\nKonteyner: 20DC x 3\nYükleme Tarihi: 12 Temmuz 2026\nIncoterm: FOB\n\nAll-in fiyatınızı ve geçerlilik süresini iletmenizi rica ederiz.\n\nSaygılarımızla,\nPruva Pricing AI',
-            carriers: ['MSC', 'Maersk', 'CMA CGM'],
-            status: 'PENDING'
-        };
-
-        mockActions.push(newAction);
-        this.app.state.pricingActions = mockActions;
-
-        this.showToast('Yeni e-posta tarandı: Vestel Dış Ticaret (1 Yeni Aksiyon) 📬', 'success');
-        this.app.commit();
     }
 
     async connectOutlook() {
@@ -1997,6 +1580,245 @@ window.PruvaAiManager = class PruvaAiManager {
         } catch (e) {
             console.error('Outlook disconnect error:', e);
             this.showToast('Bağlantı kesilemedi.', 'danger');
+        }
+    }
+
+    async sendInput() {
+        const input = document.getElementById('chat-command-input');
+        if (!input) return;
+        const text = input.value.trim();
+        if (!text) return;
+
+        input.value = '';
+        this.app.state.chatCommandInputValue = '';
+
+        let conversations = this.app.state.pricingConversations;
+        if (!conversations || conversations.length === 0) {
+            conversations = [];
+            this.app.state.pricingConversations = conversations;
+        }
+
+        let activeConvId = this.app.state.activeConversationId || 'copilot';
+        this.app.state.activeConversationId = activeConvId;
+        
+        // Eğer aktif konuşma listede yoksa, oluştur (Co-pilot veya diğer durumlar için)
+        let convIdx = conversations.findIndex(c => c.id === activeConvId);
+        if (convIdx === -1) {
+            const isCopilot = activeConvId === 'copilot';
+            const newConv = {
+                id: activeConvId,
+                company: isCopilot ? 'Pruva AI Co-pilot' : 'Canlı Yapay Zeka Asistanı',
+                email: isCopilot ? 'copilot@pruva.ai' : '',
+                logoLetter: isCopilot ? '🤖' : '⚡',
+                logoBg: isCopilot ? 'linear-gradient(135deg, #2563eb, #1d4ed8)' : 'linear-gradient(135deg, #2563eb, #3b82f6)',
+                lastMessage: text,
+                time: new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }),
+                status: 'PENDING',
+                messages: []
+            };
+            conversations.push(newConv);
+            this.app.state.pricingConversations = conversations;
+            convIdx = conversations.length - 1;
+        }
+
+        const timeStr = new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+        
+        // Kullanıcı komutunu timeline'a anında geçici olarak ekle
+        conversations[convIdx].messages.push({
+            sender: 'Kullanıcı',
+            time: `Bugün ${timeStr}`,
+            type: 'outgoing',
+            text: text
+        });
+
+        conversations[convIdx].lastMessage = text;
+        conversations[convIdx].time = 'Şimdi';
+        
+        this.app.state.aiLoading = true;
+        this.app.commit();
+        this.scrollToBottom();
+
+        // Gerçek veya Mock AI Analiz çağrısı
+        try {
+            const firebaseUser = window.fbAuth?.currentUser;
+            const token = firebaseUser ? await firebaseUser.getIdToken() : '';
+            
+            const response = await fetch('/api/ai/analyze', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    message: text,
+                    context: {
+                        conversationId: activeConvId,
+                        email: conversations[convIdx].email,
+                        company: conversations[convIdx].company,
+                        status: conversations[convIdx].status
+                    }
+                })
+            });
+
+            if (response.ok) {
+                // Sunucudan güncel mesajları veri tabanından canlı olarak çekelim ve UI'ı tazeleyelim
+                await this.loadState();
+            } else {
+                throw new Error('API Hatası');
+            }
+        } catch (err) {
+            console.warn('[PRUVA AI] API AI analiz başarısız:', err.message);
+            this.showToast('Komut işlenemedi. Sunucuya ulaşılamıyor.', 'danger');
+            
+            // Eğer mesaj hata verirse, son eklenen kullanıcı mesajını UI'da hata olarak işaretle (veya bilgilendir)
+            conversations[convIdx].messages.push({
+                sender: 'Sistem',
+                time: `Bugün ${timeStr}`,
+                type: 'incoming',
+                text: '❌ Hata: Yapay zeka servisinden yanıt alınamadı. (API Kota Sınırı Aşılmış Olabilir / 429 Too Many Requests)'
+            });
+        } finally {
+            this.app.state.aiLoading = false;
+            this.app.commit();
+            this.scrollToBottom();
+        }
+    }
+
+    async approveSuggestion(convId, msgIndex, action) {
+        let conversations = this.app.state.pricingConversations;
+        if (!conversations) return;
+        const parsedId = isNaN(convId) ? convId : Number(convId);
+        const convIdx = conversations.findIndex(c => c.id === parsedId);
+        if (convIdx === -1) return;
+        const timeStr = new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+        
+        const suggestionMsg = conversations[convIdx].messages[msgIndex];
+        if (!suggestionMsg || (suggestionMsg.type !== 'ai_suggestion' && suggestionMsg.type !== 'AI_SUGGESTION')) {
+            this.showToast('Bu öneri bulunamadı veya daha önce işlenmiş.', 'warning');
+            return;
+        }
+
+        const actualIndex = conversations[convIdx].messages.indexOf(suggestionMsg);
+        if (actualIndex !== -1) {
+            conversations[convIdx].messages.splice(actualIndex, 1);
+        }
+        let actionMsg = '';
+        let newStatus = 'COMPLETED';
+        let emailTo = 'pricing@pruvahub.com';
+        if (conversations[convIdx].email) {
+            emailTo = conversations[convIdx].email;
+        }
+        if (action === 'SEND_CUSTOM_EMAIL') {
+            actionMsg = 'Giden Mail (Pruva AI) - Özel e-posta başarıyla iletildi.';
+            newStatus = 'COMPLETED';
+        } else if (action === 'SEND_RATE_REQUEST') {
+            actionMsg = 'Giden Mail (Pruva AI) - MSC ve Maersk\'e spot navlun talebi iletildi.';
+            newStatus = 'RATES_REQUESTED';
+            emailTo = 'quotes@maersk.com';
+        } else if (action === 'SEND_OFFER') {
+            actionMsg = 'Giden Mail (Pruva AI) - Müşteriye özel navlun teklifi iletildi.';
+            newStatus = 'OFFER_SENT';
+        } else if (action === 'SEND_MISSING_INFO') {
+            actionMsg = 'Giden Mail (Pruva AI) - Eksik bilgi talep e-postası müşteriye iletildi.';
+            newStatus = 'MISSING_INFO_SENT';
+        } else if (action === 'SEND_FOLLOWUP') {
+            actionMsg = 'Giden Mail (Pruva AI) - Taşıyıcıya hatırlatma e-postası (takip maili) gönderildi.';
+            newStatus = 'RATES_REQUESTED';
+        } else {
+            actionMsg = 'İşlem onaylandı.';
+        }
+        conversations[convIdx].messages.push({
+            sender: 'Pruva AI (Sistem)',
+            time: `Bugün ${timeStr}`,
+            type: 'ai_action',
+            text: `AI: Aksiyon başarıyla onaylandı ✓`
+        });
+        conversations[convIdx].messages.push({
+            sender: 'Pruva AI (Giden Mail)',
+            time: `Bugün ${timeStr}`,
+            type: 'outgoing',
+            text: suggestionMsg.suggestedMessage || actionMsg
+        });
+        conversations[convIdx].lastMessage = actionMsg;
+        conversations[convIdx].status = newStatus;
+        try {
+            const firebaseUser = window.fbAuth?.currentUser;
+            const token = firebaseUser ? await firebaseUser.getIdToken() : '';
+            const suggestedMail = suggestionMsg.suggestedMail || {};
+            const finalTo = suggestedMail.to || emailTo;
+            const finalSubject = suggestedMail.subject || suggestionMsg.text || 'Pruva AI Navlun Bildirimi';
+            const finalBody = suggestedMail.body || suggestionMsg.suggestedMessage || actionMsg;
+            await fetch('/api/pricing/send-email', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({ to: finalTo, subject: finalSubject, body: finalBody })
+            });
+            const actionId = suggestionMsg.actionId;
+            if (actionId) {
+                await fetch(`/api/pricing/actions/${actionId}/approve`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ edited_subject: finalSubject, edited_body: finalBody, selected_carriers: [] })
+                });
+            }
+        } catch (e) {
+            console.warn('[PRUVA AI] E-posta gönderimi veya DB onayı başarısız:', e.message);
+            this.showToast('Hata: ' + e.message, 'danger');
+        }
+        this.app.commit();
+        this.showToast('AI aksiyonu başarıyla onaylandı ve gönderildi!', 'success');
+        try {
+            await this.loadState();
+        } catch (loadErr) {
+            console.warn('[PRUVA AI] Güncel konuşma geçmişi yüklenemedi:', loadErr.message);
+        }
+        this.scrollToBottom();
+    }
+
+    async rejectSuggestion(convId, msgIndex) {
+        let conversations = this.app.state.pricingConversations;
+        if (!conversations) return;
+
+        const parsedId = isNaN(convId) ? convId : Number(convId);
+        const convIdx = conversations.findIndex(c => c.id === parsedId);
+        if (convIdx === -1) return;
+
+        const suggestionMsg = conversations[convIdx].messages[msgIndex];
+        if (!suggestionMsg || (suggestionMsg.type !== 'ai_suggestion' && suggestionMsg.type !== 'AI_SUGGESTION')) {
+            this.showToast('Bu öneri bulunamadı veya daha önce işlenmiş.', 'warning');
+            return;
+        }
+
+        const actualIndex = conversations[convIdx].messages.indexOf(suggestionMsg);
+        if (actualIndex !== -1) {
+            conversations[convIdx].messages.splice(actualIndex, 1);
+        }
+
+        const actionId = suggestionMsg ? suggestionMsg.actionId : null;
+        conversations[convIdx].lastMessage = 'Öneri reddedildi.';
+        conversations[convIdx].status = 'COMPLETED';
+
+        this.app.commit();
+        this.showToast('AI önerisi reddedildi.', 'danger');
+
+        if (actionId) {
+            try {
+                const firebaseUser = window.fbAuth?.currentUser;
+                const token = firebaseUser ? await firebaseUser.getIdToken() : '';
+                
+                await fetch(`/api/pricing/actions/${actionId}/reject`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                // Veri tabanından en güncel halini çek
+                await this.loadState();
+            } catch (err) {
+                console.warn('[PRUVA AI] Backend aksiyon reddi başarısız:', err.message);
+            }
         }
     }
 }

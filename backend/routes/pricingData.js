@@ -537,73 +537,7 @@ router.post('/rfqs/:id/lost', auth, async (req, res) => {
     }
 });
 
-// ─────────────────────────────────────────────
-// 6. AKSİYON MERKEZİ ENDPOINTS (Eksik olan)
-// ─────────────────────────────────────────────
 
-// @route   GET api/pricing/actions
-// @desc    Bekleyen AI aksiyonlarını getirir
-router.get('/actions', auth, async (req, res) => {
-    try {
-        const query = 'SELECT id, type, transport_mode, "from", route, subject, preview, body, carriers, status, rfq_id, created_at FROM pricing_actions WHERE user_id = $1 ORDER BY created_at DESC';
-        const result = await db.query(query, [req.user.id]);
-        res.json(result.rows);
-    } catch (err) {
-        console.error('[GET ACTIONS ERR]', err);
-        res.status(500).json({ error: 'Aksiyonlar getirilemedi.' });
-    }
-});
-
-// @route   GET api/pricing/rfqs
-// @desc    Kullanıcının tüm RFQ'larını getirir
-router.get('/rfqs', auth, async (req, res) => {
-    try {
-        const query = 'SELECT id, date, company, sender_name, route, pol, pod, mode, transport_mode, status, competitor_price, lost_reason, created_at FROM pricing_rfqs WHERE user_id = $1 ORDER BY created_at DESC';
-        const result = await db.query(query, [req.user.id]);
-        res.json(result.rows);
-    } catch (err) {
-        console.error('[GET RFQS ERR]', err);
-        res.status(500).json({ error: 'RFQ listesi getirilemedi.' });
-    }
-});
-
-// @route   POST api/pricing/actions/:id/approve
-// @desc    AI aksiyonunu onaylar (e-posta gönderimini tetikler)
-router.post('/actions/:id/approve', auth, async (req, res) => {
-    try {
-        const { id } = req.params;
-        const { edited_subject, edited_body, selected_carriers } = req.body;
-
-        const updateQuery = 'UPDATE pricing_actions SET status = $1, subject = $2, body = $3 WHERE id = $4';
-        await db.query(updateQuery, [
-            'COMPLETED',
-            edited_subject || '',
-            edited_body || '',
-            parseInt(id)
-        ]);
-
-        res.json({ success: true, message: 'Aksiyon onaylandı ve e-posta gönderildi.' });
-    } catch (err) {
-        console.error('[POST APPROVE ACTION ERR]', err);
-        res.status(500).json({ error: 'Aksiyon onaylanamadı.' });
-    }
-});
-
-// @route   POST api/pricing/actions/:id/reject
-// @desc    AI aksiyonunu reddeder
-router.post('/actions/:id/reject', auth, async (req, res) => {
-    try {
-        const { id } = req.params;
-
-        const updateQuery = 'UPDATE pricing_actions SET status = $1 WHERE id = $2';
-        await db.query(updateQuery, ['CANCELLED', parseInt(id)]);
-
-        res.json({ success: true, message: 'Aksiyon reddedildi.' });
-    } catch (err) {
-        console.error('[POST REJECT ACTION ERR]', err);
-        res.status(500).json({ error: 'Aksiyon reddedilemedi.' });
-    }
-});
 
 // @route   DELETE api/pricing/margins/:id
 // @desc    Margin kuralını siler

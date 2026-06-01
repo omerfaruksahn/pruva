@@ -1,0 +1,442 @@
+/**
+ * PRUVA — Rate Sheets CSS (Navlun Fiyat Görselleri)
+ * 
+ * Light premium SaaS theme matching Pruva's overall UI character.
+ * Renkler, yazı boyutları ve responsive grid sistemi.
+ */
+
+.rate-sheets-container {
+    padding: 30px var(--container-padding);
+    max-width: var(--container-width);
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    background-color: #f8f9fc;
+    min-height: 100vh;
+}
+
+/* Üst başlık (Hero section) */
+.rate-sheets-hero {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: var(--radius-lg);
+    padding: 24px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.hero-meta {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.hero-meta-icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 8px;
+    background-color: rgba(37, 99, 235, 0.1);
+    color: #2563eb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.hero-meta-text h2 {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: #0f172a;
+    margin: 0 0 4px 0;
+    letter-spacing: -0.3px;
+}
+
+.hero-meta-text p {
+    color: #64748b;
+    font-size: 0.85rem;
+    margin: 0;
+    max-width: 550px;
+    line-height: 1.45;
+}
+
+.hero-action-btn {
+    background-color: #2563eb;
+    color: #ffffff;
+    font-weight: 700;
+    padding: 10px 18px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-size: 0.82rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background-color 0.2s ease;
+}
+
+.hero-action-btn:hover {
+    background-color: #1d4ed8;
+}
+
+/* Grid Layout: Sol (40%) - Sağ (60%) */
+.rate-sheets-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 24px;
+}
+
+@media (min-width: 1024px) {
+    .rate-sheets-grid {
+        grid-template-columns: 4fr 6fr;
+    }
+}
+
+.rate-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.rate-card-title {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: #0f172a;
+    margin: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.badge-count {
+    background: rgba(37, 99, 235, 0.08);
+    color: #2563eb;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 4px;
+}
+
+/* Sürükle ve Bırak Kartı */
+.drag-drop-zone {
+    background: #ffffff;
+    border: 2px dashed #e2e8f0;
+    border-radius: var(--radius-md);
+    padding: 40px 20px;
+    text-align: center;
+    cursor: pointer;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    transition: all 0.2s ease;
+}
+
+.drag-drop-zone:hover, .drag-drop-zone.drag-active {
+    border-color: #2563eb;
+    background-color: rgba(37, 99, 235, 0.02);
+}
+
+.drag-drop-zone .icon-container {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background-color: rgba(37, 99, 235, 0.08);
+    color: #2563eb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s ease;
+}
+
+.drag-drop-zone:hover .icon-container {
+    transform: translateY(-3px);
+}
+
+.drag-drop-zone h3 {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0;
+}
+
+.drag-drop-zone p {
+    font-size: 0.82rem;
+    color: #64748b;
+    margin: 0;
+    line-height: 1.4;
+}
+
+.drag-drop-zone .btn-select {
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    color: #0f172a;
+    font-weight: 700;
+    font-size: 0.8rem;
+    padding: 8px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 4px;
+}
+
+.drag-drop-zone:hover .btn-select {
+    border-color: #2563eb;
+    color: #2563eb;
+}
+
+.drag-drop-zone input[type="file"] {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.upload-note {
+    font-size: 0.72rem;
+    color: #64748b;
+    margin-top: 4px;
+}
+
+/* AI loading */
+.ai-loading-indicator {
+    padding: 40px 20px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: var(--radius-md);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    text-align: center;
+}
+
+.ai-pulse-scanner {
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    background-color: rgba(37, 99, 235, 0.08);
+    color: #2563eb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    animation: scanner-pulse 1.5s infinite ease-in-out;
+}
+
+@keyframes scanner-pulse {
+    0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.2); }
+    50% { transform: scale(1.06); box-shadow: 0 0 15px 5px rgba(37, 99, 235, 0.15); }
+}
+
+/* Sheets List */
+.sheets-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-height: 480px;
+    overflow-y: auto;
+}
+
+.sheet-item {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-left: 3px solid #2563eb;
+    border-radius: 6px;
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: all 0.2s ease;
+}
+
+.sheet-item:hover {
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+    border-color: #cbd5e1;
+    border-left-color: #2563eb;
+}
+
+.sheet-info-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.sheet-icon-box {
+    width: 36px;
+    height: 36px;
+    border-radius: 6px;
+    background-color: rgba(37, 99, 235, 0.06);
+    color: #2563eb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sheet-meta h4 {
+    margin: 0 0 2px 0;
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.sheet-meta p {
+    margin: 0;
+    font-size: 0.78rem;
+    color: #64748b;
+    line-height: 1.3;
+}
+
+.sheet-meta .sheet-validity {
+    color: #2563eb;
+    font-weight: 600;
+    font-size: 0.75rem;
+    margin-top: 2px;
+}
+
+.btn-delete-sheet {
+    background: transparent;
+    border: none;
+    color: #ef4444;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s;
+}
+
+.btn-delete-sheet:hover {
+    background-color: #fef2f2;
+}
+
+/* Sorgulama Bölümü */
+.route-query-card {
+    margin-top: 10px;
+}
+
+.route-query-form {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+    align-items: flex-end;
+}
+
+@media (min-width: 768px) {
+    .route-query-form {
+        grid-template-columns: 1fr 1fr auto;
+    }
+}
+
+.query-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.query-input-group label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.query-input-group input {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 10px 14px;
+    color: #0f172a;
+    font-size: 0.88rem;
+    transition: all 0.2s;
+}
+
+.query-input-group input:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+    outline: none;
+}
+
+.query-submit-btn {
+    background-color: #2563eb;
+    color: #ffffff;
+    font-weight: 700;
+    padding: 10px 20px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-size: 0.88rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    height: 40px;
+    transition: background-color 0.2s;
+}
+
+.query-submit-btn:hover {
+    background-color: #1d4ed8;
+}
+
+/* Fiyat Sonuç Tablosu */
+.query-results-box {
+    margin-top: 16px;
+    overflow-x: auto;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+}
+
+.results-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+}
+
+.results-table th, .results-table td {
+    padding: 12px 18px;
+    text-align: left;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.results-table th {
+    background-color: #f1f5f9;
+    font-weight: 700;
+    color: #64748b;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.results-table tbody tr:nth-child(even) {
+    background-color: #f8fafc;
+}
+
+.results-table tbody tr.cheapest-row {
+    background-color: #f0fdf4 !important;
+}
+
+.results-table tbody tr:hover {
+    background-color: #f1f5f9;
+}
+
+.results-table tbody tr.cheapest-row:hover {
+    background-color: #dcfce7 !important;
+}
+
+.results-table td.price-tag {
+    font-weight: 800;
+    color: #059669;
+    font-size: 0.92rem;
+}

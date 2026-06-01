@@ -21,7 +21,8 @@ export const ROUTE_MAP = {
         'pricing-actions': 'pruva-ai/actions',
         'pricing-customers': 'pricing-customers',
         'pricing-settings': 'pruva-ai/settings',
-        'pricing-reports': 'pricing-reports'
+        'pricing-reports': 'pricing-reports',
+        'rate-sheets': 'rate-sheets'
     },
     en: {
         'home': '',
@@ -45,7 +46,8 @@ export const ROUTE_MAP = {
         'pricing-actions': 'pruva-ai/actions',
         'pricing-customers': 'pricing-customers',
         'pricing-settings': 'pruva-ai/settings',
-        'pricing-reports': 'pricing-reports'
+        'pricing-reports': 'pricing-reports',
+        'rate-sheets': 'rate-sheets'
     }
 };
 

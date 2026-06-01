@@ -1125,17 +1125,12 @@ input:checked + .switch-slider:before {
    ========================================================================== */
 
 .pruva-chat-layout {
-    display: grid;
-    grid-template-columns: 320px 1fr;
+    display: flex;
     gap: 0;
-    height: calc(100vh - 150px);
-    min-height: 450px;
-    max-height: 650px;
-    background-color: var(--bg-surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
+    height: calc(100vh - 160px);
     overflow: hidden;
-    box-shadow: var(--shadow-premium);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
 }
 
 /* Sol Kolon */
@@ -1305,8 +1300,11 @@ input:checked + .switch-slider:before {
 .chat-right-panel {
     display: flex;
     flex-direction: column;
-    height: 100%;
-    background-color: var(--bg-surface);
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+    background: var(--bg-surface);
+    min-height: 0;
 }
 
 .chat-welcome-box {
@@ -1339,11 +1337,8 @@ input:checked + .switch-slider:before {
 .chat-timeline-area {
     flex: 1;
     overflow-y: auto;
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-    background: var(--bg-elevated);
+    padding: 16px;
+    min-height: 0;
 }
 
 /* Balonlar */
@@ -1450,12 +1445,14 @@ input:checked + .switch-slider:before {
 
 /* Giriş Kutusu */
 .chat-input-wrapper {
+    display: flex !important;
+    align-items: center;
+    gap: 8px;
     padding: 12px 16px;
     border-top: 1px solid var(--border);
-    background-color: var(--bg-surface);
-    display: flex;
-    gap: 10px;
-    align-items: center;
+    background: var(--bg-surface);
+    flex-shrink: 0;
+    min-height: 56px;
 }
 
 .chat-input-field {
@@ -1763,5 +1760,341 @@ body.view-pricing-reports #app-footer {
         height: calc(100vh - 160px) !important;
         max-height: none !important;
     }
+}
+
+/* ============================================================
+   SAAS REDESIGN OVERRIDES
+   ============================================================ */
+.pruva-saas-layout {
+    max-width: 1600px !important;
+    width: 100%;
+    margin: 0 auto;
+    padding: 24px 32px !important;
+    height: calc(100vh - 70px);
+    display: flex;
+    flex-direction: column;
+}
+
+/* Header Area */
+.saas-header-wrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.saas-header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.saas-logo-box {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 800;
+    font-size: 1.25rem;
+    box-shadow: 0 4px 12px rgba(37,99,235,0.3);
+}
+
+.saas-header-title {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin: 0;
+    letter-spacing: -0.5px;
+}
+
+.saas-header-actions {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.saas-header-actions .btn {
+    border-radius: 8px !important;
+    padding: 10px 18px !important;
+    font-size: 0.85rem !important;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+}
+
+/* 2-Column Overrides */
+.pruva-saas-layout .pruva-chat-layout {
+    flex: 1;
+    display: flex;
+    gap: 24px;
+    height: 100% !important;
+    max-height: none !important;
+    background: transparent;
+    overflow: hidden;
+}
+
+/* Sidebar Overrides */
+.pruva-saas-layout .chat-left-sidebar {
+    width: 360px;
+    background-color: var(--bg-surface) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 16px !important;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.03) !important;
+    overflow: hidden;
+}
+
+.pruva-saas-layout .chat-summary-bar {
+    background: transparent !important;
+    color: var(--text-secondary) !important;
+    font-weight: 700 !important;
+    border-radius: 0 !important;
+    border-bottom: 1px solid var(--border);
+    padding: 20px 24px 16px 24px !important;
+    font-size: 0.8rem !important;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.pruva-saas-layout .chat-search-wrapper {
+    padding: 16px 24px 8px 24px !important;
+    background: transparent !important;
+    border-bottom: none !important;
+}
+
+.pruva-saas-layout .chat-search-input {
+    background-color: var(--bg-elevated) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 10px !important;
+    padding: 12px 16px !important;
+    font-size: 0.88rem !important;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.02);
+}
+
+.pruva-saas-layout .chat-filter-tabs {
+    padding: 8px 24px 16px 24px !important;
+    gap: 8px !important;
+    display: flex;
+    flex-wrap: wrap;
+}
+.pruva-saas-layout .chat-filter-tabs::-webkit-scrollbar { display: none; }
+
+.pruva-saas-layout .chat-filter-btn {
+    border-radius: 20px !important;
+    padding: 8px 16px !important;
+    font-size: 0.75rem !important;
+    background: var(--bg-elevated) !important;
+    border: 1px solid var(--border) !important;
+    color: var(--text-secondary) !important;
+    font-weight: 600 !important;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.pruva-saas-layout .chat-filter-btn.active {
+    background: var(--text-primary) !important;
+    color: var(--bg-surface) !important;
+    border-color: var(--text-primary) !important;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1) !important;
+}
+
+/* Chat Item Overrides */
+.pruva-saas-layout .chat-list-scroll {
+    padding-top: 8px;
+}
+.pruva-saas-layout .chat-list-item {
+    margin: 0 16px 8px 16px !important;
+    border-radius: 12px !important;
+    padding: 14px 16px !important;
+    border: 1px solid transparent !important;
+    transition: all 0.2s ease !important;
+}
+.pruva-saas-layout .chat-list-item:hover {
+    background-color: var(--bg-elevated) !important;
+    border-color: var(--border) !important;
+}
+.pruva-saas-layout .chat-list-item.active {
+    background-color: rgba(37,99,235,0.06) !important;
+    border-color: rgba(37,99,235,0.2) !important;
+    box-shadow: 0 4px 12px rgba(37,99,235,0.05);
+}
+
+/* Right Panel Overrides */
+.pruva-saas-layout .chat-right-panel {
+    flex: 1;
+    background-color: var(--bg-surface) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 16px !important;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.03) !important;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* Welcome Robot Overrides */
+.pruva-saas-layout .chat-welcome-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    gap: 20px;
+}
+.welcome-robot-wrapper {
+    background: var(--bg-elevated);
+    padding: 40px;
+    border-radius: 50%;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.04), inset 0 0 0 1px var(--border);
+    margin-bottom: 24px;
+}
+
+/* SaaS Input Box Overrides */
+.saas-input-wrapper {
+    margin: 24px !important;
+    background: var(--bg-elevated) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 16px !important;
+    padding: 10px 16px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 16px !important;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.08) !important;
+    position: sticky;
+    bottom: 0;
+    transition: box-shadow 0.3s ease;
+}
+.saas-input-wrapper:focus-within {
+    box-shadow: 0 12px 50px rgba(37,99,235,0.12) !important;
+    border-color: rgba(37,99,235,0.3) !important;
+}
+
+.chat-attach-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s, color 0.2s;
+    height: 44px;
+}
+.chat-attach-btn:hover {
+    background: var(--bg-surface);
+    color: var(--text-primary);
+}
+
+.saas-input-field {
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    padding: 12px 0 !important;
+    font-size: 0.95rem !important;
+    height: auto !important;
+    flex: 1;
+}
+.saas-input-field:focus {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+.saas-send-btn {
+    background: #2563eb !important;
+    border: none !important;
+    color: white !important;
+    width: 44px !important;
+    height: 44px !important;
+    border-radius: 12px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    box-shadow: 0 4px 12px rgba(37,99,235,0.3) !important;
+    transition: transform 0.2s, background 0.2s !important;
+}
+.saas-send-btn:hover {
+    transform: translateY(-2px) !important;
+    background: #1d4ed8 !important;
+}
+
+/* Chat Messages Area Overrides */
+.pruva-saas-layout .chat-messages-scroll {
+    padding: 32px 40px !important;
+}
+.pruva-saas-layout .chat-bubble-row {
+    margin-bottom: 28px !important;
+}
+.pruva-saas-layout .chat-bubble {
+    font-size: 0.95rem !important;
+    line-height: 1.6 !important;
+    padding: 16px 24px !important;
+    border-radius: 20px !important;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.03) !important;
+    max-width: 85% !important;
+}
+.pruva-saas-layout .chat-bubble-row.outgoing .chat-bubble {
+    background: #2563eb !important;
+    color: white !important;
+    border-bottom-right-radius: 4px !important;
+}
+.pruva-saas-layout .chat-bubble-row.incoming .chat-bubble {
+    background: var(--bg-elevated) !important;
+    border: 1px solid var(--border) !important;
+    border-bottom-left-radius: 4px !important;
+}
+
+/* AI Suggestion Card Premium Redesign */
+.pruva-saas-layout .ai-suggestion-card {
+    background: var(--bg-surface) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 16px !important;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.06) !important;
+    overflow: hidden;
+    width: 100% !important;
+    max-width: 600px !important;
+}
+.pruva-saas-layout .ai-suggestion-title {
+    background: rgba(37,99,235,0.05) !important;
+    padding: 16px 24px !important;
+    border-bottom: 1px solid var(--border) !important;
+    font-weight: 800 !important;
+    font-size: 0.88rem !important;
+    color: #2563eb;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.pruva-saas-layout .ai-suggestion-text {
+    padding: 20px 24px !important;
+    font-size: 0.92rem !important;
+    line-height: 1.6 !important;
+}
+.pruva-saas-layout .mail-preview-box {
+    margin: 0 24px 20px 24px !important;
+    padding: 16px !important;
+    background: var(--bg-elevated) !important;
+    border-radius: 12px !important;
+    border: 1px solid var(--border) !important;
+}
+.pruva-saas-layout .ai-suggestion-actions {
+    background: var(--bg-elevated) !important;
+    padding: 16px 24px !important;
+    border-top: 1px solid var(--border) !important;
+    display: flex !important;
+    justify-content: flex-end !important;
+    gap: 12px !important;
+}
+.pruva-saas-layout .ai-suggestion-actions .btn {
+    padding: 10px 24px !important;
+    font-size: 0.85rem !important;
+    border-radius: 8px !important;
+    font-weight: 700 !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05) !important;
 }
 

@@ -48,117 +48,153 @@ YANIT FORMATI (Her zaman bu JSON formatında yanıt ver):
 async function analyzeCommand(userMessage, context = {}) {
   try {
     if (!genAI) {
-      console.warn('GEMINI_API_KEY bulunamadı, fallback kullanılıyor');
-      return fallbackAnalysis(userMessage);
+      throw new Error('GEMINI_API_KEY bulunamadı. Yapay zeka kullanılamıyor.');
     }
     
     const model = genAI.getGenerativeModel({ 
-      model: process.env.AI_MODEL || 'gemini-1.5-pro' 
+      model: process.env.AI_MODEL || 'gemini-2.0-flash' 
     });
     
     const contextStr = context.company 
       ? `\nAKTİF KONUŞMA: ${context.company} (${context.status || 'UNKNOWN'})`
       : '';
     
+    let historyStr = '';
+    if (context.history && context.history.length > 0) {
+      historyStr = '\nSOHBET GEÇMİŞİ:\n' + context.history.map(h => `${h.role === 'user' ? 'Kullanıcı' : 'Pruva AI'}: ${h.text}`).join('\n') + '\n';
+    }
+    
     const carriersStr = context.carriers?.length 
       ? `\nMEVCUT TAŞIYICILAR: ${context.carriers.map(c => c.name).join(', ')}`
       : '';
     
-    const prompt = `${SYSTEM_PROMPT}\n${contextStr}\n${carriersStr}\n\nKULLANICI MESAJI: "${userMessage}"\n\nJSON yanıtını ver:`;
+    const prompt = `${SYSTEM_PROMPT}\n${contextStr}${historyStr}\n${carriersStr}\n\nKULLANICI MESAJI: "${userMessage}"\n\nJSON yanıtını ver:`;
     
-    const result = await model.generateContent(prompt);
+    const result = await model.generateContent({
+      contents: [{ role: "user", parts: [{ text: prompt }] }],
+      generationConfig: {
+        responseMimeType: "application/json"
+      }
+    });
+    
     const responseText = result.response.text();
     
-    let jsonStr = responseText;
-    const jsonMatch = responseText.match(/```(?:json)?\s*([\s\S]*?)```/);
-    if (jsonMatch) {
-      jsonStr = jsonMatch[1].trim();
-    }
-    
-    const parsed = JSON.parse(jsonStr);
-    return { success: true, ...parsed };
-  } catch (error) {
-    console.error('AI analiz hatası:', error);
-    return fallbackAnalysis(userMessage);
-  }
-}
-
-function fallbackAnalysis(text) {
-  const lower = text.toLowerCase();
-  let action = 'GENERAL';
-  let summary = 'Mesajınız alındı.';
-  let templateKey = null;
-  let carriers = [];
-  let toEmail = null;
-  let subject = null;
-  let suggestedMessage = null;
-
-  const emailMatch = text.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
-  
-  if (emailMatch && (lower.includes('tanıtım') || lower.includes('tanitim') || lower.includes('mail') || lower.includes('gönder') || lower.includes('gonder'))) {
-    action = 'SEND_CUSTOM_EMAIL';
-    toEmail = emailMatch[0];
-    templateKey = 'custom-email';
-    
-    // Şirket adını çıkarmaya çalışalım
-    let companyName = 'Pruva Lojistik';
-    const companyMatch = text.match(/\[([^\]]+)\]/);
-    if (companyMatch) {
-      companyName = companyMatch[1];
-    } else {
-      const parts = text.split(/\s+/);
-      const nameIndex = parts.findIndex(p => p.toLowerCase().includes('adıyla') || p.toLowerCase().includes('ismiyle'));
-      if (nameIndex > 0) {
-        companyName = parts[nameIndex - 1];
+    let parsed;
+    try {
+      parsed = JSON.parse(responseText.trim());
+    } catch (parseErr) {
+      const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        parsed = JSON.parse(jsonMatch[0].trim());
+      } else {
+        throw parseErr;
       }
     }
     
-    summary = `${toEmail} adresine ${companyName} tanıtım e-postası taslağı hazırlandı.`;
-    subject = `${companyName} — Tanıtım ve İş Birliği Talebi`;
-    suggestedMessage = `Sayın Yetkili,<br><br><b>${companyName}</b> olarak lojistik operasyonlarımızda spot navlun, gümrükleme ve tedarik zinciri çözümleri sunmaktayız. Şirketinizin lojistik ihtiyaçları doğrultusunda spot FCL/LCL, hava yolu ve kara yolu taşımalarınız için fiyat teklifleri sunmaktan ve iş birliği yapmaktan memnuniyet duyarız.<br><br>Güncel navlun taleplerinizi paylaşmanız halinde en kısa sürede fiyatlandırma çalışmasını tamamlayabiliriz.<br><br>Saygılarımızla,<br>Pruva Pricing Team`;
-  } else if (lower.includes('fiyat sor') || lower.includes('rate iste') || lower.includes('rfq') || lower.includes('navlun')) {
-    action = 'SEND_RATE_REQUEST';
-    summary = 'Taşıyıcılara fiyat talebi gönderilecek.';
-    templateKey = 'fcl-request';
-    carriers = ['MSC', 'Maersk'];
-  } else if (lower.includes('teklif ver') || lower.includes('teklif gönder') || lower.includes('teklif hazırla')) {
-    action = 'SEND_OFFER';
-    summary = 'Müşteriye fiyat teklifi gönderilecek.';
-    templateKey = 'fcl-offer';
-  } else if (lower.includes('eksik bilgi') || lower.includes('bilgi iste') || lower.includes('missing')) {
-    action = 'SEND_MISSING_INFO';
-    summary = 'Eksik bilgi talebi gönderilecek.';
-    templateKey = 'common-missing';
-  } else if (lower.includes('takip') || lower.includes('hatırlat') || lower.includes('follow')) {
-    action = 'SEND_FOLLOWUP';
-    summary = 'Takip maili gönderilecek.';
-    templateKey = 'fcl-followup';
-    carriers = ['MSC'];
+    return { success: true, ...parsed };
+  } catch (error) {
+    console.error('AI analiz hatası:', error);
+    throw error;
   }
-  
-  return {
-    success: true, action, confidence: action === 'GENERAL' ? 0.3 : 0.85,
-    companyMention: null, summary,
-    details: { to_email: toEmail, subject, transportMode: null, route: { pol: null, pod: null }, carriers, templateKey, urgency: 'MEDIUM' },
-    suggestedMessage
-  };
 }
+
+// FallbackAnalysis tamamen silindi.
 
 async function analyzeEmail(emailBody, emailSubject = '') {
   try {
     if (!genAI) return null;
-    const model = genAI.getGenerativeModel({ model: process.env.AI_MODEL || 'gemini-1.5-pro' });
+    const model = genAI.getGenerativeModel({ model: process.env.AI_MODEL || 'gemini-2.0-flash' });
     const prompt = `Sen lojistik maillerini analiz edip yapılandırılmış veri çıkaran bir Pricing AI asistanısın.\n\nAşağıdaki emaili analiz et ve şu JSON formatında yanıt ver:\n{\n  "category": "RFQ|RATE_RESPONSE|NEGOTIATION|FOLLOWUP|OTHER",\n  "transport_mode": "DENIZ_FCL|DENIZ_LCL|HAVA|KARA|null",\n  "extracted_data": {\n    "pol": "yükleme limanı/şehri",\n    "pod": "varış limanı/şehri",\n    "container_type": "20DC|40HC|etc veya null",\n    "quantity": "adet veya null",\n    "incoterm": "FOB|EXW|CIF|etc veya null",\n    "loading_date": "tarih veya null",\n    "cargo_type": "yük cinsi veya null",\n    "weight_kg": "ağırlık veya null",\n    "price": "fiyat veya null",\n    "currency": "USD|EUR|TRY veya null",\n    "carrier_name": "taşıyıcı adı veya null",\n    "transit_time": "transit süre veya null"\n  },\n  "missing_fields": ["eksik alanlar listesi"],\n  "action": "SEND_RATE_REQUEST|SEND_OFFER|SEND_MISSING_INFO|null",\n  "summary": "Kısa Türkçe özet"\n}\n\nKONU: ${emailSubject}\nİÇERİK: ${emailBody}\n\nSadece JSON döndür:`;
-    const result = await model.generateContent(prompt);
+    
+    const result = await model.generateContent({
+      contents: [{ role: "user", parts: [{ text: prompt }] }],
+      generationConfig: {
+        responseMimeType: "application/json"
+      }
+    });
+    
     const responseText = result.response.text();
-    let jsonStr = responseText;
-    const jsonMatch = responseText.match(/```(?:json)?\s*([\s\S]*?)```/);
-    if (jsonMatch) jsonStr = jsonMatch[1].trim();
-    return JSON.parse(jsonStr);
+    
+    let parsed;
+    try {
+      parsed = JSON.parse(responseText.trim());
+    } catch (parseErr) {
+      const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        parsed = JSON.parse(jsonMatch[0].trim());
+      } else {
+        throw parseErr;
+      }
+    }
+    
+    return parsed;
   } catch (error) {
     console.error('Email AI analiz hatası:', error);
     return null;
   }
 }
 
-module.exports = { analyzeCommand, analyzeEmail, fallbackAnalysis };
+async function analyzeRateSheetImage(base64Data, mimeType, filename = '') {
+  try {
+    if (!genAI) {
+      throw new Error('GEMINI_API_KEY bulunamadı, rate sheet analizi yapılamıyor.');
+    }
+
+    const model = genAI.getGenerativeModel({ 
+      model: process.env.AI_MODEL || 'gemini-2.0-flash' 
+    });
+
+    const imagePart = {
+      inlineData: {
+        data: base64Data,
+        mimeType: mimeType
+      }
+    };
+
+    const prompt = `Aşağıdaki navlun fiyat görselini (rate sheet / fiyat listesi) analiz et ve taşıyıcı adı, geçerlilik tarihi ile spot navlun fiyat satırlarını çıkart. 
+Yanıtı tam olarak aşağıdaki JSON formatında dön. JSON dışında hiçbir açıklama veya metin ekleme.
+
+JSON Formatı:
+{
+  "carrier_name": "Armatör veya taşıyıcı adı (MSC, Maersk vb.) veya null",
+  "valid_until": "Fiyatların son geçerlilik tarihi (YYYY-MM-DD formatında) veya null",
+  "items": [
+    {
+      "pol": "Yükleme limanı (Port of Loading)",
+      "pod": "Varış limanı (Port of Discharge)",
+      "container_type": "Konteyner tipi (40HC, 20DC, 40GP vb.)",
+      "price": 1850.00, // sayısal fiyat
+      "currency": "USD veya EUR vb.",
+      "includes": ["Dahil olan ücretler, örn: THC, B/L, LSS vb. dizisi"],
+      "transit_days": 28 // sayısal transit süre (varsa veya null)
+    }
+  ]
+}`;
+
+    const result = await model.generateContent({
+      contents: [{ role: 'user', parts: [{ text: prompt }, imagePart] }],
+      generationConfig: {
+        responseMimeType: "application/json"
+      }
+    });
+
+    const responseText = result.response.text();
+    let parsed;
+    try {
+      parsed = JSON.parse(responseText.trim());
+    } catch (parseErr) {
+      const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        parsed = JSON.parse(jsonMatch[0].trim());
+      } else {
+        throw parseErr;
+      }
+    }
+    return parsed;
+  } catch (error) {
+    console.error('Rate sheet vision analiz hatası:', error);
+    throw error;
+  }
+}
+
+module.exports = { analyzeCommand, analyzeEmail, analyzeRateSheetImage };

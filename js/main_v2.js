@@ -34,6 +34,7 @@ import '../css/views/inbox.css';
 import '../css/views/membership.css';
 import '../css/views/pruvaAi.css';
 import '../css/views/pricingActions.css';
+import '../css/views/rateSheets.css';
 import '../style.css';
 import '../css/base/mobile.css';
 
@@ -81,6 +82,7 @@ import './views/pricingActions.js';
 import './views/pricingSettings.js';
 import './views/pricingCustomers.js';
 import './views/pricingReports.js';
+import './views/rateSheets.js';
 import './views/dashboard.js';
 import './views/seo/lojistikHizmetleri.js';
 import './views/seo/ithalatIhracat.js';
@@ -109,6 +111,7 @@ import './components/navbarComponent.js';
 import './components/operationModal.js';
 import './components/userProfileModal.js';
 import './components/pruvaAiManager.js';
+import './components/rateSheetsManager.js';
 
 // ─────────────────────────────────────────
 // 6. App Bootstrap (HER ZAMAN EN SON!)

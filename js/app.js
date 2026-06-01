@@ -27,6 +27,7 @@ const MANAGER_REGISTRY = [
     { key: 'membership',   class: 'MembershipManager',   global: 'membershipManager' },
     { key: 'navbarComponent', class: 'NavbarComponent',   global: 'navbarComponent' },
     { key: 'pruvaAi',      class: 'PruvaAiManager',      global: 'pruvaAiManager' },
+    { key: 'rateSheets',   class: 'RateSheetsManager',   global: 'rateSheetsManager' },
 ];
 
 
@@ -54,6 +55,7 @@ const VIEW_REGISTRY = {
     'pruva-ai':         'pruvaAiView',
     'pricing-settings': 'pricingSettingsView',
     'pricing-reports':  'pricingReportsView',
+    'rate-sheets':      'rateSheetsView',
 };
 
 

@@ -144,10 +144,23 @@ router.post('/actions/:id/approve', auth, async (req, res) => {
         console.log(`E-posta İçeriği:\n"""\n${edited_body}\n"""`);
         console.log(`==================================================\n`);
 
-        // 3. Aksiyon durumunu 'COMPLETED' yap
-        await db.query(
-            'UPDATE pricing_actions SET status = \'COMPLETED\' WHERE id = $1 AND user_id = $2',
+        // 3. Aksiyon durumunu 'COMPLETED' yap ve düzenlenen mail içeriğini kaydet
+        const actionCheck = await db.query(
+            'SELECT suggested_mail FROM pricing_actions WHERE id = $1 AND user_id = $2',
             [id, req.user.id]
+        );
+        let suggestedMail = {};
+        if (actionCheck.rows.length > 0 && actionCheck.rows[0].suggested_mail) {
+            suggestedMail = typeof actionCheck.rows[0].suggested_mail === 'string'
+                ? JSON.parse(actionCheck.rows[0].suggested_mail)
+                : actionCheck.rows[0].suggested_mail;
+        }
+        suggestedMail.subject = edited_subject || suggestedMail.subject || '';
+        suggestedMail.body = edited_body || suggestedMail.body || '';
+
+        await db.query(
+            'UPDATE pricing_actions SET status = \'COMPLETED\', suggested_mail = $1 WHERE id = $2 AND user_id = $3',
+            [JSON.stringify(suggestedMail), id, req.user.id]
         );
 
         // 4. İlgili RFQ'nun durumunu aksiyon tipine göre güncelle
@@ -183,21 +196,13 @@ router.post('/actions/:id/reject', auth, async (req, res) => {
             return res.status(404).json({ error: 'Aksiyon bulunamadı.' });
         }
 
-        const { rfq_id } = actionResult.rows[0];
-
         // 2. Aksiyon durumunu 'CANCELLED' (Reddedildi) yap
         await db.query(
             'UPDATE pricing_actions SET status = \'CANCELLED\' WHERE id = $1 AND user_id = $2',
             [id, req.user.id]
         );
 
-        // 3. İlgili RFQ'nun durumunu 'CANCELLED' yap
-        await db.query(
-            'UPDATE pricing_rfqs SET status = \'CANCELLED\' WHERE id = $1 AND user_id = $2',
-            [rfq_id, req.user.id]
-        );
-
-        res.json({ success: true, message: 'Aksiyon reddedildi ve arşivlendi.' });
+        res.json({ success: true, message: 'Aksiyon reddedildi.' });
     } catch (err) {
         console.error('[REJECT ACTION ERR]', err);
         res.status(500).json({ error: 'Aksiyon reddedilirken hata oluştu.' });

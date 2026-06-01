@@ -15,6 +15,11 @@ export default defineConfig({
       '/api': {
         target: 'http://localhost:5000',
         changeOrigin: true,
+        configure: (proxy) => {
+          proxy.on('proxyReq', (proxyReq) => {
+            proxyReq.setHeader('content-length', proxyReq.getHeader('content-length') || '');
+          });
+        }
       }
     }
   },

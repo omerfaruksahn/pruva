@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const { startEmailScheduler } = require('./services/schedulerService');
 const helmet = require('helmet');
 const hpp = require('hpp');
 const xss = require('xss-clean');
@@ -30,7 +31,13 @@ app.use(helmet({
 app.use(xss());    // Request body/query/params içindeki script'leri temizle
 app.use(hpp());    // HTTP Parameter Pollution koruması
 app.use(cors());
-app.use(express.json({ limit: '10kb' })); // Body boyutunu kısıtla (Paranoid)
+app.use((req, res, next) => {
+    if (req.path.startsWith('/api/rate-sheets')) {
+        express.json({ limit: '50mb' })(req, res, next);
+    } else {
+        express.json({ limit: '10kb' })(req, res, next);
+    }
+});
 
 // Static Files - Serve everything from the parent directory (No Rate Limit for assets)
 app.use(express.static(path.join(__dirname, '..')));
@@ -47,6 +54,7 @@ app.use('/api/coins', require('./routes/coins'));
 app.use('/api/pricing', require('./routes/pricingData'));
 app.use('/api/pricing', require('./routes/pricingActions'));
 app.use('/api/ai', require('./routes/aiChat'));
+app.use('/api/rate-sheets', express.json({ limit: '50mb' }), express.urlencoded({ limit: '50mb', extended: true }), require('./routes/rateSheets'));
 
 
 
@@ -75,6 +83,8 @@ const PORT = process.env.PORT || 5000;
 const server = app.listen(PORT, () => {
     console.log(`[SERVER] ${PORT} portunda yayında...`);
     console.log(`[SERVER] Frontend: http://localhost:${PORT}`);
+    // E-posta arka plan zamanlayıcısını otomatik olarak başlat
+    startEmailScheduler();
 });
 
 module.exports = server;

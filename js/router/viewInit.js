@@ -314,4 +314,9 @@ export const VIEW_INIT_MAP = {
             window.pricingCustomersViewInit(app);
         }
     },
+    'rate-sheets': (app) => {
+        if (window.rateSheetsViewInit) {
+            window.rateSheetsViewInit(app);
+        }
+    },
 };

@@ -4,18 +4,23 @@
  * WhatsApp/Slack tarzı 2 kolonlu layout ile premium e-posta ve AI önerileri yönetim merkezi.
  */
 
+// XSS Koruması için escape HTML fonksiyonu
+const escapeHTML = (str) => {
+    if (typeof str !== 'string') return str || '';
+    return str.replace(/[&<>'"]/g, 
+        tag => ({
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            "'": '&#39;',
+            '"': '&quot;'
+        }[tag] || tag)
+    );
+};
+
 window.pruvaAiView = (state) => {
     // 1. Durum / Konuşmalar State Yükle
-    let conversations = state.pricingConversations;
-    
-    // Kullanıcının talebi doğrultusunda sahte (mock) mailler tamamen kaldırılmıştır.
-    // Sayfa her durumda temiz ve boş başlayacaktır. Canlı mailler taranınca dolacaktır.
-    const hasMock = conversations && conversations.some(c => c.id === 11 || c.id === 12 || c.id === 13 || c.id === 14 || c.id === 21 || c.id === 22);
-    if (!conversations || hasMock) {
-        conversations = [];
-        state.pricingConversations = [];
-        localStorage.setItem('pruva_pricing_conversations', JSON.stringify([]));
-    }
+    let conversations = state.pricingConversations || [];
 
     const activeConvId = state.activeConversationId || null;
     const activeConv = conversations.find(c => c.id === activeConvId) || null;
@@ -23,6 +28,10 @@ window.pruvaAiView = (state) => {
     // Arama & Filtreleme Terimleri
     const searchQuery = (state.convSearchQuery || '').toLowerCase().trim();
     const filterMode = state.convFilterMode || 'ALL'; // ALL, CUSTOMERS, CARRIERS, PENDING
+
+    // Taşıyıcı e-postalarını toplayalım
+    const mgr = window.app?.managers?.pruvaAi;
+    const carrierEmails = new Set((mgr?.carriers || []).map(c => (c.email || '').toLowerCase()));
 
     // Konuşmaları Filtrele
     const filteredConversations = conversations.filter(c => {
@@ -34,11 +43,9 @@ window.pruvaAiView = (state) => {
 
         // Sekme Filtre Eşleşmesi
         if (filterMode === 'CUSTOMERS') {
-            // Müşteri ise (Arçelik, Vestel vb.)
-            return c.id === 11 || c.id === 12 || c.id === 13 || c.id === 14;
+            return c.id !== 'copilot' && !carrierEmails.has((c.email || '').toLowerCase());
         } else if (filterMode === 'CARRIERS') {
-            // Taşıyıcı ise (MSC, Maersk vb.)
-            return c.id === 21 || c.id === 22;
+            return c.id !== 'copilot' && carrierEmails.has((c.email || '').toLowerCase());
         } else if (filterMode === 'PENDING') {
             // Bekleyen aksiyon varsa (status kırmızı=RATES_REQUESTED/PENDING veya sarı=MISSING_INFO_SENT)
             return c.status === 'PENDING' || c.status === 'RATES_REQUESTED' || c.status === 'MISSING_INFO_SENT';
@@ -78,24 +85,21 @@ window.pruvaAiView = (state) => {
         }
     };
 
-    // Metrik Sayılarını Hesapla (Dinamik - Faz 1)
-    const mgr = window.app?.managers?.pruvaAi;
-    const metrics = mgr?.getMetrics?.() || {};
-    const rfqCount = metrics.rfqCount || (state.pricingRFQs ? state.pricingRFQs.length : 4);
-    const offerCount = metrics.offerCount || (9 + conversations.filter(c => c.status === 'OFFER_SENT' || c.status === 'COMPLETED').length);
-    const winRate = metrics.winRate || 72;
+    // Metrik Sayılarını Hesapla (Gerçek Veri)
+    const rfqCount = state.pricingRFQs ? state.pricingRFQs.length : 0;
+    const offerCount = conversations.filter(c => c.status === 'OFFER_SENT' || c.status === 'COMPLETED').length;
 
     return `
-    <div class="pruva-ai-page-container" style="padding: 16px 24px;">
+    <div class="pruva-ai-page-container pruva-saas-layout">
         
         <!-- ÜST KISIM / SAYFA BAŞLIĞI VE AYARLAR BUTONU -->
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-            <div style="display: flex; align-items: center; gap: 8px;">
-                <div style="background: var(--primary-gradient); width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 1.1rem;">P</div>
-                <h2 style="font-size: 1.25rem; font-weight: 800; color: var(--text-primary); margin: 0; letter-spacing: -0.5px;">Pruva AI — Operasyon ve Teklif Asistanı</h2>
+        <div class="saas-header-wrapper">
+            <div class="saas-header-left">
+                <div class="saas-logo-box">P</div>
+                <h2 class="saas-header-title">Pruva AI — Operasyon ve Teklif Asistanı</h2>
             </div>
             
-            <div style="display: flex; gap: 8px; align-items: center;">
+            <div class="saas-header-actions">
                 ${state.outlookConnected ? `
                     <div style="display: flex; align-items: center; gap: 8px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: var(--radius-md); padding: 8px 16px;">
                         <span style="color: #10b981; font-weight: 700; font-size: 0.8rem; display: flex; align-items: center; gap: 6px;">
@@ -109,7 +113,7 @@ window.pruvaAiView = (state) => {
                     </button>
                 `}
                 <button class="btn btn-secondary" onclick="window.app.managers.pruvaAi.triggerMailScan()" style="padding: 8px 16px; font-weight: 700; border-radius: var(--radius-md); display: flex; align-items: center; gap: 6px; cursor: pointer; background: var(--bg-elevated); border: 1px solid var(--border);">
-                    📥 Mail Tara ${state.outlookConnected ? '(Canlı)' : '(Mock)'}
+                    📥 Mail Tara
                 </button>
                 <button class="btn btn-secondary" onclick="window.app.router.navigate('pricing-settings')" style="padding: 8px 16px; font-weight: 700; border-radius: var(--radius-md); display: flex; align-items: center; gap: 6px; cursor: pointer;">
                     ⚙️ Ayarlar
@@ -125,7 +129,7 @@ window.pruvaAiView = (state) => {
                 
                 <!-- Üst Özet Bar -->
                 <div class="chat-summary-bar">
-                    Bu hafta: ${rfqCount} RFQ | ${offerCount} Teklif | %${winRate} Kazanma
+                    Durum: ${rfqCount} RFQ | ${offerCount} Teklif
                 </div>
 
                 <!-- Arama Kutusu -->
@@ -198,8 +202,8 @@ window.pruvaAiView = (state) => {
                 ${!activeConv ? `
                     <!-- 1. HİÇBİR KONUŞMA SEÇİLİ DEĞİLKEN -->
                     <div class="chat-welcome-box">
-                        <div style="margin-bottom: 16px;">
-                            <svg class="cute-robot-svg" viewBox="0 0 100 100" width="120" height="120" style="filter: drop-shadow(0 12px 24px rgba(59, 130, 246, 0.2));">
+                        <div class="welcome-robot-wrapper">
+                            <svg class="cute-robot-svg" viewBox="0 0 100 100" width="120" height="120">
                                 <style>
                                     @keyframes robotBlink {
                                         0%, 90%, 100% { transform: scaleY(1); }
@@ -287,15 +291,14 @@ window.pruvaAiView = (state) => {
                         </button>
                     </div>
 
-                    <!-- TIMELINE (KONUŞMA AKIŞI) -->
                     <div class="chat-timeline-area" id="chat-timeline-area">
-                        ${activeConv.messages.map((msg, index) => {
+                        ${(activeConv.messages || []).map((msg, index) => {
                             if (msg.type === 'incoming') {
                                 return `
                                     <div class="chat-bubble-row incoming">
                                         <div class="chat-bubble">
-                                            <strong style="font-size: 0.75rem; color: var(--primary); display: block; margin-bottom: 4px;">${msg.sender}</strong>
-                                            ${msg.text}
+                                            <strong style="font-size: 0.75rem; color: var(--primary); display: block; margin-bottom: 4px;">${escapeHTML(msg.sender)}</strong>
+                                            ${escapeHTML(msg.text)}
                                             <span class="chat-bubble-meta">${msg.time}</span>
                                         </div>
                                     </div>
@@ -304,7 +307,7 @@ window.pruvaAiView = (state) => {
                                 return `
                                     <div class="chat-bubble-row outgoing">
                                         <div class="chat-bubble">
-                                            ${msg.text}
+                                            ${escapeHTML(msg.text)}
                                             <span class="chat-bubble-meta">${msg.time}</span>
                                         </div>
                                     </div>
@@ -318,15 +321,31 @@ window.pruvaAiView = (state) => {
                                     </div>
                                 `;
                             } else if (msg.type === 'ai_suggestion' || msg.type === 'AI_SUGGESTION') {
+                                const suggestedMail = typeof msg.suggestedMail === 'string' ? JSON.parse(msg.suggestedMail) : (msg.suggestedMail || {});
+                                const hasMail = suggestedMail.body || msg.suggestedMessage;
+                                
                                 return `
                                     <div class="chat-bubble-row center">
-                                        <div class="ai-suggestion-card" id="suggestion-card-${activeConv.id}-${index}">
+                                        <div class="ai-suggestion-card" id="suggestion-card-${activeConv.id}-${index}" style="width: 100%; max-width: 500px;">
                                             <div class="ai-suggestion-title">
                                                 🤖 Yapay Zeka Önerisi
                                             </div>
                                             <div class="ai-suggestion-text">
                                                 ${msg.text}
                                             </div>
+                                            ${hasMail ? `
+                                                <div class="mail-preview-box" style="margin-top: 12px; border-top: 1px dashed var(--border); padding-top: 12px; text-align: left; width: 100%;">
+                                                    <div style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 4px; display: flex; gap: 4px;">
+                                                        <strong style="color: var(--text-primary); min-width: 45px;">Alıcı:</strong> 
+                                                        <span>${escapeHTML(suggestedMail.to || activeConv.email || 'Alıcı Belirtilmedi')}</span>
+                                                    </div>
+                                                    <div style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 8px; display: flex; gap: 4px;">
+                                                        <strong style="color: var(--text-primary); min-width: 45px;">Konu:</strong> 
+                                                        <span>${escapeHTML(suggestedMail.subject || 'Konu Yok')}</span>
+                                                    </div>
+                                                    <div class="mail-body-preview" style="font-size: 0.78rem; background: rgba(0, 0, 0, 0.2); padding: 10px; border-radius: var(--radius-sm); max-height: 150px; overflow-y: auto; white-space: pre-wrap; font-family: monospace; color: var(--text-primary); border: 1px solid rgba(255,255,255,0.03); line-height: 1.4;">${escapeHTML(suggestedMail.body || msg.suggestedMessage || '')}</div>
+                                                </div>
+                                            ` : ''}
                                             <div class="ai-suggestion-actions">
                                                 <button class="btn btn-danger" onclick="window.pruvaAiManager.rejectSuggestion('${activeConv.id}', ${index})" style="padding: 4px 10px; font-size: 0.7rem; border-radius: var(--radius-sm);">Reddet</button>
                                                 <button class="btn btn-primary" onclick="window.pruvaAiManager.approveSuggestion('${activeConv.id}', ${index}, '${msg.action || ''}')" style="padding: 4px 10px; font-size: 0.7rem; background: #d97706; border-color: #d97706; color: white; border-radius: var(--radius-sm);">Onayla</button>
@@ -337,14 +356,39 @@ window.pruvaAiView = (state) => {
                             }
                             return '';
                         }).join('')}
+                        ${state.aiLoading ? `
+                            <div class="chat-bubble-row incoming">
+                                <div class="chat-avatar" style="background: linear-gradient(135deg, #2563eb, #1d4ed8); display: flex; align-items: center; justify-content: center; font-size: 0.85rem; color: white; width: 34px; height: 34px;">
+                                    🤖
+                                </div>
+                                <div class="chat-bubble" style="padding: 12px 16px; border-radius: var(--radius-md); background: var(--bg-surface); border: 1px solid var(--border); display: flex; flex-direction: column; gap: 8px;">
+                                    <strong style="font-size: 0.75rem; color: var(--primary); display: block;">Pruva AI</strong>
+                                    <div class="typing-indicator" style="display: flex; gap: 4px; align-items: center; padding: 4px 0;">
+                                        <span style="width: 6px; height: 6px; background-color: var(--text-secondary); border-radius: 50%; display: inline-block; animation: typingBlink 1.4s infinite both;"></span>
+                                        <span style="width: 6px; height: 6px; background-color: var(--text-secondary); border-radius: 50%; display: inline-block; animation: typingBlink 1.4s infinite both 0.2s;"></span>
+                                        <span style="width: 6px; height: 6px; background-color: var(--text-secondary); border-radius: 50%; display: inline-block; animation: typingBlink 1.4s infinite both 0.4s;"></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <style>
+                                @keyframes typingBlink {
+                                    0% { opacity: .2; }
+                                    20% { opacity: 1; }
+                                    100% { opacity: .2; }
+                                }
+                            </style>
+                        ` : ''}
                     </div>
                 `}
 
                 <!-- HER ZAMAN ALTA SABİT KOMUT INPUT KUTUSU -->
-                <div class="chat-input-wrapper">
-                    <input type="text" class="chat-input-field" id="chat-command-input" placeholder="Bir komut girin... (örn: 'Arçelik'ten RFQ geldi, Çin'den 2x40HC FOB Temmuz' veya 'Hamburg'dan İzmir'e TIR fiyatı sor')" value="${state.chatCommandInputValue || ''}" oninput="window.pruvaAiManager.updateCommandInput(this.value)" onkeydown="if(event.key === 'Enter') window.pruvaAiManager.sendInput()">
-                    <button class="chat-send-btn" onclick="window.pruvaAiManager.sendInput()" title="Komut Gönder">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                <div class="chat-input-wrapper saas-input-wrapper">
+                    <button class="chat-attach-btn" title="Dosya Ekle">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
+                    </button>
+                    <input type="text" class="chat-input-field saas-input-field" id="chat-command-input" placeholder="Bir komut girin... (örn: 'Arçelik'ten RFQ geldi, FOB Temmuz')" value="${state.chatCommandInputValue || ''}" oninput="window.pruvaAiManager.updateCommandInput(this.value)" onkeydown="if(event.key === 'Enter') window.pruvaAiManager.sendInput()">
+                    <button class="chat-send-btn saas-send-btn" onclick="window.pruvaAiManager.sendInput()" title="Komut Gönder">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
                     </button>
                 </div>
 
