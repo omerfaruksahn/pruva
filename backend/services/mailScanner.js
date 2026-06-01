@@ -220,9 +220,9 @@ async function scanEmails(userId) {
                 continue;
             }
 
-            // Microsoft sistem maillerini atla
-            const systemDomains = ['microsoft.com', 'microsoftemail.com', 'outlook.com'];
-            const isSystemMail = systemDomains.some(d => mail.sender_email.toLowerCase().endsWith('@' + d));
+            // Microsoft ve diğer sistem maillerini atla
+            const systemDomains = ['microsoft.com', 'microsoftemail.com', 'outlook.com', 'accountprotection.microsoft.com', 'google.com', 'linkedin.com'];
+            const isSystemMail = systemDomains.some(d => mail.sender_email.toLowerCase().endsWith('@' + d) || mail.sender_email.toLowerCase().includes('noreply') || mail.sender_email.toLowerCase().includes('no-reply'));
             if (isSystemMail && !mail.sender_email.toLowerCase().includes('pruvahub')) {
                 console.log(`[MAIL SCANNER] Sistem maili atlanıyor: ${mail.sender_email}`);
                 continue;

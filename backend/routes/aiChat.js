@@ -207,7 +207,7 @@ router.get('/conversations', auth, async (req, res) => {
         c.active_regions
       FROM pricing_rfqs r
       LEFT JOIN pricing_customers c ON LOWER(c.email) = LOWER(r.sender_email) AND c.user_id = $1
-      WHERE r.user_id = $1
+      WHERE r.user_id = $1 AND (r.category IS DISTINCT FROM 'OTHER' OR r.sender_email = 'copilot@pruva.ai')
       ORDER BY r.created_at DESC
     `, [userId]);
     
