@@ -77,6 +77,18 @@ router.post('/analyze', auth, async (req, res) => {
         rfqId = conversationId;
       } else if (typeof conversationId === 'string' && conversationId.startsWith('rfq-')) {
         rfqId = parseInt(conversationId.replace('rfq-', ''));
+
+        // Secret command to clear history and force the AI to forget past hallucinated limitations
+        if (message.trim() === 'RESET_HISTORY') {
+          await client.query('DELETE FROM pricing_actions WHERE rfq_id = $1 AND user_id = $2', [rfqId, req.user.id]);
+          await client.query('COMMIT');
+          return res.json({
+            success: true,
+            action: 'GENERAL',
+            summary: 'Hafıza başarıyla silindi. Geçmiş kısıtlamalarımı unuttum. Lütfen komutunuzu tekrar gönderin.',
+            confidence: 1
+          });
+        }
       } else {
         const latestRfq = await client.query(
           "SELECT id FROM pricing_rfqs WHERE sender_email = $1 AND user_id = $2 ORDER BY created_at DESC LIMIT 1",
