@@ -6,7 +6,9 @@ export class NavbarComponent {
     }
 
     render(state) {
-        const pendingCount = state.pricingActions ? state.pricingActions.filter(a => a.status === 'PENDING').length : 3;
+        const pendingActionsCount = state.pricingActions ? state.pricingActions.filter(a => a.status === 'PENDING').length : 0;
+        const pendingConvCount = state.pricingConversations ? state.pricingConversations.filter(c => c.status === 'PENDING' || c.status === 'RATES_REQUESTED' || c.status === 'MISSING_INFO_SENT').length : 0;
+        const pendingCount = pendingActionsCount + pendingConvCount;
         const badgeHTML = pendingCount > 0 ? `<span class="pruva-ai-badge" style="background-color: #ef4444; color: white; font-size: 0.65rem; font-weight: 800; padding: 2px 7px; border-radius: 10px; line-height: 1; margin-left: 6px; display: inline-block; vertical-align: middle;">${pendingCount}</span>` : '';
 
         // Cache check to prevent unnecessary re-renders and flickering
