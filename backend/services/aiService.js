@@ -53,8 +53,14 @@ async function analyzeCommand(userMessage, context = {}, fileParts = []) {
       functionDeclarations: [
         {
           name: "scan_recent_emails",
-          description: "Kullanıcının Outlook gelen kutusundaki son 10 maili tarayıp özetlerini ve içeriklerini getirir. Müşteriden gelen yeni bir fiyat talebi (RFQ) var mı diye kontrol etmek için kullanılır.",
-          parameters: { type: "OBJECT", properties: {}, required: [] }
+          description: "Kullanıcının Outlook gelen kutusundaki mailleri tarar. İstenirse bir 'search_query' (isim, e-posta veya kelime) gönderilerek spesifik mailler aranabilir.",
+          parameters: { 
+            type: "OBJECT", 
+            properties: {
+              search_query: { type: "STRING", description: "Aranacak kelime, kişi ismi veya e-posta adresi (Opsiyonel)" }
+            }, 
+            required: [] 
+          }
         },
         {
           name: "search_past_rates",
@@ -113,7 +119,7 @@ async function analyzeCommand(userMessage, context = {}, fileParts = []) {
         } else {
           try {
             const mailScanner = require('./mailScanner');
-            const scanRes = await mailScanner.scanEmails(context.userId);
+            const scanRes = await mailScanner.scanEmails(context.userId, call.args.search_query);
             functionResult = scanRes;
           } catch (e) {
             functionResult = { error: "Mail tarama hatası: " + e.message };

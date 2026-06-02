@@ -135,8 +135,8 @@ async function analyzeMailContent(bodyText, emailSubject = '') {
 // runHeuristicAnalysis tamamen silinmiştir.
 
 // Mail Tarama Servisi (Ana Fonksiyon)
-async function scanEmails(userId) {
-    console.log(`[MAIL SCANNER] Tarama başlatıldı. Kullanıcı ID: ${userId}`);
+async function scanEmails(userId, searchQuery = null) {
+    console.log(`[MAIL SCANNER] Tarama başlatıldı. Kullanıcı ID: ${userId}, Search Query: ${searchQuery}`);
 
     let mailsToProcess = [];
 
@@ -173,7 +173,11 @@ async function scanEmails(userId) {
             const accessToken = tokenResponse.accessToken;
 
             // Microsoft Graph API'den gelen mailleri çek (En son 10 mail)
-            const graphUrl = "https://graph.microsoft.com/v1.0/me/messages?$top=10&$orderby=receivedDateTime desc";
+            let graphUrl = "https://graph.microsoft.com/v1.0/me/messages?$top=10&$orderby=receivedDateTime desc";
+            if (searchQuery) {
+                graphUrl = `https://graph.microsoft.com/v1.0/me/messages?$search="${encodeURIComponent(searchQuery)}"&$top=15`;
+            }
+            
             const response = await fetch(graphUrl, {
                 headers: {
                     'Authorization': `Bearer ${accessToken}`,
