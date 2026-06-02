@@ -12,18 +12,26 @@ async function sendViaGraph(accessToken, mailData) {
   };
 
   if (mailData.attachments && mailData.attachments.length > 0) {
-    const { createClient } = require('@supabase/supabase-js');
-    const supabaseUrl = process.env.SUPABASE_URL;
-    const supabaseKey = process.env.SUPABASE_KEY;
-    const supabase = supabaseUrl && supabaseKey ? createClient(supabaseUrl, supabaseKey) : null;
-    
-    if (supabase) {
-      graphPayload.message.attachments = [];
-      for (const att of mailData.attachments) {
-        if (att.path) {
-          const { data, error } = await supabase.storage.from('pruva_files').download(att.path);
-          if (data && !error) {
-            const buffer = await data.arrayBuffer();
+    graphPayload.message.attachments = [];
+    for (const att of mailData.attachments) {
+      if (att.path) {
+        try {
+          let buffer;
+          if (att.path.startsWith('http')) {
+            const response = await fetch(att.path);
+            if (response.ok) {
+              buffer = await response.arrayBuffer();
+            }
+          } else if (att.path.startsWith('uploads/')) {
+            const fs = require('fs');
+            const path = require('path');
+            const localPath = path.join(__dirname, '..', '..', att.path);
+            if (fs.existsSync(localPath)) {
+              buffer = fs.readFileSync(localPath);
+            }
+          }
+
+          if (buffer) {
             const base64Data = Buffer.from(buffer).toString('base64');
             graphPayload.message.attachments.push({
               "@odata.type": "#microsoft.graph.fileAttachment",
@@ -32,6 +40,8 @@ async function sendViaGraph(accessToken, mailData) {
               contentBytes: base64Data
             });
           }
+        } catch (e) {
+          console.error('[EMAIL SENDER] Attachment download error:', e);
         }
       }
     }

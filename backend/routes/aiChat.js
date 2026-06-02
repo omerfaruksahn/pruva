@@ -4,14 +4,11 @@ const auth = require('../authMiddleware');
 const { analyzeCommand } = require('../services/aiService');
 const db = require('../db');
 const multer = require('multer');
-const { createClient } = require('@supabase/supabase-js');
 const fs = require('fs');
 const path = require('path');
+const admin = require('../firebaseAdmin');
 
 const upload = multer({ dest: 'uploads/' });
-const supabase = process.env.SUPABASE_URL && process.env.SUPABASE_KEY 
-  ? createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY)
-  : null;
 
 // @route   POST api/ai/analyze
 // @desc    Kullanıcı komutunu analiz eder ve AI önerisi üretir
@@ -126,20 +123,35 @@ router.post('/analyze', auth, async (req, res) => {
       });
     }
 
-    // Ekli dosyaları Supabase'den çekip Gemini için base64 (inlineData) formatına dönüştürelim
+    // Ekli dosyaları çekip Gemini için base64 (inlineData) formatına dönüştürelim
     let fileParts = [];
-    if (req.body.attachments && Array.isArray(req.body.attachments) && supabase) {
+    if (req.body.attachments && Array.isArray(req.body.attachments)) {
       for (const att of req.body.attachments) {
         if (att.path) {
-          const { data, error } = await supabase.storage.from('pruva_files').download(att.path);
-          if (data && !error) {
-            const buffer = await data.arrayBuffer();
-            fileParts.push({
-              inlineData: {
-                data: Buffer.from(buffer).toString('base64'),
-                mimeType: att.type || 'application/pdf'
+          try {
+            let buffer;
+            if (att.path.startsWith('http')) {
+              const response = await fetch(att.path);
+              if (response.ok) {
+                buffer = await response.arrayBuffer();
               }
-            });
+            } else if (att.path.startsWith('uploads/')) {
+              const localPath = path.join(__dirname, '..', '..', att.path);
+              if (fs.existsSync(localPath)) {
+                buffer = fs.readFileSync(localPath);
+              }
+            }
+            
+            if (buffer) {
+              fileParts.push({
+                inlineData: {
+                  data: Buffer.from(buffer).toString('base64'),
+                  mimeType: att.type || 'application/pdf'
+                }
+              });
+            }
+          } catch (e) {
+            console.error('[ATTACHMENT DOWNLOAD ERROR]', e);
           }
         }
       }
@@ -200,7 +212,7 @@ router.post('/analyze', auth, async (req, res) => {
 });
 
 // @route   POST api/ai/upload
-// @desc    Dosya yükler ve Supabase Storage'a atar
+// @desc    Dosya yükler ve Firebase Storage'a atar
 router.post('/upload', auth, upload.single('file'), async (req, res) => {
   try {
     if (!req.file) {
@@ -211,9 +223,36 @@ router.post('/upload', auth, upload.single('file'), async (req, res) => {
     const fileExtension = path.extname(file.originalname);
     const fileName = `${req.user.id}_${Date.now()}${fileExtension}`;
     const filePath = file.path;
+    const destination = `chat_attachments/${fileName}`;
 
-    if (!supabase) {
-      // Supabase yoksa lokal uploads klasöründe tut
+    try {
+      const bucket = admin.storage().bucket();
+      await bucket.upload(filePath, {
+        destination: destination,
+        metadata: {
+          contentType: file.mimetype
+        }
+      });
+      
+      // Public URL oluştur
+      const fileUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/${encodeURIComponent(destination)}?alt=media`;
+
+      // Temp dosyayı sil
+      fs.unlinkSync(filePath);
+
+      res.json({
+        success: true,
+        file: {
+          name: file.originalname,
+          path: fileUrl,
+          type: file.mimetype,
+          size: file.size
+        }
+      });
+    } catch (uploadError) {
+      console.error('[FIREBASE UPLOAD ERROR]', uploadError);
+      
+      // Fallback: Local upload
       const localFileName = `uploads/${fileName}`;
       fs.renameSync(filePath, path.join(__dirname, '..', '..', localFileName));
       return res.json({
@@ -223,37 +262,11 @@ router.post('/upload', auth, upload.single('file'), async (req, res) => {
           path: localFileName,
           type: file.mimetype,
           size: file.size,
-          isLocal: true
+          isLocal: true,
+          warning: 'Firebase Storage yüklemesi başarısız oldu, dosya geçici olarak sunucuya kaydedildi.'
         }
       });
     }
-
-    // Supabase yapılandırılmışsa oraya yükle
-    const fileBuffer = fs.readFileSync(filePath);
-    const { data, error } = await supabase.storage
-      .from('pruva_files')
-      .upload(`chat_attachments/${fileName}`, fileBuffer, {
-        contentType: file.mimetype,
-        upsert: false
-      });
-
-    // Temp dosyayı sil
-    fs.unlinkSync(filePath);
-
-    if (error) {
-      console.error('[SUPABASE UPLOAD ERROR]', error);
-      return res.status(500).json({ error: 'Dosya yükleme başarısız: ' + error.message });
-    }
-
-    res.json({
-      success: true,
-      file: {
-        name: file.originalname,
-        path: `chat_attachments/${fileName}`,
-        type: file.mimetype,
-        size: file.size
-      }
-    });
 
   } catch (error) {
     console.error('[UPLOAD ERROR]', error);
@@ -380,12 +393,8 @@ router.get('/conversations', auth, async (req, res) => {
         if (action.attachments && Array.isArray(action.attachments)) {
           for (const att of action.attachments) {
             let signedUrl = att.path;
-            if (supabase && att.path) {
-              const { data, error } = await supabase.storage.from('pruva_files').createSignedUrl(att.path, 60 * 60); // 1 saat geçerli
-              if (data && !error) {
-                signedUrl = data.signedUrl;
-              }
-            }
+            let signedUrl = att.path;
+            // Zaten public URL döndürüyoruz, ek işleme gerek yok
             processedAttachments.push({ ...att, signedUrl });
           }
         }

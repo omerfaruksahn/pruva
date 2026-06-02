@@ -10,7 +10,8 @@ if (admin.apps.length === 0) {
             // Local dev mode: load from service account file
             const serviceAccount = require(serviceAccountPath);
             admin.initializeApp({
-                credential: admin.credential.cert(serviceAccount)
+                credential: admin.credential.cert(serviceAccount),
+                storageBucket: process.env.VITE_FIREBASE_STORAGE_BUCKET || 'pruva-633b8.firebasestorage.app'
             });
             console.log('[FIREBASE ADMIN] Firebase Admin SDK başarıyla dosya üzerinden başlatıldı.');
         } else if (process.env.FIREBASE_PRIVATE_KEY && process.env.FIREBASE_CLIENT_EMAIL && process.env.FIREBASE_PROJECT_ID) {
@@ -20,7 +21,8 @@ if (admin.apps.length === 0) {
                     projectId: process.env.FIREBASE_PROJECT_ID,
                     clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
                     privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n')
-                })
+                }),
+                storageBucket: process.env.VITE_FIREBASE_STORAGE_BUCKET || 'pruva-633b8.firebasestorage.app'
             });
             console.log('[FIREBASE ADMIN] Firebase Admin SDK başarıyla Çevre Değişkenleri üzerinden başlatıldı.');
         } else {
