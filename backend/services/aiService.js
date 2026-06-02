@@ -95,8 +95,7 @@ async function analyzeCommand(userMessage, context = {}, fileParts = []) {
 
     // İlk çağrı
     let result = await model.generateContent({
-      contents: contents,
-      generationConfig: { responseMimeType: "application/json" } // JSON zorunluluğu
+      contents: contents
     });
     
     // Eğer AI bir function call (araç kullanımı) döndürdüyse
@@ -138,8 +137,7 @@ async function analyzeCommand(userMessage, context = {}, fileParts = []) {
       
       console.log(`[AI AGENT] Function Response AI'a iletiliyor...`);
       result = await model.generateContent({
-        contents: contents,
-        generationConfig: { responseMimeType: "application/json" }
+        contents: contents
       });
     }
     
