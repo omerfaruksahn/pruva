@@ -99,8 +99,9 @@ async function analyzeCommand(userMessage, context = {}, fileParts = []) {
     });
     
     // Eğer AI bir function call (araç kullanımı) döndürdüyse
-    if (result.response.functionCalls && result.response.functionCalls().length > 0) {
-      const call = result.response.functionCalls()[0];
+    const fCalls = typeof result.response.functionCalls === 'function' ? result.response.functionCalls() : null;
+    if (fCalls && fCalls.length > 0) {
+      const call = fCalls[0];
       console.log(`[AI AGENT] Function Call tetiklendi: ${call.name}`, call.args);
       
       let functionResult = {};
