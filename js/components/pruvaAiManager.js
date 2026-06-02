@@ -1842,10 +1842,11 @@ window.PruvaAiManager = class PruvaAiManager {
             const finalTo = suggestedMail.to || emailTo;
             const finalSubject = suggestedMail.subject || suggestionMsg.text || 'Pruva AI Navlun Bildirimi';
             const finalBody = suggestedMail.body || suggestionMsg.suggestedMessage || actionMsg;
+            const finalAttachments = suggestedMail.attachments || [];
             await fetch('/api/pricing/send-email', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                body: JSON.stringify({ to: finalTo, subject: finalSubject, body: finalBody })
+                body: JSON.stringify({ to: finalTo, subject: finalSubject, body: finalBody, attachments: finalAttachments })
             });
             const actionId = suggestionMsg.actionId;
             if (actionId) {

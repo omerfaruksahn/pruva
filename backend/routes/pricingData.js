@@ -771,12 +771,18 @@ router.get('/conversations', auth, async (req, res) => {
 router.post('/send-email', auth, async (req, res) => {
   try {
     const userId = req.user.id;
-    const { to, cc, subject, body } = req.body;
+    const { to, cc, subject, body, attachments } = req.body;
     if (!to || !subject || !body) {
       return res.status(400).json({ error: 'Eksik parametreler (to, subject, body).' });
     }
     const { sendEmail } = require('../services/emailSender');
-    const result = await sendEmail(userId, { to: Array.isArray(to) ? to : [to], cc: Array.isArray(cc) ? cc : (cc ? [cc] : []), subject, body });
+    const result = await sendEmail(userId, { 
+      to: Array.isArray(to) ? to : [to], 
+      cc: Array.isArray(cc) ? cc : (cc ? [cc] : []), 
+      subject, 
+      body,
+      attachments: attachments || []
+    });
     res.json({ success: true, ...result });
   } catch (error) {
     console.error('Send email error:', error);

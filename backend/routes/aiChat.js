@@ -160,13 +160,15 @@ router.post('/analyze', auth, async (req, res) => {
         suggestedMail = {
           to: result.details?.to_email || '',
           subject: result.details?.subject || 'Pruva Lojistik Tanıtım Maili',
-          body: result.suggestedMessage || ''
+          body: result.suggestedMessage || '',
+          attachments: req.body.attachments || []
         };
       } else if (result.suggestedMessage) {
         suggestedMail = {
           to: '',
           subject: '',
-          body: result.suggestedMessage
+          body: result.suggestedMessage,
+          attachments: req.body.attachments || []
         };
       }
       

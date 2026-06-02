@@ -10,6 +10,33 @@ async function sendViaGraph(accessToken, mailData) {
     },
     saveToSentItems: true
   };
+
+  if (mailData.attachments && mailData.attachments.length > 0) {
+    const { createClient } = require('@supabase/supabase-js');
+    const supabaseUrl = process.env.SUPABASE_URL;
+    const supabaseKey = process.env.SUPABASE_KEY;
+    const supabase = supabaseUrl && supabaseKey ? createClient(supabaseUrl, supabaseKey) : null;
+    
+    if (supabase) {
+      graphPayload.message.attachments = [];
+      for (const att of mailData.attachments) {
+        if (att.path) {
+          const { data, error } = await supabase.storage.from('pruva_files').download(att.path);
+          if (data && !error) {
+            const buffer = await data.arrayBuffer();
+            const base64Data = Buffer.from(buffer).toString('base64');
+            graphPayload.message.attachments.push({
+              "@odata.type": "#microsoft.graph.fileAttachment",
+              name: att.name || "Ekli_Dosya",
+              contentType: att.type || "application/octet-stream",
+              contentBytes: base64Data
+            });
+          }
+        }
+      }
+    }
+  }
+
   const response = await fetch('https://graph.microsoft.com/v1.0/me/sendMail', {
     method: 'POST',
     headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
