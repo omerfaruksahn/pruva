@@ -1778,6 +1778,20 @@ window.PruvaAiManager = class PruvaAiManager {
             return;
         }
 
+        const editedBodyEl = document.getElementById(`edit-mail-body-${convId}-${msgIndex}`);
+        if (editedBodyEl) {
+            if (typeof suggestionMsg.suggestedMail === 'object') {
+                suggestionMsg.suggestedMail.body = editedBodyEl.value;
+            } else if (typeof suggestionMsg.suggestedMail === 'string') {
+                try {
+                    let parsed = JSON.parse(suggestionMsg.suggestedMail);
+                    parsed.body = editedBodyEl.value;
+                    suggestionMsg.suggestedMail = parsed;
+                } catch(e) {}
+            }
+            suggestionMsg.suggestedMessage = editedBodyEl.value;
+        }
+
         const actualIndex = conversations[convIdx].messages.indexOf(suggestionMsg);
         if (actualIndex !== -1) {
             conversations[convIdx].messages.splice(actualIndex, 1);
