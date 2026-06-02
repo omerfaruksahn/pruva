@@ -52,7 +52,7 @@ async function analyzeCommand(userMessage, context = {}, fileParts = []) {
     }
     
     const model = genAI.getGenerativeModel({ 
-      model: process.env.AI_MODEL || 'gemini-2.0-flash' 
+      model: process.env.AI_MODEL || 'gemini-2.5-flash' 
     });
     
     const contextStr = context.company 
