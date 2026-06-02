@@ -95,8 +95,8 @@ window.pruvaAiView = (state) => {
         <!-- ÜST KISIM / SAYFA BAŞLIĞI VE AYARLAR BUTONU -->
         <div class="saas-header-wrapper">
             <div class="saas-header-left">
-                <div class="saas-logo-box">P</div>
-                <h2 class="saas-header-title">Pruva AI — Operasyon ve Teklif Asistanı</h2>
+                <img src="/assets/pruva_robot_icon.png" style="width: 42px; height: 42px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);" alt="Pruva AI Robot">
+                <h2 class="saas-header-title">Pruva AI — Pricing Asistanı</h2>
             </div>
             
             <div class="saas-header-actions">
@@ -149,8 +149,8 @@ window.pruvaAiView = (state) => {
                 <div class="chat-list-scroll">
                     <!-- PRUVA AI CO-PILOT PINNED CHANNEL -->
                     <div class="chat-list-item ${activeConvId === 'copilot' ? 'active' : ''}" onclick="window.pruvaAiManager.selectConversation('copilot')" style="background: ${activeConvId === 'copilot' ? 'rgba(37,99,235,0.08)' : 'transparent'}; border-left: 3px solid #2563eb; margin-bottom: 8px; border-radius: var(--radius-md);">
-                        <div class="chat-avatar" style="background: linear-gradient(135deg, #2563eb, #1d4ed8); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; color: white;">
-                            🤖
+                        <div class="chat-avatar" style="background: white; border: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: center; overflow: hidden; padding: 2px;">
+                            <img src="/assets/pruva_robot_icon.png" style="width: 100%; height: 100%; object-fit: contain;">
                         </div>
                         <div class="chat-item-details">
                             <div class="chat-item-row1">
@@ -203,81 +203,18 @@ window.pruvaAiView = (state) => {
                     <!-- 1. HİÇBİR KONUŞMA SEÇİLİ DEĞİLKEN -->
                     <div class="chat-welcome-box">
                         <div class="welcome-robot-wrapper">
-                            <svg class="cute-robot-svg" viewBox="0 0 100 100" width="120" height="120">
-                                <style>
-                                    @keyframes robotBlink {
-                                        0%, 90%, 100% { transform: scaleY(1); }
-                                        95% { transform: scaleY(0.1); }
-                                    }
-                                    @keyframes robotBreathe {
-                                        0%, 100% { opacity: 0.4; fill: #60a5fa; filter: drop-shadow(0 0 2px #3b82f6); }
-                                        50% { opacity: 1; fill: #93c5fd; filter: drop-shadow(0 0 8px #60a5fa); }
-                                    }
-                                    @keyframes armWiggle {
-                                        0%, 100% { transform: rotate(0deg); }
-                                        50% { transform: rotate(5deg); }
-                                    }
-                                    .robot-eye-left, .robot-eye-right {
-                                        transform-origin: center;
-                                        animation: robotBlink 4s infinite;
-                                    }
-                                    .robot-eye-left { transform-origin: 44px 37px; }
-                                    .robot-eye-right { transform-origin: 56px 37px; }
-                                    .chest-light {
-                                        animation: robotBreathe 2s infinite ease-in-out;
-                                    }
-                                    .antenna-glow {
-                                        animation: robotBreathe 1.5s infinite ease-in-out;
-                                    }
-                                    .robot-arm-left {
-                                        transform-origin: 32px 62px;
-                                        animation: armWiggle 3s infinite ease-in-out;
-                                    }
-                                    .robot-arm-right {
-                                        transform-origin: 68px 62px;
-                                        animation: armWiggle 3s infinite ease-in-out reverse;
-                                    }
-                                </style>
-                                <defs>
-                                    <radialGradient id="screen-glow" cx="50%" cy="50%" r="50%">
-                                        <stop offset="0%" stop-color="#2563eb" stop-opacity="0.3"/>
-                                        <stop offset="100%" stop-color="#0f172a" stop-opacity="0.95"/>
-                                    </radialGradient>
-                                    <linearGradient id="body-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                                        <stop offset="0%" stop-color="#ffffff"/>
-                                        <stop offset="100%" stop-color="#f1f5f9"/>
-                                    </linearGradient>
-                                    <linearGradient id="ear-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                                        <stop offset="0%" stop-color="#3b82f6"/>
-                                        <stop offset="100%" stop-color="#1d4ed8"/>
-                                    </linearGradient>
-                                </defs>
-                                <line x1="50" y1="20" x2="50" y2="10" stroke="#cbd5e1" stroke-width="3" stroke-linecap="round"/>
-                                <circle class="antenna-glow" cx="50" cy="8" r="4.5" fill="#3b82f6"/>
-                                <rect x="23" y="31" width="6" height="12" rx="3" fill="url(#ear-gradient)"/>
-                                <rect x="71" y="31" width="6" height="12" rx="3" fill="url(#ear-gradient)"/>
-                                <rect x="28" y="21" width="44" height="34" rx="17" fill="url(#body-gradient)" stroke="#cbd5e1" stroke-width="1.5"/>
-                                <rect x="34" y="26" width="32" height="24" rx="12" fill="#0f172a"/>
-                                <rect x="34" y="26" width="32" height="24" rx="12" fill="url(#screen-glow)"/>
-                                <ellipse class="robot-eye-left" cx="44" cy="37" rx="3" ry="4" fill="#60a5fa"/>
-                                <ellipse class="robot-eye-right" cx="56" cy="37" rx="3" ry="4" fill="#60a5fa"/>
-                                <circle cx="39" cy="43" r="2" fill="#f43f5e" opacity="0.5"/>
-                                <circle cx="61" cy="43" r="2" fill="#f43f5e" opacity="0.5"/>
-                                <rect x="35" y="56" width="30" height="28" rx="12" fill="url(#body-gradient)" stroke="#cbd5e1" stroke-width="1.5"/>
-                                <circle class="chest-light" cx="50" cy="70" r="4.5" fill="#60a5fa"/>
-                                <path class="robot-arm-left" d="M32 62 C23 64 21 72 26 75" stroke="url(#body-gradient)" stroke-width="4.5" stroke-linecap="round" fill="none"/>
-                                <path class="robot-arm-right" d="M68 62 C77 64 79 72 74 75" stroke="url(#body-gradient)" stroke-width="4.5" stroke-linecap="round" fill="none"/>
-                            </svg>
+
+                            <img src="/assets/pruva_robot_icon.png" style="width: 140px; height: 140px; border-radius: 24px; box-shadow: 0 12px 30px rgba(0,0,0,0.15);" alt="Pruva AI Robot">
                         </div>
-                        <h3 style="color: var(--text-primary); font-weight: 800; font-size: 1.15rem; margin-bottom: 6px;">Pruva AI Lojistik Asistanı</h3>
+                        <h3 style="color: var(--text-primary); font-weight: 800; font-size: 1.15rem; margin-bottom: 6px;">Pruva AI — Pricing Asistanı</h3>
                         <p style="font-size: 0.82rem; color: var(--text-secondary); max-width: 320px; line-height: 1.5; margin: 0 auto 20px;">Bir konuşma seçerek timeline akışını görüntüleyin veya yeni bir yapay zeka komutu gönderin.</p>
                     </div>
                 ` : `
                     <!-- 2. KONUŞMA SEÇİLİNCE -->
                     <div class="chat-active-header">
                         <div class="chat-header-info">
-                            <div class="chat-avatar" style="background-color: ${activeConv.logoBg || '#3b82f6'}; width: 34px; height: 34px; font-size: 0.85rem;">
-                                ${activeConv.logoLetter || activeConv.company.charAt(0).toUpperCase()}
+                            <div class="chat-avatar" style="background-color: ${activeConv.logoLetter === '🤖' ? 'white' : (activeConv.logoBg || '#3b82f6')}; width: 34px; height: 34px; font-size: 0.85rem; padding: ${activeConv.logoLetter === '🤖' ? '2px' : '0'}; overflow: hidden; border: ${activeConv.logoLetter === '🤖' ? '1px solid #e2e8f0' : 'none'};">
+                                ${activeConv.logoLetter === '🤖' ? '<img src="/assets/pruva_robot_icon.png" style="width: 100%; height: 100%; object-fit: contain;">' : (activeConv.logoLetter || activeConv.company.charAt(0).toUpperCase())}
                             </div>
                             <div>
                                 <h4 style="margin: 0; font-size: 0.9rem; font-weight: 700; color: var(--text-primary);">${activeConv.company}</h4>
@@ -328,7 +265,7 @@ window.pruvaAiView = (state) => {
                                     <div class="chat-bubble-row center">
                                         <div class="ai-suggestion-card" id="suggestion-card-${activeConv.id}-${index}" style="width: 100%; max-width: 500px;">
                                             <div class="ai-suggestion-title">
-                                                🤖 Yapay Zeka Önerisi
+                                                <img src="/assets/pruva_robot_icon.png" style="width: 18px; height: 18px; vertical-align: text-bottom; margin-right: 4px; border-radius: 4px;"> Yapay Zeka Önerisi
                                             </div>
                                             <div class="ai-suggestion-text">
                                                 ${msg.text}
