@@ -1915,6 +1915,80 @@ window.PruvaAiManager = class PruvaAiManager {
                 console.warn('[PRUVA AI] Backend aksiyon reddi başarısız:', err.message);
             }
         }
+    async clearConversationHistory(convId) {
+        if (!confirm('Geçmiş sohbet verilerini silmek istediğinize emin misiniz?')) return;
+        
+        // GİZLİ SIFIRLAMA KOMUTUNU TETİKLE
+        const input = document.getElementById('chat-command-input');
+        if (input) {
+            input.value = 'RESET_HISTORY';
+            await this.sendInput();
+            this.showToast('Hafıza başarıyla silindi!', 'success');
+        }
+    }
+
+    copyText(btnElement) {
+        const text = btnElement.getAttribute('data-text');
+        if (text) {
+            // HTML entity decode for copy
+            const textarea = document.createElement('textarea');
+            textarea.innerHTML = text;
+            const decodedText = textarea.value;
+            
+            navigator.clipboard.writeText(decodedText).then(() => {
+                this.showToast('Metin kopyalandı!', 'success');
+                const originalSvg = btnElement.innerHTML;
+                btnElement.innerHTML = '✅';
+                setTimeout(() => btnElement.innerHTML = originalSvg, 2000);
+            }).catch(err => {
+                this.showToast('Kopyalama başarısız oldu.', 'danger');
+            });
+        }
+    }
+
+    startVoiceRecognition() {
+        if (!('webkitSpeechRecognition' in window)) {
+            this.showToast('Tarayıcınız sesli komutu desteklemiyor.', 'warning');
+            return;
+        }
+
+        const recognition = new webkitSpeechRecognition();
+        recognition.lang = 'tr-TR';
+        recognition.interimResults = false;
+        recognition.maxAlternatives = 1;
+
+        const micBtn = document.querySelector('.chat-mic-btn');
+        if (micBtn) {
+            micBtn.style.color = 'var(--danger, #ef4444)';
+            micBtn.style.animation = 'pulse 1.5s infinite';
+        }
+
+        recognition.start();
+
+        recognition.onresult = (event) => {
+            const speechResult = event.results[0][0].transcript;
+            const input = document.getElementById('chat-command-input');
+            if (input) {
+                input.value += (input.value ? ' ' : '') + speechResult;
+                this.updateCommandInput(input.value);
+            }
+            this.showToast('Ses metne çevrildi', 'success');
+        };
+
+        recognition.onspeechend = () => {
+            recognition.stop();
+        };
+
+        recognition.onerror = (event) => {
+            this.showToast('Ses tanıma hatası: ' + event.error, 'danger');
+        };
+
+        recognition.onend = () => {
+            if (micBtn) {
+                micBtn.style.color = 'var(--text-secondary)';
+                micBtn.style.animation = '';
+            }
+        };
     }
 }
 

@@ -222,9 +222,14 @@ window.pruvaAiView = (state) => {
                                 </div>
                             </div>
                         </div>
-                        <button class="btn btn-secondary" onclick="window.app.managers.pruvaAi.toggleDetailsDrawer()" style="padding: 6px 12px; font-size: 0.72rem; font-weight: 700; border-radius: var(--radius-md);">
-                            📋 Detaylar
-                        </button>
+                        <div style="display: flex; gap: 8px;">
+                            <button class="btn btn-secondary" onclick="window.app.managers.pruvaAi.clearConversationHistory('${activeConv.id}')" style="padding: 6px 12px; font-size: 0.72rem; font-weight: 700; border-radius: var(--radius-md); background: rgba(239,68,68,0.1); color: #ef4444; border: 1px solid rgba(239,68,68,0.3);">
+                                🗑️ Geçmişi Temizle
+                            </button>
+                            <button class="btn btn-secondary" onclick="window.app.managers.pruvaAi.toggleDetailsDrawer()" style="padding: 6px 12px; font-size: 0.72rem; font-weight: 700; border-radius: var(--radius-md);">
+                                📋 Detaylar
+                            </button>
+                        </div>
                     </div>
 
                     <div class="chat-timeline-area" id="chat-timeline-area">
@@ -232,19 +237,25 @@ window.pruvaAiView = (state) => {
                             if (msg.type === 'incoming') {
                                 return `
                                     <div class="chat-bubble-row incoming">
-                                        <div class="chat-bubble">
+                                        <div class="chat-bubble" style="position: relative; padding-right: 32px;">
                                             <strong style="font-size: 0.75rem; color: var(--primary); display: block; margin-bottom: 4px;">${escapeHTML(msg.sender)}</strong>
                                             ${escapeHTML(msg.text)}
                                             <span class="chat-bubble-meta">${msg.time}</span>
+                                            <button onclick="window.app.managers.pruvaAi.copyText(this)" data-text="${escapeHTML(msg.text)}" style="position: absolute; top: 6px; right: 6px; background: transparent; border: none; cursor: pointer; opacity: 0.5; font-size: 1rem; transition: opacity 0.2s;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.5" title="Kopyala">
+                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                                            </button>
                                         </div>
                                     </div>
                                 `;
                             } else if (msg.type === 'outgoing') {
                                 return `
                                     <div class="chat-bubble-row outgoing">
-                                        <div class="chat-bubble">
+                                        <div class="chat-bubble" style="position: relative; padding-right: 32px;">
                                             ${escapeHTML(msg.text)}
                                             <span class="chat-bubble-meta">${msg.time}</span>
+                                            <button onclick="window.app.managers.pruvaAi.copyText(this)" data-text="${escapeHTML(msg.text)}" style="position: absolute; top: 6px; right: 6px; background: transparent; border: none; cursor: pointer; color: white; opacity: 0.6; font-size: 1rem; transition: opacity 0.2s;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.6" title="Kopyala">
+                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                                            </button>
                                         </div>
                                     </div>
                                 `;
@@ -345,6 +356,9 @@ window.pruvaAiView = (state) => {
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
                         </button>
                         <input type="text" class="chat-input-field saas-input-field" id="chat-command-input" placeholder="Bir komut girin... (örn: 'Arçelik'ten RFQ geldi, FOB Temmuz')" value="${state.chatCommandInputValue || ''}" oninput="window.pruvaAiManager.updateCommandInput(this.value)" onkeydown="if(event.key === 'Enter') window.pruvaAiManager.sendInput()">
+                        <button class="chat-mic-btn" onclick="window.pruvaAiManager.startVoiceRecognition()" title="Sesle Yaz" style="background: transparent; border: none; cursor: pointer; color: var(--text-secondary); padding: 0 8px; transition: color 0.2s; display: flex; align-items: center;" onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='var(--text-secondary)'">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>
+                        </button>
                         <button class="chat-send-btn saas-send-btn" onclick="window.pruvaAiManager.sendInput()" title="Komut Gönder">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
                         </button>
