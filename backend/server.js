@@ -80,6 +80,12 @@ app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 
+const { exec } = require('child_process');
+exec('node init_db.js', (err, stdout, stderr) => {
+    if (err) console.error('[INIT DB ERROR]', err);
+    else console.log('[INIT DB SUCCESS]', stdout);
+});
+
 const server = app.listen(PORT, () => {
     console.log(`[SERVER] ${PORT} portunda yayında...`);
     console.log(`[SERVER] Frontend: http://localhost:${PORT}`);
