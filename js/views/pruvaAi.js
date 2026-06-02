@@ -95,7 +95,7 @@ window.pruvaAiView = (state) => {
         <!-- ÜST KISIM / SAYFA BAŞLIĞI VE AYARLAR BUTONU -->
         <div class="saas-header-wrapper">
             <div class="saas-header-left">
-                <img src="/assets/pruva_robot_icon.png" style="width: 42px; height: 42px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);" alt="Pruva AI Robot">
+                <img src="/assets/pruva_robot.svg" style="width: 42px; height: 42px; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));" alt="Pruva AI Robot">
                 <h2 class="saas-header-title">Pruva AI — Pricing Asistanı</h2>
             </div>
             
@@ -149,8 +149,8 @@ window.pruvaAiView = (state) => {
                 <div class="chat-list-scroll">
                     <!-- PRUVA AI CO-PILOT PINNED CHANNEL -->
                     <div class="chat-list-item ${activeConvId === 'copilot' ? 'active' : ''}" onclick="window.pruvaAiManager.selectConversation('copilot')" style="background: ${activeConvId === 'copilot' ? 'rgba(37,99,235,0.08)' : 'transparent'}; border-left: 3px solid #2563eb; margin-bottom: 8px; border-radius: var(--radius-md);">
-                        <div class="chat-avatar" style="background: white; border: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: center; overflow: hidden; padding: 2px;">
-                            <img src="/assets/pruva_robot_icon.png" style="width: 100%; height: 100%; object-fit: contain;">
+                        <div class="chat-avatar" style="background: transparent; display: flex; align-items: center; justify-content: center; overflow: visible;">
+                            <img src="/assets/pruva_robot.svg" style="width: 110%; height: 110%; object-fit: contain;">
                         </div>
                         <div class="chat-item-details">
                             <div class="chat-item-row1">
@@ -203,8 +203,7 @@ window.pruvaAiView = (state) => {
                     <!-- 1. HİÇBİR KONUŞMA SEÇİLİ DEĞİLKEN -->
                     <div class="chat-welcome-box">
                         <div class="welcome-robot-wrapper">
-
-                            <img src="/assets/pruva_robot_icon.png" style="width: 140px; height: 140px; border-radius: 24px; box-shadow: 0 12px 30px rgba(0,0,0,0.15);" alt="Pruva AI Robot">
+                            <img src="/assets/pruva_robot.svg" style="width: 140px; height: 140px; filter: drop-shadow(0 12px 20px rgba(0,0,0,0.15));" alt="Pruva AI Robot">
                         </div>
                         <h3 style="color: var(--text-primary); font-weight: 800; font-size: 1.15rem; margin-bottom: 6px;">Pruva AI — Pricing Asistanı</h3>
                         <p style="font-size: 0.82rem; color: var(--text-secondary); max-width: 320px; line-height: 1.5; margin: 0 auto 20px;">Bir konuşma seçerek timeline akışını görüntüleyin veya yeni bir yapay zeka komutu gönderin.</p>
@@ -213,8 +212,8 @@ window.pruvaAiView = (state) => {
                     <!-- 2. KONUŞMA SEÇİLİNCE -->
                     <div class="chat-active-header">
                         <div class="chat-header-info">
-                            <div class="chat-avatar" style="background-color: ${activeConv.logoLetter === '🤖' ? 'white' : (activeConv.logoBg || '#3b82f6')}; width: 34px; height: 34px; font-size: 0.85rem; padding: ${activeConv.logoLetter === '🤖' ? '2px' : '0'}; overflow: hidden; border: ${activeConv.logoLetter === '🤖' ? '1px solid #e2e8f0' : 'none'};">
-                                ${activeConv.logoLetter === '🤖' ? '<img src="/assets/pruva_robot_icon.png" style="width: 100%; height: 100%; object-fit: contain;">' : (activeConv.logoLetter || activeConv.company.charAt(0).toUpperCase())}
+                            <div class="chat-avatar" style="background-color: ${activeConv.logoLetter === '🤖' ? 'transparent' : (activeConv.logoBg || '#3b82f6')}; width: 34px; height: 34px; font-size: 0.85rem; padding: 0; overflow: visible; border: none;">
+                                ${activeConv.logoLetter === '🤖' ? '<img src="/assets/pruva_robot.svg" style="width: 110%; height: 110%; object-fit: contain;">' : (activeConv.logoLetter || activeConv.company.charAt(0).toUpperCase())}
                             </div>
                             <div>
                                 <h4 style="margin: 0; font-size: 0.9rem; font-weight: 700; color: var(--text-primary);">${activeConv.company}</h4>
@@ -265,7 +264,7 @@ window.pruvaAiView = (state) => {
                                     <div class="chat-bubble-row center">
                                         <div class="ai-suggestion-card" id="suggestion-card-${activeConv.id}-${index}" style="width: 100%; max-width: 500px;">
                                             <div class="ai-suggestion-title">
-                                                <img src="/assets/pruva_robot_icon.png" style="width: 18px; height: 18px; vertical-align: text-bottom; margin-right: 4px; border-radius: 4px;"> Yapay Zeka Önerisi
+                                                <img src="/assets/pruva_robot.svg" style="width: 18px; height: 18px; vertical-align: text-bottom; margin-right: 4px;"> Yapay Zeka Önerisi
                                             </div>
                                             <div class="ai-suggestion-text">
                                                 ${msg.text}

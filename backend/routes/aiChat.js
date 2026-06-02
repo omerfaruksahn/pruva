@@ -207,16 +207,28 @@ router.post('/upload', auth, upload.single('file'), async (req, res) => {
       return res.status(400).json({ error: 'Dosya yüklenmedi.' });
     }
 
-    if (!supabase) {
-      return res.status(500).json({ error: 'Supabase yapılandırılmamış. Lütfen .env dosyasında SUPABASE_URL ve SUPABASE_KEY tanımlayın.' });
-    }
-
     const file = req.file;
     const fileExtension = path.extname(file.originalname);
     const fileName = `${req.user.id}_${Date.now()}${fileExtension}`;
     const filePath = file.path;
 
-    // Supabase'e yükle
+    if (!supabase) {
+      // Supabase yoksa lokal uploads klasöründe tut
+      const localFileName = `uploads/${fileName}`;
+      fs.renameSync(filePath, path.join(__dirname, '..', '..', localFileName));
+      return res.json({
+        success: true,
+        file: {
+          name: file.originalname,
+          path: localFileName,
+          type: file.mimetype,
+          size: file.size,
+          isLocal: true
+        }
+      });
+    }
+
+    // Supabase yapılandırılmışsa oraya yükle
     const fileBuffer = fs.readFileSync(filePath);
     const { data, error } = await supabase.storage
       .from('pruva_files')

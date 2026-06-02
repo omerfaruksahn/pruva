@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100%" height="100%">
+    <style>
+        @keyframes robotBlink {
+            0%, 90%, 100% { transform: scaleY(1); }
+            95% { transform: scaleY(0.1); }
+        }
+        .robot-eye-left, .robot-eye-right {
+            transform-origin: center;
+            animation: robotBlink 4s infinite;
+        }
+        .robot-eye-left { transform-origin: 44px 37px; }
+        .robot-eye-right { transform-origin: 56px 37px; }
+    </style>
+    <defs>
+        <radialGradient id="screen-glow" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#2563eb" stop-opacity="0.3"/>
+            <stop offset="100%" stop-color="#0f172a" stop-opacity="0.95"/>
+        </radialGradient>
+        <linearGradient id="body-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#ffffff"/>
+            <stop offset="100%" stop-color="#f1f5f9"/>
+        </linearGradient>
+        <linearGradient id="ear-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#3b82f6"/>
+            <stop offset="100%" stop-color="#1d4ed8"/>
+        </linearGradient>
+    </defs>
+    
+    <circle cx="50" cy="50" r="45" fill="#eff6ff" />
+    
+    <line x1="50" y1="20" x2="50" y2="10" stroke="#cbd5e1" stroke-width="3" stroke-linecap="round"/>
+    <circle cx="50" cy="8" r="4.5" fill="#3b82f6"/>
+    
+    <rect x="23" y="31" width="6" height="12" rx="3" fill="url(#ear-gradient)"/>
+    <rect x="71" y="31" width="6" height="12" rx="3" fill="url(#ear-gradient)"/>
+    
+    <rect x="28" y="21" width="44" height="34" rx="17" fill="url(#body-gradient)" stroke="#cbd5e1" stroke-width="1.5"/>
+    
+    <rect x="34" y="26" width="32" height="24" rx="12" fill="url(#screen-glow)"/>
+    
+    <ellipse class="robot-eye-left" cx="44" cy="37" rx="3" ry="4" fill="#60a5fa"/>
+    <ellipse class="robot-eye-right" cx="56" cy="37" rx="3" ry="4" fill="#60a5fa"/>
+    <circle cx="39" cy="43" r="2" fill="#f43f5e" opacity="0.5"/>
+    <circle cx="61" cy="43" r="2" fill="#f43f5e" opacity="0.5"/>
+</svg>
