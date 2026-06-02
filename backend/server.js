@@ -16,6 +16,7 @@ app.set('trust proxy', 1);
 
 // --- PARANOID SECURITY MIDDLEWARE ---
 app.use(helmet({
+    crossOriginOpenerPolicy: false, // OAuth pop-up penceresinin parent ile iletişim kurabilmesi için kapatıldı
     contentSecurityPolicy: {
         directives: {
             defaultSrc: ["'self'"],
