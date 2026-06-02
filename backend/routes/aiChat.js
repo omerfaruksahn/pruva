@@ -180,17 +180,10 @@ router.post('/analyze', auth, async (req, res) => {
     console.log('DEBUG AI ACTION:', result.action, 'isDraftAction:', isDraftAction);
       
       let suggestedMail = null;
-      if (result.action === 'SEND_CUSTOM_EMAIL') {
+      if (result.suggestedMessage) {
         suggestedMail = {
           to: result.details?.to_email || '',
-          subject: result.details?.subject || 'Pruva Lojistik Tanıtım Maili',
-          body: result.suggestedMessage || '',
-          attachments: req.body.attachments || []
-        };
-      } else if (result.suggestedMessage) {
-        suggestedMail = {
-          to: '',
-          subject: '',
+          subject: result.details?.subject || 'Pruva Lojistik',
           body: result.suggestedMessage,
           attachments: req.body.attachments || []
         };
