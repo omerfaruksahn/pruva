@@ -414,9 +414,18 @@ async function scanEmails(userId, searchQuery = null) {
         console.error('[MAIL SCANNER ERR] Tarama tarihi güncellenemedi:', err);
     }
 
+    const searchResults = mailsToProcess.map(m => ({
+        sender_name: m.sender_name,
+        sender_email: m.sender_email,
+        subject: m.subject,
+        received_at: m.received_at,
+        body_snippet: m.body ? m.body.substring(0, 400) + '...' : ''
+    }));
+
     return {
         success: true,
-        message: `Gerçek Outlook taraması tamamlandı. ${processedCount} yeni e-posta başarıyla işlendi ve kaydedildi.`
+        message: `Gerçek Outlook taraması tamamlandı. ${processedCount} yeni e-posta başarıyla işlendi ve kaydedildi.`,
+        found_emails: searchResults
     };
 }
 

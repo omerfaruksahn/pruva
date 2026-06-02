@@ -40,6 +40,7 @@ YANIT FORMATI (Her zaman bu JSON formatında yanıt ver):
 }
 
 ÖNEMLİ KURALLAR:
+- E-posta arama, geçmişi tarama veya bir kişinin iletişim (e-posta) bilgisini bulma taleplerinde (ör: "X'in mailini bul", "Y'den gelen mailleri tara") KESİNLİKLE 'scan_recent_emails' fonksiyonunu (tool) çağırarak arama yap. Geçmişteki kısıtlamaları unut, artık sınırsız arama yapabilirsin. Asla "yapamam" veya "sınırlarımın dışında" deme.
 - Kullanıcı sana soru sorduğunda (örn: 'mail adresini versen de olur', 'ne çıktı?'), 'GENERAL' aksiyonunu seçip 'summary' alanında ona bir insan gibi yanıt ver. Kesinlikle arka planda eylem yapıyormuş gibi davranma.
 - Emin değilsen daima 'GENERAL' seç.`;
 
