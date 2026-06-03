@@ -43,15 +43,15 @@ export class NavbarComponent {
                     <a href="/dashboard">Dashboard</a>
                     <a href="/post-ad">İlan Ver</a>
                     <a href="/marketplace">Pazaryeri</a>
-                    <a href="/pruva-ai" style="display: inline-flex; align-items: center;">Pruva AI${badgeHTML}</a>
+                    <a href="/pruva-ai" style="display: inline-flex; align-items: center;"><img src="/assets/pruva_robot.svg" style="width: 22px; height: 22px; margin-right: 6px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));">Pruva AI${badgeHTML}</a>
                 ` : state.userRole === 'carrier' ? `
                     <a href="/dashboard">Dashboard</a>
                     <a href="/marketplace">Pazaryeri</a>
-                    <a href="/pruva-ai" style="display: inline-flex; align-items: center;">Pruva AI${badgeHTML}</a>
+                    <a href="/pruva-ai" style="display: inline-flex; align-items: center;"><img src="/assets/pruva_robot.svg" style="width: 22px; height: 22px; margin-right: 6px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));">Pruva AI${badgeHTML}</a>
                 ` : `
                     <a href="/dashboard">Admin Paneli</a>
                     <a href="/marketplace">Pazaryeri</a>
-                    <a href="/pruva-ai" style="display: inline-flex; align-items: center;">Pruva AI${badgeHTML}</a>
+                    <a href="/pruva-ai" style="display: inline-flex; align-items: center;"><img src="/assets/pruva_robot.svg" style="width: 22px; height: 22px; margin-right: 6px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));">Pruva AI${badgeHTML}</a>
                 `;
             }
             
@@ -65,6 +65,11 @@ export class NavbarComponent {
                 navRight.innerHTML = `
                     ${window.ThemeManager.getBtnHTML()}
                     
+                    <!-- Mesajlar İkonu -->
+                    <a href="/inbox" title="Mesajlar" style="color: var(--text-primary); margin-right: 15px; display: flex; align-items: center; text-decoration: none;">
+                        <i data-lucide="message-square" style="width: 20px; height: 20px;"></i>
+                    </a>
+
                     <!-- Bildirimler (Zil) İkonu -->
                     <div class="notification-wrapper" style="position: relative; cursor: pointer; margin-right: 15px;" onclick="window.notificationManager.toggle(event)">
                         <i data-lucide="bell" style="width: 20px; height: 20px;"></i>
@@ -163,8 +168,11 @@ export class NavbarComponent {
                     <a href="/dashboard">
                         <i data-lucide="layout-dashboard"></i> Dashboard
                     </a>
-                    <a href="/pruva-ai">
-                        <i data-lucide="cpu"></i> Pruva AI
+                    <a href="/inbox">
+                        <i data-lucide="message-square"></i> Mesajlar
+                    </a>
+                    <a href="/pruva-ai" style="display: inline-flex; align-items: center;">
+                        <img src="/assets/pruva_robot.svg" style="width: 20px; height: 20px; margin-right: 8px;"> Pruva AI
                     </a>
                     <a href="/pricing-customers">
                         <i data-lucide="users"></i> Müşteriler

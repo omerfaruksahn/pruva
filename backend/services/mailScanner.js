@@ -175,7 +175,7 @@ async function scanEmails(userId, searchQuery = null) {
             // Microsoft Graph API'den gelen mailleri çek (En son 10 mail)
             let graphUrl = "https://graph.microsoft.com/v1.0/me/messages?$top=10&$orderby=receivedDateTime desc";
             if (searchQuery) {
-                graphUrl = `https://graph.microsoft.com/v1.0/me/messages?$search="${encodeURIComponent(searchQuery)}"&$top=15`;
+                graphUrl = `https://graph.microsoft.com/v1.0/me/messages?$search="${encodeURIComponent(searchQuery)}"&$top=50`;
             }
             
             const response = await fetch(graphUrl, {

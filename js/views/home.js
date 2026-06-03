@@ -10,7 +10,7 @@ window.homeView = (state) => {
     <!-- Hero Section -->
     <section class="hero">
         <div class="hero-content">
-            <div class="hero-badge">
+            <div class="hero-badge" style="background: rgba(59, 130, 246, 0.15) !important; color: #60a5fa !important; border: 1px solid rgba(59, 130, 246, 0.3) !important;">
                 <i data-lucide="sparkles" style="width: 14px; height: 14px; margin-right: 8px;"></i>
                 Türkiye'nin Dijital Lojistik Operatörü
             </div>

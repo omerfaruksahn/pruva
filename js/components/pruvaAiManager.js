@@ -1708,6 +1708,13 @@ window.PruvaAiManager = class PruvaAiManager {
         this.app.commit();
         this.scrollToBottom();
 
+        // Hands-Free Filler "Hmm..."
+        if (this.app.state.isHandsFreeMode && !pendingFiles.length) {
+            const fillers = ["Hımm...", "Bir saniye bakıyorum...", "Hemen kontrol ediyorum..."];
+            const randomFiller = fillers[Math.floor(Math.random() * fillers.length)];
+            this.speakText(null, randomFiller, false);
+        }
+
         // Gerçek veya Mock AI Analiz çağrısı
         try {
             const firebaseUser = window.fbAuth?.currentUser;
@@ -1738,6 +1745,19 @@ window.PruvaAiManager = class PruvaAiManager {
             if (response.ok) {
                 // Sunucudan güncel mesajları veri tabanından canlı olarak çekelim ve UI'ı tazeleyelim
                 await this.loadState();
+                
+                // Hands-Free Mode Auto-Read
+                if (this.app.state.isHandsFreeMode) {
+                    let activeConv = this.app.state.pricingConversations.find(c => c.id === activeConvId);
+                    if (activeConv && activeConv.messages && activeConv.messages.length > 0) {
+                        let lastMsg = activeConv.messages[activeConv.messages.length - 1];
+                        if (lastMsg.type === 'incoming') {
+                            this.speakText(null, lastMsg.text, true);
+                        } else if (lastMsg.type === 'ai_suggestion' || lastMsg.type === 'AI_SUGGESTION') {
+                            this.speakText(null, lastMsg.text + " Lütfen ekranda onaylayın veya reddedin.", true);
+                        }
+                    }
+                }
             } else {
                 let errorData;
                 try {
@@ -1915,15 +1935,48 @@ window.PruvaAiManager = class PruvaAiManager {
                 console.warn('[PRUVA AI] Backend aksiyon reddi başarısız:', err.message);
             }
         }
+    }
+    
     async clearConversationHistory(convId) {
         if (!confirm('Geçmiş sohbet verilerini silmek istediğinize emin misiniz?')) return;
         
-        // GİZLİ SIFIRLAMA KOMUTUNU TETİKLE
-        const input = document.getElementById('chat-command-input');
-        if (input) {
-            input.value = 'RESET_HISTORY';
-            await this.sendInput();
-            this.showToast('Hafıza başarıyla silindi!', 'success');
+        try {
+            this.app.state.aiLoading = true;
+            this.app.commit();
+            
+            const firebaseUser = window.fbAuth?.currentUser;
+            const token = firebaseUser ? await firebaseUser.getIdToken() : '';
+            
+            const reqBody = {
+                message: 'RESET_HISTORY',
+                context: { conversationId: convId, email: convId === 'copilot' ? 'copilot@pruva.ai' : '' }
+            };
+
+            await fetch('/api/ai/analyze', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(reqBody)
+            });
+
+            // UI'daki mesajları tamamen sil
+            const conversations = this.app.state.pricingConversations;
+            const convIdx = conversations.findIndex(c => c.id === convId);
+            if (convIdx !== -1) {
+                conversations[convIdx].messages = [];
+                conversations[convIdx].lastMessage = '';
+            }
+            
+            this.showToast('Hafıza ve ekran başarıyla temizlendi!', 'success');
+        } catch (err) {
+            console.error('Hafıza silinemedi:', err);
+            this.showToast('Hafıza silinirken hata oluştu.', 'danger');
+        } finally {
+            this.app.state.aiLoading = false;
+            this.app.commit();
+            this.scrollToBottom();
         }
     }
 
@@ -1946,15 +1999,118 @@ window.PruvaAiManager = class PruvaAiManager {
         }
     }
 
+    toggleHandsFreeMode() {
+        this.app.state.isHandsFreeMode = !this.app.state.isHandsFreeMode;
+        this.app.commit();
+        if (this.app.state.isHandsFreeMode) {
+            this.showToast('Eller Serbest (Hands-Free) Modu Açıldı. Asistan sizi dinliyor...', 'info');
+            this.startVoiceRecognition();
+        } else {
+            this.showToast('Eller Serbest Modu Kapatıldı.', 'info');
+            if (this.isRecognizing && this.recognition) {
+                this.recognition.stop();
+            }
+            window.speechSynthesis.cancel();
+        }
+    }
+
+    getBestVoice() {
+        const voices = window.speechSynthesis.getVoices();
+        if (!voices || voices.length === 0) return null;
+        
+        const trVoices = voices.filter(v => v.lang.includes('tr') || v.lang.includes('TR'));
+        if (trVoices.length === 0) return voices[0];
+        
+        // Prioritize natural/online premium voices (e.g. Edge Natural voices like 'Microsoft Emel Online (Natural) - Turkish (Turkey)')
+        let bestVoice = trVoices.find(v => (v.name.includes('Natural') || v.name.includes('Online')) && (v.name.includes('Emel') || v.name.includes('Tolga')));
+        if (!bestVoice) bestVoice = trVoices.find(v => v.name.includes('Natural') || v.name.includes('Premium'));
+        if (!bestVoice) bestVoice = trVoices.find(v => v.name.includes('Yelda') || v.name.includes('Cem')); // Mac voices
+        if (!bestVoice) bestVoice = trVoices[0]; // Fallback to standard Turkish voice
+        
+        return bestVoice;
+    }
+
+    speakText(btnElement, rawText = null, autoListenAfter = false) {
+        let text = rawText;
+        if (btnElement) {
+            text = btnElement.getAttribute('data-text');
+        }
+        if (!text) return;
+        
+        if (!('speechSynthesis' in window)) {
+            if (btnElement) this.showToast('Tarayıcınız sesli okumayı desteklemiyor.', 'warning');
+            return;
+        }
+
+        // HTML entity decode for speech
+        const textarea = document.createElement('textarea');
+        textarea.innerHTML = text;
+        const decodedText = textarea.value;
+
+        // If currently speaking this text, stop it
+        if (window.speechSynthesis.speaking && this.currentUtteranceText === decodedText) {
+            window.speechSynthesis.cancel();
+            this.currentUtteranceText = null;
+            if (btnElement) btnElement.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>';
+            return;
+        }
+
+        window.speechSynthesis.cancel(); // Cancel any previous speech
+        this.currentUtteranceText = decodedText;
+
+        const utterance = new SpeechSynthesisUtterance(decodedText);
+        utterance.lang = 'tr-TR';
+        utterance.rate = 1.0; 
+        utterance.pitch = 1.0; 
+        
+        // Set the best natural voice if available
+        const bestVoice = this.getBestVoice();
+        if (bestVoice) {
+            utterance.voice = bestVoice;
+        }
+
+        let originalSvg = '';
+        if (btnElement) {
+            originalSvg = btnElement.innerHTML;
+            btnElement.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>';
+            btnElement.style.color = 'var(--secondary)';
+        }
+
+        utterance.onend = () => {
+            this.currentUtteranceText = null;
+            if (btnElement) {
+                btnElement.innerHTML = originalSvg;
+                btnElement.style.color = '';
+            }
+            // Auto Listen loop for Hands-Free Mode
+            if (autoListenAfter && this.app.state.isHandsFreeMode) {
+                setTimeout(() => {
+                    this.startVoiceRecognition();
+                }, 500); // Wait half a second before listening again
+            }
+        };
+
+        window.speechSynthesis.speak(utterance);
+    }
+
     startVoiceRecognition() {
         if (!('webkitSpeechRecognition' in window)) {
             this.showToast('Tarayıcınız sesli komutu desteklemiyor.', 'warning');
             return;
         }
 
+        if (this.isRecognizing) {
+            if (this.recognition) {
+                this.recognition.stop();
+            }
+            return;
+        }
+
         const recognition = new webkitSpeechRecognition();
+        this.recognition = recognition;
         recognition.lang = 'tr-TR';
-        recognition.interimResults = false;
+        recognition.continuous = true;
+        recognition.interimResults = true;
         recognition.maxAlternatives = 1;
 
         const micBtn = document.querySelector('.chat-mic-btn');
@@ -1963,32 +2119,108 @@ window.PruvaAiManager = class PruvaAiManager {
             micBtn.style.animation = 'pulse 1.5s infinite';
         }
 
-        recognition.start();
+        let finalTranscript = '';
+        let initialWaitTimeout;
+        let silenceTimeout;
+
+        const resetSilenceTimer = () => {
+            clearTimeout(silenceTimeout);
+            silenceTimeout = setTimeout(() => {
+                if (this.isRecognizing) recognition.stop();
+            }, 2000); // 2 saniye sessizlik = cümle bitti
+        };
+
+        const resetInitialWaitTimer = () => {
+            clearTimeout(initialWaitTimeout);
+            initialWaitTimeout = setTimeout(() => {
+                if (this.isRecognizing) recognition.stop();
+            }, 6000); // İlk 6 saniye hiç ses gelmezse kapat
+        };
+
+        recognition.onstart = () => {
+            this.isRecognizing = true;
+            resetInitialWaitTimer(); // Dinleme başladı, 6 saniyelik saati kur
+            
+            // Eğer daha önceden inputta text varsa, voice ile üstüne eklemek için onu alalım
+            const input = document.getElementById('chat-command-input');
+            if (input && input.value) {
+                finalTranscript = input.value + ' ';
+            }
+        };
 
         recognition.onresult = (event) => {
-            const speechResult = event.results[0][0].transcript;
+            clearTimeout(initialWaitTimeout); // Ses geldi, başlangıç timer'ını iptal et
+            resetSilenceTimer(); // Sessizlik timer'ını sıfırla
+
+            let interimTranscript = '';
+            for (let i = event.resultIndex; i < event.results.length; ++i) {
+                if (event.results[i].isFinal) {
+                    finalTranscript += event.results[i][0].transcript;
+                } else {
+                    interimTranscript += event.results[i][0].transcript;
+                }
+            }
+
             const input = document.getElementById('chat-command-input');
             if (input) {
-                input.value += (input.value ? ' ' : '') + speechResult;
+                input.value = finalTranscript + interimTranscript;
                 this.updateCommandInput(input.value);
             }
-            this.showToast('Ses metne çevrildi', 'success');
         };
 
         recognition.onspeechend = () => {
-            recognition.stop();
+            // continuous = true olduğunda onspeechend sadece sessizlikte tetiklenebilir
+            // Ama biz zaten silenceTimeout ile stop edeceğiz
         };
 
         recognition.onerror = (event) => {
-            this.showToast('Ses tanıma hatası: ' + event.error, 'danger');
+            if (event.error === 'not-allowed') {
+                this.showToast('Mikrofon izni verilmedi veya kapalı.', 'warning');
+                this.app.state.isHandsFreeMode = false;
+                this.app.commit();
+            } else if (event.error === 'aborted') {
+                console.log('Ses tanıma durduruldu (aborted).');
+            } else if (event.error === 'no-speech') {
+                // no-speech geldiğinde bir şey yapmamıza gerek yok, timer'ımız stop edecek
+            } else {
+                console.warn('Ses tanıma hatası:', event.error);
+            }
         };
 
         recognition.onend = () => {
+            clearTimeout(silenceTimeout);
+            clearTimeout(initialWaitTimeout);
+            this.isRecognizing = false;
+            
             if (micBtn) {
                 micBtn.style.color = 'var(--text-secondary)';
                 micBtn.style.animation = '';
             }
+
+            const input = document.getElementById('chat-command-input');
+            const hasText = input && input.value.trim().length > 0;
+
+            if (this.app.state.isHandsFreeMode) {
+                if (hasText) {
+                    // Cümle bitti, otomatik yolla!
+                    this.sendInput();
+                } else {
+                    // Eller serbest açık ama hiç konuşmadı. (6 sn bitti)
+                    this.app.state.isHandsFreeMode = false;
+                    this.app.commit();
+                    this.showToast('Ses algılanmadı, eller serbest modu kapatıldı.', 'info');
+                    // Header'daki butonu tekrar render etmek için router çağrılabilir:
+                    if (window.app && window.app.router) window.app.router.render();
+                }
+            }
         };
+
+        try {
+            recognition.start();
+        } catch (e) {
+            console.error('Mikrofon başlatılamadı:', e);
+            this.isRecognizing = false;
+        }
     }
 }
 

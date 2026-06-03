@@ -223,6 +223,9 @@ window.pruvaAiView = (state) => {
                             </div>
                         </div>
                         <div style="display: flex; gap: 8px;">
+                            <button class="btn btn-secondary" onclick="window.app.managers.pruvaAi.toggleHandsFreeMode()" style="padding: 6px 12px; font-size: 0.72rem; font-weight: 700; border-radius: var(--radius-md); ${window.app.state.isHandsFreeMode ? 'background: rgba(37,99,235,0.1); color: #2563eb; border: 1px solid rgba(37,99,235,0.3);' : ''}">
+                                ${window.app.state.isHandsFreeMode ? '🎙️ Eller Serbest: AÇIK' : '🎧 Sesli Mod'}
+                            </button>
                             <button class="btn btn-secondary" onclick="window.app.managers.pruvaAi.clearConversationHistory('${activeConv.id}')" style="padding: 6px 12px; font-size: 0.72rem; font-weight: 700; border-radius: var(--radius-md); background: rgba(239,68,68,0.1); color: #ef4444; border: 1px solid rgba(239,68,68,0.3);">
                                 🗑️ Geçmişi Temizle
                             </button>
@@ -237,10 +240,17 @@ window.pruvaAiView = (state) => {
                             if (msg.type === 'incoming') {
                                 return `
                                     <div class="chat-bubble-row incoming">
-                                        <div class="chat-bubble" style="position: relative; padding-right: 32px;">
+                                        <div class="chat-bubble" style="position: relative; padding-right: 56px;">
                                             <strong style="font-size: 0.75rem; color: var(--primary); display: block; margin-bottom: 4px;">${escapeHTML(msg.sender)}</strong>
                                             ${escapeHTML(msg.text)}
                                             <span class="chat-bubble-meta">${msg.time}</span>
+                                            
+                                            <!-- Speak Button -->
+                                            <button onclick="window.app.managers.pruvaAi.speakText(this)" data-text="${escapeHTML(msg.text)}" style="position: absolute; top: 6px; right: 28px; background: transparent; border: none; cursor: pointer; opacity: 0.5; font-size: 1rem; transition: opacity 0.2s;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.5" title="Sesli Oku">
+                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+                                            </button>
+                                            
+                                            <!-- Copy Button -->
                                             <button onclick="window.app.managers.pruvaAi.copyText(this)" data-text="${escapeHTML(msg.text)}" style="position: absolute; top: 6px; right: 6px; background: transparent; border: none; cursor: pointer; opacity: 0.5; font-size: 1rem; transition: opacity 0.2s;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.5" title="Kopyala">
                                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
                                             </button>

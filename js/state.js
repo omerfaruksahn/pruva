@@ -57,6 +57,16 @@ function getDefaults() {
         // Navigation
         currentView: 'home',
 
+        // PRUVA AI STATE
+        aiLoading: false,
+        activeConversationId: null,
+        convSearchQuery: '',
+        convFilterMode: 'all', // all, active, completed
+        pricingConversations: [],
+        detailsDrawerOpen: false,
+        isHandsFreeMode: false,
+        isAiThinking: false,
+
         // Core Data (Başlangıçta boş, Firestore'dan dolacak)
         ads: [],
         users: [],

@@ -64,6 +64,18 @@ router.post('/analyze', auth, async (req, res) => {
         rfqId = insertBase.rows[0].id;
       }
       
+      // Secret command to clear history and force the AI to forget past hallucinated limitations
+      if (message.trim() === 'RESET_HISTORY') {
+        await client.query('DELETE FROM pricing_actions WHERE rfq_id = $1 AND user_id = $2', [rfqId, req.user.id]);
+        await client.query('COMMIT');
+        return res.json({
+          success: true,
+          action: 'GENERAL',
+          summary: 'Hafıza başarıyla silindi. Geçmiş kısıtlamalarımı unuttum. Lütfen komutunuzu tekrar gönderin.',
+          confidence: 1
+        });
+      }
+
       // Kullanıcının yazdığı yeni co-pilot komutunu veri tabanında bir aksiyon olarak sakla (outgoing/giden)
       // rfqId'yi ezmiyoruz, base RFQ id'si olarak koruyoruz!
       await client.query(
