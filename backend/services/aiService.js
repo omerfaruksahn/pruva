@@ -85,8 +85,8 @@ async function analyzeCommand(userMessage, context = {}, fileParts = []) {
     });
     
     const contextStr = context.company 
-      ? `\nAKTİF KONUŞMA: ${context.company} (${context.status || 'UNKNOWN'})`
-      : '';
+      ? `\nAKTİF KONUŞMA: ${context.company} (${context.status || 'UNKNOWN'})\nMUHATAP E-POSTA ADRESİ: ${context.email || 'Bilinmiyor'}`
+      : `\nMUHATAP E-POSTA ADRESİ: ${context.email || 'Bilinmiyor'}`;
     
     let historyStr = '';
     if (context.history && context.history.length > 0) {

@@ -197,8 +197,12 @@ router.post('/analyze', auth, async (req, res) => {
       
       let suggestedMail = null;
       if (result.suggestedMessage) {
+        let toEmail = result.details?.to_email || '';
+        if ((toEmail.endsWith('@pruva.ai') && toEmail !== 'copilot@pruva.ai') || !toEmail) {
+           toEmail = email || '';
+        }
         suggestedMail = {
-          to: result.details?.to_email || '',
+          to: toEmail,
           subject: result.details?.subject || 'Pruva Lojistik',
           body: result.suggestedMessage,
           attachments: req.body.attachments || []
