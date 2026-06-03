@@ -471,8 +471,11 @@ router.delete('/customers/:id', auth, async (req, res) => {
 // @desc    Taşıyıcı performans skorlarını getirir (Faz 5)
 router.get('/carrier_performance', auth, async (req, res) => {
     try {
-        const query = 'SELECT id, carrier_id, response_hours, was_cheapest, was_selected, rfq_id FROM pricing_carrier_performance';
-        const result = await db.query(query);
+        const query = `SELECT cp.id, cp.carrier_id, cp.response_hours, cp.was_cheapest, cp.was_selected, cp.rfq_id 
+  FROM pricing_carrier_performance cp
+  JOIN pricing_carriers c ON c.id = cp.carrier_id
+  WHERE c.user_id = $1`;
+        const result = await db.query(query, [req.user.id]);
         res.json(result.rows);
     } catch (err) {
         console.error('[GET PERFORMANCE ERR]', err);
@@ -485,7 +488,7 @@ router.get('/carrier_performance', auth, async (req, res) => {
 router.get('/rate-history', auth, async (req, res) => {
     try {
         const { pol, pod, mode } = req.query;
-        let query = 'SELECT id, pol, pod, transport_mode, container_type, carrier_name, price, currency, valid_until, created_at FROM pricing_rate_history WHERE 1=1';
+        let query = 'SELECT id, pol, pod, transport_mode, container_type, carrier_name, price, currency, valid_until, created_at FROM pricing_rate_history WHERE user_id = $' + (paramIdx++); queryParams.push(req.user.id);
         const queryParams = [];
         let paramIdx = 1;
         
@@ -522,12 +525,13 @@ router.post('/rfqs/:id/lost', auth, async (req, res) => {
             return res.status(400).json({ error: 'Kaybetme nedeni belirtilmelidir.' });
         }
  
-        const updateQuery = 'UPDATE pricing_rfqs SET lost_reason = $1, competitor_price = $2, status = $3 WHERE id = $4';
+        const updateQuery = 'UPDATE pricing_rfqs SET lost_reason = $1, competitor_price = $2, status = $3 WHERE id = $4 AND user_id = $5';
         await db.query(updateQuery, [
             lost_reason,
             parseFloat(competitor_price) || 0,
             'CANCELLED',
-            parseInt(id)
+            parseInt(id),
+            req.user.id
         ]);
  
         res.json({ success: true, message: 'Kaybedilen teklif analizi başarıyla kaydedildi.' });

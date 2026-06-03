@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const auth = require('../authMiddleware');
 const db = require('../db');
 const { analyzeRateSheetImage } = require('../services/aiService');
 
@@ -9,9 +10,9 @@ const { analyzeRateSheetImage } = require('../services/aiService');
  */
 
 // 1. POST /api/rate-sheets/upload — Görsel yükle, Gemini Vision ile analiz et, kaydet
-router.post('/upload', async (req, res, next) => {
+router.post('/upload', auth, async (req, res, next) => {
     const { file, filename, mimeType } = req.body;
-    const userId = '1'; // Gerçek uygulamada req.user?.id veya '1'
+    const userId = req.user.id;
 
     if (!file) {
         return res.status(400).json({ success: false, message: 'Yüklenecek dosya verisi (base64) bulunamadı.' });
@@ -106,8 +107,8 @@ router.post('/upload', async (req, res, next) => {
 });
 
 // 2. GET /api/rate-sheets — Yüklenen sheet listesi
-router.get('/', async (req, res, next) => {
-    const userId = '1';
+router.get('/', auth, async (req, res, next) => {
+    const userId = req.user.id;
     try {
         const result = await db.query(
             'SELECT * FROM rate_sheets WHERE user_id = $1 ORDER BY created_at DESC',
@@ -120,7 +121,7 @@ router.get('/', async (req, res, next) => {
 });
 
 // 3. GET /api/rate-sheets/query — Belirli rota için en uygun fiyatı sorgula
-router.get('/query', async (req, res, next) => {
+router.get('/query', auth, async (req, res, next) => {
     const { pol, pod } = req.query;
     
     if (!pol || !pod) {
@@ -143,10 +144,10 @@ router.get('/query', async (req, res, next) => {
 });
 
 // 4. DELETE /api/rate-sheets/:id — Navlun sayfasını sil (cascade ile item'lar silinir)
-router.delete('/:id', async (req, res, next) => {
+router.delete('/:id', auth, async (req, res, next) => {
     const { id } = req.params;
     try {
-        await db.query('DELETE FROM rate_sheets WHERE id = $1', [id]);
+        await db.query('DELETE FROM rate_sheets WHERE id = $1 AND user_id = $2', [id, req.user.id]);
         res.json({ success: true, message: 'Navlun fiyat görseli ve ilişkili satırları başarıyla silindi.' });
     } catch (err) {
         next(err);

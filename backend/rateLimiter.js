@@ -1,21 +1,21 @@
 const rateLimit = require('express-rate-limit');
 
-// Genel Uygulama Limiti: Yerelde kısıtlamayı kaldırıyoruz (Maksimum limit)
+// Genel Uygulama Limiti
 const generalLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 dakika
-    max: 999999, 
+    max: process.env.NODE_ENV === 'production' ? 200 : 999999, 
     message: {
         success: false,
         message: 'Çok fazla istek gönderdiniz. Lütfen bir süre sonra tekrar deneyiniz.'
     },
-    standardHeaders: true, // `RateLimit-*` headerlarını döndürür
-    legacyHeaders: false, // `X-RateLimit-*` headerlarını devre dışı bırakır
+    standardHeaders: true,
+    legacyHeaders: false,
 });
 
-// Kimlik Doğrulama Limiti (Login/Register/Verify): Yerelde kısıtlamayı kaldırıyoruz
+// Kimlik Doğrulama Limiti
 const authLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 dakika
-    max: 999999,
+    max: process.env.NODE_ENV === 'production' ? 10 : 999999,
     message: {
         success: false,
         message: 'Güvenlik nedeniyle kimlik doğrulama denemeleriniz kısıtlanmıştır. Lütfen 15 dakika sonra tekrar deneyiniz.'
@@ -24,4 +24,28 @@ const authLimiter = rateLimit({
     legacyHeaders: false,
 });
 
-module.exports = { generalLimiter, authLimiter };
+// AI Istekleri Limiti
+const aiLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 dakika
+    max: process.env.NODE_ENV === 'production' ? 30 : 999999,
+    message: {
+        success: false,
+        message: 'AI istek limitine ulaştınız. Lütfen bir süre bekleyin.'
+    },
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+
+// Dosya Yükleme Limiti
+const uploadLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 dakika
+    max: process.env.NODE_ENV === 'production' ? 15 : 999999,
+    message: {
+        success: false,
+        message: 'Dosya yükleme limitine ulaştınız. Lütfen bir süre bekleyin.'
+    },
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+
+module.exports = { generalLimiter, authLimiter, aiLimiter, uploadLimiter };

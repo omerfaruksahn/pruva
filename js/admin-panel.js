@@ -12,7 +12,23 @@ function log(a,d){ state.activityLog.unshift({action:a,detail:d,time:new Date().
 
 async function api(endpoint, body) {
     try {
-        const opts = body ? {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)} : {};
+        let token = '';
+        if (window.auth && auth.currentUser) {
+            token = await auth.currentUser.getIdToken();
+        } else if (window.firebase && firebase.auth().currentUser) {
+            token = await firebase.auth().currentUser.getIdToken();
+        }
+        
+        const headers = {};
+        if (token) headers['Authorization'] = 'Bearer ' + token;
+        if (body) headers['Content-Type'] = 'application/json';
+        
+        const opts = {
+            method: body ? 'POST' : 'GET',
+            headers: headers
+        };
+        if (body) opts.body = JSON.stringify(body);
+        
         const res = await fetch(API+endpoint, opts);
         const data = await res.json();
         return data;

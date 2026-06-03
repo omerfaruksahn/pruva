@@ -458,9 +458,13 @@ export class SettingsManager {
             await reauthenticateWithCredential(fbUser, EmailAuthProvider.credential(fbUser.email, password));
 
             try {
-                await fetch('http://localhost:3005/api/delete-user', {
+                let token = await fbUser.getIdToken();
+                await fetch('http://localhost:5000/api/user-actions/delete-user', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
                     body: JSON.stringify({ uid })
                 });
             } catch(e) { console.warn('[SETTINGS] Server delete failed:', e.message); }

@@ -288,7 +288,7 @@ window.pruvaAiView = (state) => {
                                                 <img src="/assets/pruva_robot.svg" style="width: 18px; height: 18px; vertical-align: text-bottom; margin-right: 4px;"> Yapay Zeka Önerisi
                                             </div>
                                             <div class="ai-suggestion-text">
-                                                ${msg.text}
+                                                ${escapeHTML(msg.text)}
                                             </div>
                                             ${hasMail ? `
                                                 <div class="mail-preview-box" style="margin-top: 12px; border-top: 1px dashed var(--border); padding-top: 12px; text-align: left; width: 100%;">
@@ -300,7 +300,7 @@ window.pruvaAiView = (state) => {
                                                         <strong style="color: var(--text-primary); min-width: 45px;">Konu:</strong> 
                                                         <span>${escapeHTML(suggestedMail.subject || 'Konu Yok')}</span>
                                                     </div>
-                                                    <div class="chat-bubble-text" style="${msg.action === 'SEND_CUSTOM_EMAIL' ? 'font-family: monospace; white-space: pre-wrap; background: rgba(0,0,0,0.02); padding: 8px; border-radius: 4px; border: 1px dashed var(--border); margin-top: 6px;' : ''}">${msg.text}</div>
+                                                    <div class="chat-bubble-text" style="${msg.action === 'SEND_CUSTOM_EMAIL' ? 'font-family: monospace; white-space: pre-wrap; background: rgba(0,0,0,0.02); padding: 8px; border-radius: 4px; border: 1px dashed var(--border); margin-top: 6px;' : ''}">${escapeHTML(msg.text)}</div>
                                                     ${msg.attachments && msg.attachments.length > 0 ? `
                                                         <div class="chat-attachments-list" style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px;">
                                                             ${msg.attachments.map(att => `

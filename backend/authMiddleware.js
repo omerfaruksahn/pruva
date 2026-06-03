@@ -51,7 +51,7 @@ module.exports = async function(req, res, next) {
         next();
     } catch (err) {
         // 3. Dummy data mode aktifse Firebase tokenlarını veya test tokenlarını çöz ve hata verme
-        if (process.env.USE_DUMMY_DATA === 'true') {
+        if (process.env.USE_DUMMY_DATA === 'true' && process.env.NODE_ENV !== 'production') {
             try {
                 const decoded = jwt.decode(token);
                 if (decoded) {

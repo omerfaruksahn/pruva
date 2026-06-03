@@ -215,12 +215,13 @@ router.get('/rates/:rfqId', auth, async (req, res) => {
     try {
         const { rfqId } = req.params;
         const query = `
-            SELECT id, carrier_name, extracted_price, currency, price_per, validity_date, status, received_at
-            FROM pricing_rates
-            WHERE rfq_id = $1
-            ORDER BY extracted_price ASC;
+            SELECT pr.id, pr.carrier_name, pr.extracted_price, pr.currency, pr.price_per, pr.validity_date, pr.status, pr.received_at
+            FROM pricing_rates pr
+            JOIN pricing_rfqs r ON r.id = pr.rfq_id
+            WHERE pr.rfq_id = $1 AND r.user_id = $2
+            ORDER BY pr.extracted_price ASC;
         `;
-        const result = await db.query(query, [rfqId]);
+        const result = await db.query(query, [rfqId, req.user.id]);
         res.json(result.rows);
     } catch (err) {
         console.error('[GET RATES ERR]', err);

@@ -22,13 +22,15 @@ service firebase.storage {
     // Sevkiyat evrakları
     match /shipment_docs/{allPaths=**} {
       allow read, write: if request.auth != null
-        && request.resource.size < 15 * 1024 * 1024;
+        && request.resource.size < 15 * 1024 * 1024
+        && request.resource.contentType.matches('(application/pdf|image/.*|application/vnd\\..*|text/csv)');
     }
 
     // Referans belgeleri
     match /references/{allPaths=**} {
       allow read, write: if request.auth != null
-        && request.resource.size < 5 * 1024 * 1024;
+        && request.resource.size < 5 * 1024 * 1024
+        && request.resource.contentType.matches('(application/pdf|image/.*|application/vnd\\..*|text/csv)');
     }
 
     match /{allPaths=**} {

@@ -60,7 +60,7 @@ router.get('/login', async (req, res) => {
 
         // State parametresi içine kullanıcı ID'sini şifrelemeden güvenle yerleştiriyoruz.
         // Microsoft bu parametreyi callback'te aynen geri gönderecektir.
-        const state = JSON.stringify({ userId });
+        const state = jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: '10m' });
 
         const authCodeUrlParameters = {
             scopes: scopes,
@@ -92,7 +92,7 @@ router.get('/callback', async (req, res) => {
 
     try {
         // State parametresini çözüp userId'yi al
-        const stateData = JSON.parse(state);
+        const stateData = jwt.verify(state, process.env.JWT_SECRET);
         const userId = stateData.userId;
 
         if (!userId) {
@@ -138,7 +138,8 @@ router.get('/callback', async (req, res) => {
                 </div>
                 <script>
                     if (window.opener) {
-                        window.opener.postMessage({ type: 'OUTLOOK_CONNECTED', email: '${email}' }, '*');
+                        const safeEmail = '${email.replace(/['"<>]/g, '')}';
+                        window.opener.postMessage({ type: 'OUTLOOK_CONNECTED', email: safeEmail }, window.location.origin);
                     }
                     setTimeout(function() {
                         window.close();

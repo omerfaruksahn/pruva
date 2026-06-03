@@ -184,19 +184,28 @@ window.MarketplaceManager = class MarketplaceManager {
                     });
 
                     // Send email notification secure call
-                    fetch('http://localhost:3005/api/send-email-on-bid', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            adId: ad.id,
-                            price: price,
-                            carrierName: currentUser
-                        })
-                    }).then(res => res.json())
-                      .then(data => console.log('[EMAIL] Notification response:', data))
-                      .catch(err => console.warn('[EMAIL] Notification failed:', err.message));
+                    try {
+                        let token = '';
+                        if (window.auth && auth.currentUser) token = await auth.currentUser.getIdToken();
+                        else if (window.firebase && firebase.auth().currentUser) token = await firebase.auth().currentUser.getIdToken();
+                        
+                        fetch('http://localhost:5000/api/user-actions/send-email-on-bid', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': token ? 'Bearer ' + token : ''
+                            },
+                            body: JSON.stringify({
+                                adId: ad.id,
+                                price: price,
+                                carrierName: currentUser
+                            })
+                        }).then(res => res.json())
+                          .then(data => console.log('[EMAIL] Notification response:', data))
+                          .catch(err => console.warn('[EMAIL] Notification failed:', err.message));
+                    } catch(e) {
+                        console.warn('Token alınamadığı için mail gönderilemedi', e);
+                    }
                 }
             }
         }

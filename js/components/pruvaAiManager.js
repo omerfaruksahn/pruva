@@ -157,6 +157,22 @@ window.PruvaAiManager = class PruvaAiManager {
         this.app.state.detailsDrawerOpen = false;
     }
 
+    // Yardımcı: Firebase Auth Token alma (tekrarlayan kodu ortadan kaldırır)
+    async getAuthToken() {
+        const firebaseUser = window.fbAuth?.currentUser;
+        return firebaseUser ? await firebaseUser.getIdToken() : '';
+    }
+
+    // Yardımcı: Standart API header'ları oluştur
+    async getAuthHeaders() {
+        const token = await this.getAuthToken();
+        return {
+            'Content-Type': 'application/json',
+            'x-auth-token': token,
+            'Authorization': `Bearer ${token}`
+        };
+    }
+
     // Arayüz Init tetiklendiğinde
     init() {
         // Prevent infinite rendering loop and redundant API calls during commits
@@ -255,7 +271,7 @@ window.PruvaAiManager = class PruvaAiManager {
 
             // 5. Konuşmaları (conversations) çek (Faz 3)
             try {
-                const convRes = await fetch('/api/ai/conversations', { headers });
+                const convRes = await fetch(`/api/ai/conversations?_t=${Date.now()}`, { headers });
                 if (convRes.ok) {
                     const apiConversations = await convRes.json();
                     if (apiConversations.length > 0) {
@@ -702,8 +718,8 @@ window.PruvaAiManager = class PruvaAiManager {
             renderedBody = renderedBody.replace(placeholder, value);
         }
 
-        renderedSubject = renderedSubject.replace(/\{\{\s*([A-Za-z0-9_]+)\s*\}\}/g, '[$1]');
-        renderedBody = renderedBody.replace(/\{\{\s*([A-Za-z0-9_]+)\s*\}\}/g, '[$1]');
+        renderedSubject = renderedSubject.replace(/\{\{\s*([A-Za-z0-9_\u00C0-\u024F\u0100-\u017F\u011E\u011F\u0130\u0131\u015E\u015F\u00D6\u00F6\u00DC\u00FC\u00C7\u00E7]+)\s*\}\}/g, '[$1]');
+        renderedBody = renderedBody.replace(/\{\{\s*([A-Za-z0-9_\u00C0-\u024F\u0100-\u017F\u011E\u011F\u0130\u0131\u015E\u015F\u00D6\u00F6\u00DC\u00FC\u00C7\u00E7]+)\s*\}\}/g, '[$1]');
 
         const toEl = document.getElementById('preview-to');
         const subEl = document.getElementById('preview-subject');
@@ -1354,6 +1370,9 @@ window.PruvaAiManager = class PruvaAiManager {
         } else if (type === 'info') {
             icon = 'ℹ';
             color = 'var(--info)';
+        } else if (type === 'warning') {
+            icon = '⚠';
+            color = 'var(--warning, #f59e0b)';
         }
 
         toast.innerHTML = `<span style="color: ${color}; font-weight: 800; font-size: 1rem;">${icon}</span> ${message}`;
@@ -1488,7 +1507,7 @@ window.PruvaAiManager = class PruvaAiManager {
                 
                 // Konuşmaları yeniden yükle
                 const headers = { 'Authorization': `Bearer ${token}` };
-                const convRes = await fetch('/api/ai/conversations', { headers });
+                const convRes = await fetch(`/api/ai/conversations?_t=${Date.now()}`, { headers });
                 if (convRes.ok) {
                     const apiConversations = await convRes.json();
                     this.app.state.pricingConversations = apiConversations;
@@ -1533,7 +1552,7 @@ window.PruvaAiManager = class PruvaAiManager {
                     
                     // Reload state after connection
                     const headers = { 'Authorization': `Bearer ${token}` };
-                    const convRes = await fetch('/api/pricing/conversations', { headers });
+                    const convRes = await fetch(`/api/ai/conversations?_t=${Date.now()}`, { headers });
                     if (convRes.ok) {
                         const apiConversations = await convRes.json();
                         this.app.state.pricingConversations = apiConversations;
@@ -1938,41 +1957,52 @@ window.PruvaAiManager = class PruvaAiManager {
     }
     
     async clearConversationHistory(convId) {
-        if (!confirm('Geçmiş sohbet verilerini silmek istediğinize emin misiniz?')) return;
+        const isCopilot = convId === 'copilot';
+        const confirmMsg = isCopilot 
+            ? 'Co-pilot sohbet geçmişini kalıcı olarak silmek istediğinize emin misiniz?' 
+            : 'Bu konuşmayı ve tüm ilişkili verileri (mesajlar, fiyatlar, performans kayıtları) kalıcı olarak silmek istediğinize emin misiniz?';
+        
+        if (!confirm(confirmMsg)) return;
         
         try {
             this.app.state.aiLoading = true;
             this.app.commit();
             
-            const firebaseUser = window.fbAuth?.currentUser;
-            const token = firebaseUser ? await firebaseUser.getIdToken() : '';
+            const token = await this.getAuthToken();
             
-            const reqBody = {
-                message: 'RESET_HISTORY',
-                context: { conversationId: convId, email: convId === 'copilot' ? 'copilot@pruva.ai' : '' }
-            };
-
-            await fetch('/api/ai/analyze', {
-                method: 'POST',
+            const response = await fetch(`/api/ai/conversations/${convId}`, {
+                method: 'DELETE',
                 headers: {
-                    'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify(reqBody)
+                }
             });
 
-            // UI'daki mesajları tamamen sil
-            const conversations = this.app.state.pricingConversations;
-            const convIdx = conversations.findIndex(c => c.id === convId);
-            if (convIdx !== -1) {
-                conversations[convIdx].messages = [];
-                conversations[convIdx].lastMessage = '';
+            if (!response.ok) {
+                const errData = await response.json().catch(() => ({}));
+                throw new Error(errData.error || 'Silme işlemi başarısız oldu.');
+            }
+
+            if (isCopilot) {
+                // Copilot: Kanal kalır, mesajlar temizlenir
+                const conversations = this.app.state.pricingConversations || [];
+                const convIdx = conversations.findIndex(c => c.id === 'copilot');
+                if (convIdx !== -1) {
+                    conversations[convIdx].messages = [];
+                    conversations[convIdx].lastMessage = 'Genel Komut & Yapay Zeka Sohbeti';
+                }
+            } else {
+                // Normal konuşma: Listeden tamamen kaldır, copilot'a geç
+                this.app.state.pricingConversations = (this.app.state.pricingConversations || []).filter(c => c.id !== convId);
+                this.app.state.activeConversationId = 'copilot';
             }
             
-            this.showToast('Hafıza ve ekran başarıyla temizlendi!', 'success');
+            this.showToast('Geçmiş kalıcı olarak silindi!', 'success');
+            
+            // DB'den güncel listeyi çek
+            await this.loadState();
         } catch (err) {
-            console.error('Hafıza silinemedi:', err);
-            this.showToast('Hafıza silinirken hata oluştu.', 'danger');
+            console.error('Konuşma silinemedi:', err);
+            this.showToast('Silme hatası: ' + err.message, 'danger');
         } finally {
             this.app.state.aiLoading = false;
             this.app.commit();

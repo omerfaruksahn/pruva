@@ -8,7 +8,26 @@ const fs = require('fs');
 const path = require('path');
 const admin = require('../firebaseAdmin');
 
-const upload = multer({ dest: 'uploads/' });
+const upload = multer({
+  dest: 'uploads/',
+  limits: { fileSize: 10 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    const allowed = ['application/pdf', 'image/png', 'image/jpeg', 'image/webp', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-excel', 'text/csv'];
+    if (allowed.includes(file.mimetype)) cb(null, true);
+    else cb(new Error('Desteklenmeyen dosya formatı.'), false);
+  }
+});
+
+async function handleResetHistory(client, rfqId, userId, res) {
+  await client.query('DELETE FROM pricing_actions WHERE rfq_id = $1 AND user_id = $2', [rfqId, userId]);
+  await client.query('COMMIT');
+  return res.json({
+    success: true,
+    action: 'GENERAL',
+    summary: 'Hafıza başarıyla silindi. Geçmiş kısıtlamalarımı unuttum. Lütfen komutunuzu tekrar gönderin.',
+    confidence: 1
+  });
+}
 
 // @route   POST api/ai/analyze
 // @desc    Kullanıcı komutunu analiz eder ve AI önerisi üretir
@@ -64,16 +83,9 @@ router.post('/analyze', auth, async (req, res) => {
         rfqId = insertBase.rows[0].id;
       }
       
-      // Secret command to clear history and force the AI to forget past hallucinated limitations
-      if (message.trim() === 'RESET_HISTORY') {
-        await client.query('DELETE FROM pricing_actions WHERE rfq_id = $1 AND user_id = $2', [rfqId, req.user.id]);
-        await client.query('COMMIT');
-        return res.json({
-          success: true,
-          action: 'GENERAL',
-          summary: 'Hafıza başarıyla silindi. Geçmiş kısıtlamalarımı unuttum. Lütfen komutunuzu tekrar gönderin.',
-          confidence: 1
-        });
+      if (message.trim().toUpperCase() === 'RESET_HISTORY' || message.trim().toUpperCase() === 'RESET HİSTORY' || message.trim().toUpperCase() === 'RESET HISTORY') {
+        await handleResetHistory(client, rfqId, req.user.id, res);
+        return;
       }
 
       // Kullanıcının yazdığı yeni co-pilot komutunu veri tabanında bir aksiyon olarak sakla (outgoing/giden)
@@ -90,16 +102,9 @@ router.post('/analyze', auth, async (req, res) => {
       } else if (typeof conversationId === 'string' && conversationId.startsWith('rfq-')) {
         rfqId = parseInt(conversationId.replace('rfq-', ''));
 
-        // Secret command to clear history and force the AI to forget past hallucinated limitations
-        if (message.trim() === 'RESET_HISTORY') {
-          await client.query('DELETE FROM pricing_actions WHERE rfq_id = $1 AND user_id = $2', [rfqId, req.user.id]);
-          await client.query('COMMIT');
-          return res.json({
-            success: true,
-            action: 'GENERAL',
-            summary: 'Hafıza başarıyla silindi. Geçmiş kısıtlamalarımı unuttum. Lütfen komutunuzu tekrar gönderin.',
-            confidence: 1
-          });
+        if (message.trim().toUpperCase() === 'RESET_HISTORY' || message.trim().toUpperCase() === 'RESET HİSTORY' || message.trim().toUpperCase() === 'RESET HISTORY') {
+          await handleResetHistory(client, rfqId, req.user.id, res);
+          return;
         }
       } else {
         const latestRfq = await client.query(
@@ -189,7 +194,6 @@ router.post('/analyze', auth, async (req, res) => {
     // 4) Yapay zekanın cevabını veya aksiyon önerisini veritabanına kaydet
     if (rfqId) {
       const isDraftAction = ['SEND_CUSTOM_EMAIL', 'SEND_RATE_REQUEST', 'SEND_OFFER', 'SEND_MISSING_INFO', 'SEND_FOLLOWUP'].includes(result.action);
-    console.log('DEBUG AI ACTION:', result.action, 'isDraftAction:', isDraftAction);
       
       let suggestedMail = null;
       if (result.suggestedMessage) {
@@ -410,7 +414,6 @@ router.get('/conversations', auth, async (req, res) => {
         if (action.attachments && Array.isArray(action.attachments)) {
           for (const att of action.attachments) {
             let signedUrl = att.path;
-            let signedUrl = att.path;
             // Zaten public URL döndürüyoruz, ek işleme gerek yok
             processedAttachments.push({ ...att, signedUrl });
           }
@@ -468,6 +471,58 @@ router.get('/conversations', auth, async (req, res) => {
   } catch (err) {
     console.error('Conversations error:', err);
     res.json([]);
+  }
+});
+
+// @route   DELETE api/ai/conversations/:id
+// @desc    Konuşma geçmişini kalıcı olarak siler (tüm ilişkili tablolar dahil)
+router.delete('/conversations/:id', auth, async (req, res) => {
+  const client = await db.getClient();
+  try {
+    const userId = req.user.id;
+    const convId = req.params.id;
+
+    await client.query('BEGIN');
+
+    if (convId === 'copilot') {
+      // Copilot: Sadece aksiyonları sil, RFQ kaydını koru (kanal yaşasın)
+      await client.query(
+        "DELETE FROM pricing_actions WHERE user_id = $1 AND rfq_id IN (SELECT id FROM pricing_rfqs WHERE sender_email = 'copilot@pruva.ai' AND user_id = $1)",
+        [userId]
+      );
+    } else {
+      // Normal konuşma (rfq_id bazlı): Tüm ilişkili verileri cascade sil
+      const rfqId = parseInt(convId);
+      if (isNaN(rfqId)) {
+        await client.query('ROLLBACK');
+        return res.status(400).json({ error: 'Geçersiz konuşma ID.' });
+      }
+
+      // Sahiplik doğrulaması
+      const ownerCheck = await client.query(
+        'SELECT id FROM pricing_rfqs WHERE id = $1 AND user_id = $2',
+        [rfqId, userId]
+      );
+      if (ownerCheck.rows.length === 0) {
+        await client.query('ROLLBACK');
+        return res.status(404).json({ error: 'Konuşma bulunamadı.' });
+      }
+
+      // Cascade silme (foreign key sırasına göre)
+      await client.query('DELETE FROM pricing_carrier_performance WHERE rfq_id = $1', [rfqId]);
+      await client.query('DELETE FROM pricing_rates WHERE rfq_id = $1', [rfqId]);
+      await client.query('DELETE FROM pricing_actions WHERE rfq_id = $1 AND user_id = $2', [rfqId, userId]);
+      await client.query('DELETE FROM pricing_rfqs WHERE id = $1 AND user_id = $2', [rfqId, userId]);
+    }
+
+    await client.query('COMMIT');
+    res.json({ success: true, message: 'Konuşma geçmişi kalıcı olarak silindi.' });
+  } catch (err) {
+    await client.query('ROLLBACK');
+    console.error('Conversation delete error:', err);
+    res.status(500).json({ error: 'Silme işlemi sırasında bir hata oluştu.' });
+  } finally {
+    client.release();
   }
 });
 
