@@ -3,7 +3,7 @@
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "https://PROJENIN-RENDER-URLSINI-BURAYA-YAZIN.onrender.com/api/$1"
+      "destination": "https://pruva-1.onrender.com/api/$1"
     },
     {
       "source": "/(.*)",
