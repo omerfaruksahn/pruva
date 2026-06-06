@@ -139,7 +139,7 @@ router.get('/callback', async (req, res) => {
                 <script>
                     if (window.opener) {
                         const safeEmail = '${email.replace(/['"<>]/g, '')}';
-                        window.opener.postMessage({ type: 'OUTLOOK_CONNECTED', email: safeEmail }, window.location.origin);
+                        window.opener.postMessage({ type: 'OUTLOOK_CONNECTED', email: safeEmail }, '*');
                     }
                     setTimeout(function() {
                         window.close();

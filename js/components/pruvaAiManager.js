@@ -229,7 +229,7 @@ window.PruvaAiManager = class PruvaAiManager {
             };
 
             // 1. Şablonları çek
-            const tplRes = await fetch('/api/pricing/templates', { headers });
+            const tplRes = await fetch(CONFIG.API_URL + '/pricing/templates', { headers });
             if (tplRes.ok) {
                 const apiTemplates = await tplRes.json();
                 this.templates = apiTemplates;
@@ -238,7 +238,7 @@ window.PruvaAiManager = class PruvaAiManager {
             }
 
             // 2. Taşıyıcıları çek
-            const carrierRes = await fetch('/api/pricing/carriers', { headers });
+            const carrierRes = await fetch(CONFIG.API_URL + '/pricing/carriers', { headers });
             if (carrierRes.ok) {
                 const apiCarriers = await carrierRes.json();
                 this.carriers = apiCarriers;
@@ -247,7 +247,7 @@ window.PruvaAiManager = class PruvaAiManager {
 
             // 3. Margin Kurallarını çek (Faz 5)
             try {
-                const marginsRes = await fetch('/api/pricing/margins', { headers });
+                const marginsRes = await fetch(CONFIG.API_URL + '/pricing/margins', { headers });
                 if (marginsRes.ok) {
                     this.margins = await marginsRes.json();
                     this.renderMargins();
@@ -258,7 +258,7 @@ window.PruvaAiManager = class PruvaAiManager {
 
             // 4. Taşıyıcı Performans Skorlarını çek (Faz 5)
             try {
-                const perfRes = await fetch('/api/pricing/carrier_performance', { headers });
+                const perfRes = await fetch(CONFIG.API_URL + '/pricing/carrier_performance', { headers });
                 if (perfRes.ok) {
                     this.carrierPerformances = await perfRes.json();
                     this.renderCarriers(); // Performans skorlarıyla tekrar çiz
@@ -271,7 +271,7 @@ window.PruvaAiManager = class PruvaAiManager {
 
             // 5. Konuşmaları (conversations) çek (Faz 3)
             try {
-                const convRes = await fetch(`/api/ai/conversations?_t=${Date.now()}`, { headers });
+                const convRes = await fetch(CONFIG.API_URL + `/ai/conversations?_t=${Date.now()}`, { headers });
                 if (convRes.ok) {
                     const apiConversations = await convRes.json();
                     if (apiConversations.length > 0) {
@@ -290,7 +290,7 @@ window.PruvaAiManager = class PruvaAiManager {
 
             // 6. Metrikleri çek (Faz 1)
             try {
-                const metricsRes = await fetch('/api/pricing/metrics', { headers });
+                const metricsRes = await fetch(CONFIG.API_URL + '/pricing/metrics', { headers });
                 if (metricsRes.ok) {
                     this.metrics = await metricsRes.json();
                     needsCommit = true;
@@ -301,7 +301,7 @@ window.PruvaAiManager = class PruvaAiManager {
 
             // 7. Outlook bağlantı durumunu sorgula
             try {
-                const outlookRes = await fetch('/api/outlook/status', { headers });
+                const outlookRes = await fetch(CONFIG.API_URL + '/outlook/status', { headers });
                 if (outlookRes.ok) {
                     const status = await outlookRes.json();
                     if (status.isConnected) {
@@ -459,7 +459,7 @@ window.PruvaAiManager = class PruvaAiManager {
                 const firebaseUser = window.fbAuth?.currentUser;
                 const token = firebaseUser ? await firebaseUser.getIdToken() : '';
                 
-                const res = await fetch('/api/pricing/templates', {
+                const res = await fetch(CONFIG.API_URL + '/pricing/templates', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -504,7 +504,7 @@ window.PruvaAiManager = class PruvaAiManager {
             try {
                 const firebaseUser = window.fbAuth?.currentUser;
                 const token = firebaseUser ? await firebaseUser.getIdToken() : '';
-                await fetch(`/api/pricing/templates/${key}`, {
+                await fetch(CONFIG.API_URL + `/pricing/templates/${key}`, {
                     method: 'DELETE',
                     headers: {
                         'x-auth-token': token,
@@ -879,7 +879,7 @@ window.PruvaAiManager = class PruvaAiManager {
             try {
                 const firebaseUser = window.fbAuth?.currentUser;
                 const token = firebaseUser ? await firebaseUser.getIdToken() : '';
-                await fetch(`/api/pricing/carriers/${id}/toggle`, {
+                await fetch(CONFIG.API_URL + `/pricing/carriers/${id}/toggle`, {
                     method: 'PATCH',
                     headers: {
                         'Content-Type': 'application/json',
@@ -908,7 +908,7 @@ window.PruvaAiManager = class PruvaAiManager {
             try {
                 const firebaseUser = window.fbAuth?.currentUser;
                 const token = firebaseUser ? await firebaseUser.getIdToken() : '';
-                await fetch(`/api/pricing/carriers/${id}`, {
+                await fetch(CONFIG.API_URL + `/pricing/carriers/${id}`, {
                     method: 'DELETE',
                     headers: {
                         'x-auth-token': token,
@@ -1012,7 +1012,7 @@ window.PruvaAiManager = class PruvaAiManager {
             const firebaseUser = window.fbAuth?.currentUser;
             const token = firebaseUser ? await firebaseUser.getIdToken() : '';
             
-            const res = await fetch('/api/pricing/carriers', {
+            const res = await fetch(CONFIG.API_URL + '/pricing/carriers', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -1114,7 +1114,7 @@ window.PruvaAiManager = class PruvaAiManager {
             const firebaseUser = window.fbAuth?.currentUser;
             const token = firebaseUser ? await firebaseUser.getIdToken() : '';
             
-            const res = await fetch(`/api/pricing/rate-history?pol=${encodeURIComponent(pol)}&pod=${encodeURIComponent(pod)}&mode=${encodeURIComponent(mode)}`, {
+            const res = await fetch(CONFIG.API_URL + `/pricing/rate-history?pol=${encodeURIComponent(pol)}&pod=${encodeURIComponent(pod)}&mode=${encodeURIComponent(mode)}`, {
                 headers: {
                     'x-auth-token': token,
                     'Authorization': `Bearer ${token}`
@@ -1287,7 +1287,7 @@ window.PruvaAiManager = class PruvaAiManager {
             const firebaseUser = window.fbAuth?.currentUser;
             const token = firebaseUser ? await firebaseUser.getIdToken() : '';
             
-            const res = await fetch('/api/pricing/margins', {
+            const res = await fetch(CONFIG.API_URL + '/pricing/margins', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -1329,7 +1329,7 @@ window.PruvaAiManager = class PruvaAiManager {
         try {
             const firebaseUser = window.fbAuth?.currentUser;
             const token = firebaseUser ? await firebaseUser.getIdToken() : '';
-            await fetch(`/api/pricing/margins/${id}`, {
+            await fetch(CONFIG.API_URL + `/pricing/margins/${id}`, {
                 method: 'DELETE',
                 headers: {
                     'x-auth-token': token,
@@ -1492,7 +1492,7 @@ window.PruvaAiManager = class PruvaAiManager {
             const firebaseUser = window.fbAuth?.currentUser;
             const token = firebaseUser ? await firebaseUser.getIdToken() : '';
             
-            const response = await fetch('/api/outlook/scan', {
+            const response = await fetch(CONFIG.API_URL + '/outlook/scan', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -1507,7 +1507,7 @@ window.PruvaAiManager = class PruvaAiManager {
                 
                 // Konuşmaları yeniden yükle
                 const headers = { 'Authorization': `Bearer ${token}` };
-                const convRes = await fetch(`/api/ai/conversations?_t=${Date.now()}`, { headers });
+                const convRes = await fetch(CONFIG.API_URL + `/ai/conversations?_t=${Date.now()}`, { headers });
                 if (convRes.ok) {
                     const apiConversations = await convRes.json();
                     this.app.state.pricingConversations = apiConversations;
@@ -1549,16 +1549,19 @@ window.PruvaAiManager = class PruvaAiManager {
                     // Update connection state on frontend immediately
                     this.app.state.outlookConnected = true;
                     this.app.state.outlookEmail = event.data.email;
+                    if (this.app.store) this.app.store.save();
+                    this.app.commit();
                     
                     // Reload state after connection
                     const headers = { 'Authorization': `Bearer ${token}` };
-                    const convRes = await fetch(`/api/ai/conversations?_t=${Date.now()}`, { headers });
+                    const convRes = await fetch(CONFIG.API_URL + `/ai/conversations?_t=${Date.now()}`, { headers });
                     if (convRes.ok) {
                         const apiConversations = await convRes.json();
                         this.app.state.pricingConversations = apiConversations;
                         localStorage.setItem('pruva_pricing_conversations', JSON.stringify(apiConversations));
+                        if (this.app.store) this.app.store.save();
+                        this.app.commit();
                     }
-                    this.app.commit();
                 }
             };
             window.addEventListener('message', handleMessage);
@@ -1580,7 +1583,7 @@ window.PruvaAiManager = class PruvaAiManager {
             }
             
             try {
-                await fetch('/api/outlook/disconnect', {
+                await fetch(CONFIG.API_URL + '/outlook/disconnect', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -1631,7 +1634,7 @@ window.PruvaAiManager = class PruvaAiManager {
         const firebaseUser = window.fbAuth?.currentUser;
         const token = firebaseUser ? await firebaseUser.getIdToken() : '';
         
-        const response = await fetch('/api/ai/upload', {
+        const response = await fetch(CONFIG.API_URL + '/ai/upload', {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${token}`
@@ -1648,6 +1651,11 @@ window.PruvaAiManager = class PruvaAiManager {
     }
 
     async sendInput() {
+        if (!this.app.state.outlookConnected) {
+            this.showToast('⚠️ Yapay zekayı kullanmak için tanımlı bir e-posta (Outlook) ile bağlanmalısınız.', 'warning');
+            return;
+        }
+
         const input = document.getElementById('chat-command-input');
         if (!input) return;
         const text = input.value.trim();
@@ -1673,7 +1681,7 @@ window.PruvaAiManager = class PruvaAiManager {
             const isCopilot = activeConvId === 'copilot';
             const newConv = {
                 id: activeConvId,
-                company: isCopilot ? 'Pruva AI Co-pilot' : 'Canlı Yapay Zeka Asistanı',
+                company: isCopilot ? 'P-AI Komut Merkezi' : 'Canlı Yapay Zeka Asistanı',
                 email: isCopilot ? 'copilot@pruva.ai' : '',
                 logoLetter: isCopilot ? '🤖' : '⚡',
                 logoBg: isCopilot ? 'linear-gradient(135deg, #2563eb, #1d4ed8)' : 'linear-gradient(135deg, #2563eb, #3b82f6)',
@@ -1752,7 +1760,7 @@ window.PruvaAiManager = class PruvaAiManager {
                 payload.attachments = uploadedAttachments;
             }
 
-            const response = await fetch('/api/ai/analyze', {
+            const response = await fetch(CONFIG.API_URL + '/ai/analyze', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -1882,14 +1890,14 @@ window.PruvaAiManager = class PruvaAiManager {
             const finalSubject = suggestedMail.subject || suggestionMsg.text || 'Pruva AI Navlun Bildirimi';
             const finalBody = suggestedMail.body || suggestionMsg.suggestedMessage || actionMsg;
             const finalAttachments = suggestedMail.attachments || [];
-            await fetch('/api/pricing/send-email', {
+            await fetch(CONFIG.API_URL + '/pricing/send-email', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify({ to: finalTo, subject: finalSubject, body: finalBody, attachments: finalAttachments })
             });
             const actionId = suggestionMsg.actionId;
             if (actionId) {
-                await fetch(`/api/pricing/actions/${actionId}/approve`, {
+                await fetch(CONFIG.API_URL + `/pricing/actions/${actionId}/approve`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                     body: JSON.stringify({ edited_subject: finalSubject, edited_body: finalBody, selected_carriers: [] })
@@ -1940,7 +1948,7 @@ window.PruvaAiManager = class PruvaAiManager {
                 const firebaseUser = window.fbAuth?.currentUser;
                 const token = firebaseUser ? await firebaseUser.getIdToken() : '';
                 
-                await fetch(`/api/pricing/actions/${actionId}/reject`, {
+                await fetch(CONFIG.API_URL + `/pricing/actions/${actionId}/reject`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -1970,7 +1978,7 @@ window.PruvaAiManager = class PruvaAiManager {
             
             const token = await this.getAuthToken();
             
-            const response = await fetch(`/api/ai/conversations/${convId}`, {
+            const response = await fetch(CONFIG.API_URL + `/ai/conversations/${convId}`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -2095,7 +2103,7 @@ window.PruvaAiManager = class PruvaAiManager {
             const token = firebaseUser ? await firebaseUser.getIdToken() : '';
 
             // Backend Edge-TTS endpoint'ine istek gönder
-            const response = await fetch('/api/tts/synthesize', {
+            const response = await fetch(CONFIG.API_URL + '/tts/synthesize', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -2160,6 +2168,15 @@ window.PruvaAiManager = class PruvaAiManager {
     }
 
     startVoiceRecognition() {
+        if (!this.app.state.outlookConnected) {
+            this.showToast('⚠️ Sesli komutları kullanmak için tanımlı bir e-posta (Outlook) ile bağlanmalısınız.', 'warning');
+            if (this.app.state.isHandsFreeMode) {
+                this.app.state.isHandsFreeMode = false;
+                this.app.commit();
+            }
+            return;
+        }
+
         if (!('webkitSpeechRecognition' in window)) {
             this.showToast('Tarayıcınız sesli komutu desteklemiyor.', 'warning');
             return;

@@ -96,7 +96,7 @@ window.pruvaAiView = (state) => {
         <div class="saas-header-wrapper">
             <div class="saas-header-left">
                 <img src="/assets/pruva_robot.svg" style="width: 42px; height: 42px; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));" alt="Pruva AI Robot">
-                <h2 class="saas-header-title">Pruva AI — Pricing Asistanı</h2>
+                <h2 class="saas-header-title">P-AI</h2>
             </div>
             
             <div class="saas-header-actions">
@@ -112,12 +112,6 @@ window.pruvaAiView = (state) => {
                         📧 Outlook Bağla
                     </button>
                 `}
-                <button class="btn btn-secondary" onclick="window.app.managers.pruvaAi.triggerMailScan()" style="padding: 8px 16px; font-weight: 700; border-radius: var(--radius-md); display: flex; align-items: center; gap: 6px; cursor: pointer; background: var(--bg-elevated); border: 1px solid var(--border);">
-                    📥 Mail Tara
-                </button>
-                <button class="btn btn-secondary" onclick="window.app.router.navigate('pricing-settings')" style="padding: 8px 16px; font-weight: 700; border-radius: var(--radius-md); display: flex; align-items: center; gap: 6px; cursor: pointer;">
-                    ⚙️ Ayarlar
-                </button>
             </div>
         </div>
 
@@ -127,22 +121,24 @@ window.pruvaAiView = (state) => {
             <!-- SOL KOLON (320px Sabit) -->
             <div class="chat-left-sidebar">
                 
-                <!-- Üst Özet Bar -->
-                <div class="chat-summary-bar">
-                    Durum: ${rfqCount} RFQ | ${offerCount} Teklif
+                <!-- Arama ve Araçlar -->
+                <div style="display: flex; gap: 8px; margin: 12px 16px; align-items: center;">
+                    <div class="chat-search-wrapper" style="flex: 1; margin: 0;">
+                        <input type="text" class="chat-search-input" id="conv-search-input" placeholder="Konuşma veya içerik ara..." value="${state.convSearchQuery || ''}" oninput="window.pruvaAiManager.searchConversations(this.value)" style="margin: 0; width: 100%;">
+                    </div>
+                    <button class="btn btn-secondary" onclick="window.app.managers.pruvaAi.triggerMailScan()" title="Mail Tara" style="padding: 0; width: 36px; height: 36px; border-radius: var(--radius-md); cursor: pointer; background: var(--bg-elevated); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.2s;" onmouseover="this.style.background='var(--bg-surface)'; this.style.borderColor='var(--primary)'" onmouseout="this.style.background='var(--bg-elevated)'; this.style.borderColor='var(--border)'">
+                        📥
+                    </button>
                 </div>
 
-                <!-- Arama Kutusu -->
-                <div class="chat-search-wrapper">
-                    <input type="text" class="chat-search-input" id="conv-search-input" placeholder="Konuşma veya içerik ara..." value="${state.convSearchQuery || ''}" oninput="window.pruvaAiManager.searchConversations(this.value)">
-                </div>
-
-                <!-- Filtre Sekmeleri -->
-                <div class="chat-filter-tabs">
-                    <button class="chat-filter-btn ${filterMode === 'ALL' ? 'active' : ''}" onclick="window.pruvaAiManager.filterConversations('ALL')">Tümü</button>
-                    <button class="chat-filter-btn ${filterMode === 'CUSTOMERS' ? 'active' : ''}" onclick="window.pruvaAiManager.filterConversations('CUSTOMERS')">Müşteriler</button>
-                    <button class="chat-filter-btn ${filterMode === 'CARRIERS' ? 'active' : ''}" onclick="window.pruvaAiManager.filterConversations('CARRIERS')">Taşıyıcılar</button>
-                    <button class="chat-filter-btn ${filterMode === 'PENDING' ? 'active' : ''}" onclick="window.pruvaAiManager.filterConversations('PENDING')">Bekleyenler</button>
+                <!-- Filtre Dropdown -->
+                <div class="chat-filter-tabs" style="padding: 0 16px 12px 16px; margin: 0; border-bottom: 1px solid var(--border);">
+                    <select class="chat-filter-select" onchange="window.pruvaAiManager.filterConversations(this.value)" style="width: 100%; padding: 8px 12px; border-radius: var(--radius-md); border: 1px solid var(--border); background: var(--bg-surface); color: var(--text-primary); font-size: 0.85rem; font-weight: 600; cursor: pointer; outline: none; transition: border-color 0.2s;" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--border)'">
+                        <option value="ALL" ${filterMode === 'ALL' ? 'selected' : ''}>📋 Tüm Konuşmalar</option>
+                        <option value="CUSTOMERS" ${filterMode === 'CUSTOMERS' ? 'selected' : ''}>🏢 Sadece Müşteriler</option>
+                        <option value="CARRIERS" ${filterMode === 'CARRIERS' ? 'selected' : ''}>🚚 Sadece Taşıyıcılar</option>
+                        <option value="PENDING" ${filterMode === 'PENDING' ? 'selected' : ''}>⏳ İşlem Bekleyenler</option>
+                    </select>
                 </div>
 
                 <!-- Konuşma Listesi (Scrollable) -->
@@ -154,7 +150,7 @@ window.pruvaAiView = (state) => {
                         </div>
                         <div class="chat-item-details">
                             <div class="chat-item-row1">
-                                <span class="chat-item-name" style="font-weight: 800; color: var(--primary);">Pruva AI Co-pilot</span>
+                                <span class="chat-item-name" style="font-weight: 800; color: var(--primary);">P-AI Komut Merkezi</span>
                                 <span class="chat-item-time" style="font-size: 0.7rem; color: #2563eb; font-weight: 700; background: rgba(37,99,235,0.1); padding: 1px 5px; border-radius: 4px;">Pinned</span>
                             </div>
                             <div class="chat-item-row2">
@@ -188,11 +184,14 @@ window.pruvaAiView = (state) => {
                     ` : ''}
                 </div>
 
-                <!-- Sol Kolon Alt Rapor Linki -->
-                <div class="chat-left-footer">
-                    <a href="/pricing-reports">
-                        📊 Raporları Gör &rarr;
+                <!-- Sol Kolon Alt Rapor & Ayarlar -->
+                <div class="chat-left-footer" style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border); padding: 12px 16px;">
+                    <a href="/pricing-reports" style="font-size: 0.85rem; font-weight: 700; color: var(--text-secondary); text-decoration: none; display: flex; align-items: center; gap: 6px;">
+                        📊 Raporlar
                     </a>
+                    <button onclick="window.app.router.navigate('pricing-settings')" style="background: transparent; border: none; font-size: 0.85rem; font-weight: 700; color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; gap: 6px; transition: color 0.2s;" onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='var(--text-secondary)'" title="Ayarlar">
+                        ⚙️ Ayarlar
+                    </button>
                 </div>
 
             </div>
@@ -205,7 +204,7 @@ window.pruvaAiView = (state) => {
                         <div class="welcome-robot-wrapper">
                             <img src="/assets/pruva_robot.svg" style="width: 140px; height: 140px; filter: drop-shadow(0 12px 20px rgba(0,0,0,0.15));" alt="Pruva AI Robot">
                         </div>
-                        <h3 style="color: var(--text-primary); font-weight: 800; font-size: 1.15rem; margin-bottom: 6px;">Pruva AI — Pricing Asistanı</h3>
+                        <h3 style="color: var(--text-primary); font-weight: 800; font-size: 1.15rem; margin-bottom: 6px;">P-AI</h3>
                         <p style="font-size: 0.82rem; color: var(--text-secondary); max-width: 320px; line-height: 1.5; margin: 0 auto 20px;">Bir konuşma seçerek timeline akışını görüntüleyin veya yeni bir yapay zeka komutu gönderin.</p>
                     </div>
                 ` : `
@@ -216,20 +215,22 @@ window.pruvaAiView = (state) => {
                                 ${activeConv.logoLetter === '🤖' ? '<img src="/assets/pruva_robot.svg" style="width: 110%; height: 110%; object-fit: contain;">' : (activeConv.logoLetter || activeConv.company.charAt(0).toUpperCase())}
                             </div>
                             <div>
-                                <h4 style="margin: 0; font-size: 0.9rem; font-weight: 700; color: var(--text-primary);">${activeConv.company}</h4>
+                                <h4 style="margin: 0; font-size: 0.9rem; font-weight: 700; color: var(--text-primary);">${activeConv.id === 'copilot' ? 'P-AI Komut Merkezi' : activeConv.company}</h4>
                                 <div style="display: flex; align-items: center; gap: 6px; margin-top: 2px;">
-                                    ${getStatusBadge(activeConv.status)}
+                                    ${activeConv.id === 'copilot' ? `
+                                        <div style="display: flex; align-items: center; gap: 4px;">
+                                            <span style="width: 8px; height: 8px; border-radius: 50%; background-color: ${state.outlookConnected ? '#10b981' : '#94a3b8'}; box-shadow: 0 0 0 2px ${state.outlookConnected ? 'rgba(16,185,129,0.2)' : 'rgba(148,163,184,0.2)'};"></span>
+                                            <span style="font-size: 0.75rem; font-weight: 600; color: var(--text-secondary); opacity: 0.7;">${state.outlookConnected ? 'Hazır' : 'Bağlı Değil'}</span>
+                                        </div>
+                                    ` : getStatusBadge(activeConv.status)}
                                 </div>
                             </div>
                         </div>
-                        <div style="display: flex; gap: 8px;">
-                            <button class="btn btn-secondary" onclick="window.app.managers.pruvaAi.toggleHandsFreeMode()" style="padding: 6px 12px; font-size: 0.72rem; font-weight: 700; border-radius: var(--radius-md); ${window.app.state.isHandsFreeMode ? 'background: rgba(37,99,235,0.1); color: #2563eb; border: 1px solid rgba(37,99,235,0.3);' : ''}">
-                                ${window.app.state.isHandsFreeMode ? '🎙️ Eller Serbest: AÇIK' : '🎧 Sesli Mod'}
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                            <button class="btn btn-secondary" onclick="window.app.managers.pruvaAi.clearConversationHistory('${activeConv.id}')" title="Geçmişi Temizle" style="padding: 6px 8px; font-size: 1rem; border-radius: var(--radius-md); color: #ef4444; background: transparent; border: 1px solid transparent; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='rgba(239,68,68,0.1)'; this.style.borderColor='rgba(239,68,68,0.2)'" onmouseout="this.style.background='transparent'; this.style.borderColor='transparent'">
+                                🗑️
                             </button>
-                            <button class="btn btn-secondary" onclick="window.app.managers.pruvaAi.clearConversationHistory('${activeConv.id}')" style="padding: 6px 12px; font-size: 0.72rem; font-weight: 700; border-radius: var(--radius-md); background: rgba(239,68,68,0.1); color: #ef4444; border: 1px solid rgba(239,68,68,0.3);">
-                                🗑️ Geçmişi Temizle
-                            </button>
-                            <button class="btn btn-secondary" onclick="window.app.managers.pruvaAi.toggleDetailsDrawer()" style="padding: 6px 12px; font-size: 0.72rem; font-weight: 700; border-radius: var(--radius-md);">
+                            <button class="btn btn-secondary" onclick="window.app.managers.pruvaAi.toggleDetailsDrawer()" style="padding: 6px 12px; font-size: 0.75rem; font-weight: 700; border-radius: var(--radius-md); display: flex; align-items: center; gap: 6px; background: var(--bg-surface); border: 1px solid var(--border);">
                                 📋 Detaylar
                             </button>
                         </div>
@@ -246,12 +247,12 @@ window.pruvaAiView = (state) => {
                                             <span class="chat-bubble-meta">${msg.time}</span>
                                             
                                             <!-- Speak Button -->
-                                            <button onclick="window.app.managers.pruvaAi.speakText(this)" data-text="${escapeHTML(msg.text)}" style="position: absolute; top: 6px; right: 28px; background: transparent; border: none; cursor: pointer; opacity: 0.5; font-size: 1rem; transition: opacity 0.2s;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.5" title="Sesli Oku">
+                                            <button onclick="window.app.managers.pruvaAi.speakText(this)" data-text="${escapeHTML(msg.text)}" style="position: absolute; top: 6px; right: 28px; background: transparent; border: none; cursor: pointer; opacity: 0.15; font-size: 1rem; transition: opacity 0.2s;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.15" title="Sesli Oku">
                                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
                                             </button>
                                             
                                             <!-- Copy Button -->
-                                            <button onclick="window.app.managers.pruvaAi.copyText(this)" data-text="${escapeHTML(msg.text)}" style="position: absolute; top: 6px; right: 6px; background: transparent; border: none; cursor: pointer; opacity: 0.5; font-size: 1rem; transition: opacity 0.2s;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.5" title="Kopyala">
+                                            <button onclick="window.app.managers.pruvaAi.copyText(this)" data-text="${escapeHTML(msg.text)}" style="position: absolute; top: 6px; right: 6px; background: transparent; border: none; cursor: pointer; opacity: 0.15; font-size: 1rem; transition: opacity 0.2s;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.15" title="Kopyala">
                                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
                                             </button>
                                         </div>
@@ -263,7 +264,7 @@ window.pruvaAiView = (state) => {
                                         <div class="chat-bubble" style="position: relative; padding-right: 32px;">
                                             ${escapeHTML(msg.text)}
                                             <span class="chat-bubble-meta">${msg.time}</span>
-                                            <button onclick="window.app.managers.pruvaAi.copyText(this)" data-text="${escapeHTML(msg.text)}" style="position: absolute; top: 6px; right: 6px; background: transparent; border: none; cursor: pointer; color: white; opacity: 0.6; font-size: 1rem; transition: opacity 0.2s;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.6" title="Kopyala">
+                                            <button onclick="window.app.managers.pruvaAi.copyText(this)" data-text="${escapeHTML(msg.text)}" style="position: absolute; top: 6px; right: 6px; background: transparent; border: none; cursor: pointer; color: white; opacity: 0.25; font-size: 1rem; transition: opacity 0.2s;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.25" title="Kopyala">
                                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
                                             </button>
                                         </div>
@@ -366,8 +367,11 @@ window.pruvaAiView = (state) => {
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
                         </button>
                         <input type="text" class="chat-input-field saas-input-field" id="chat-command-input" placeholder="Bir komut girin... (örn: 'Arçelik'ten RFQ geldi, FOB Temmuz')" value="${state.chatCommandInputValue || ''}" oninput="window.pruvaAiManager.updateCommandInput(this.value)" onkeydown="if(event.key === 'Enter') window.pruvaAiManager.sendInput()">
-                        <button class="chat-mic-btn" onclick="window.pruvaAiManager.startVoiceRecognition()" title="Sesle Yaz" style="background: transparent; border: none; cursor: pointer; color: var(--text-secondary); padding: 0 8px; transition: color 0.2s; display: flex; align-items: center;" onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='var(--text-secondary)'">
+                        <button class="chat-mic-btn" onclick="window.pruvaAiManager.startVoiceRecognition()" title="Sesle Yaz (Bas-Konuş)" style="background: transparent; border: none; cursor: pointer; color: var(--text-secondary); opacity: 0.4; padding: 0 8px; transition: all 0.2s; display: flex; align-items: center;" onmouseover="this.style.opacity=1; this.style.color='var(--primary)'" onmouseout="this.style.opacity=0.4; this.style.color='var(--text-secondary)'">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>
+                        </button>
+                        <button class="chat-mic-btn" onclick="window.app.managers.pruvaAi.toggleHandsFreeMode()" title="Eller Serbest Modu" style="background: ${window.app.state.isHandsFreeMode ? 'rgba(37,99,235,0.1)' : 'transparent'}; border: none; cursor: pointer; color: ${window.app.state.isHandsFreeMode ? '#2563eb' : 'var(--text-secondary)'}; opacity: ${window.app.state.isHandsFreeMode ? '1' : '0.4'}; padding: 0 8px; border-radius: var(--radius-sm); transition: all 0.2s; display: flex; align-items: center; margin-right: 8px;" onmouseover="this.style.opacity=1; this.style.color='${window.app.state.isHandsFreeMode ? '#1d4ed8' : 'var(--primary)'}'" onmouseout="this.style.opacity='${window.app.state.isHandsFreeMode ? '1' : '0.4'}'; this.style.color='${window.app.state.isHandsFreeMode ? '#2563eb' : 'var(--text-secondary)'}'">
+                            ${window.app.state.isHandsFreeMode ? '<span style="font-size: 1.1rem;">🎙️</span>' : '<span style="font-size: 1.1rem;">🎧</span>'}
                         </button>
                         <button class="chat-send-btn saas-send-btn" onclick="window.pruvaAiManager.sendInput()" title="Komut Gönder">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
