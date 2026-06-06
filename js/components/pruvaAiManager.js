@@ -1727,9 +1727,9 @@ window.PruvaAiManager = class PruvaAiManager {
         this.app.commit();
         this.scrollToBottom();
 
-        // Hands-Free Filler "Hmm..."
+        // PAI Hands-Free Filler Cümleler
         if (this.app.state.isHandsFreeMode && !pendingFiles.length) {
-            const fillers = ["Hımm...", "Bir saniye bakıyorum...", "Hemen kontrol ediyorum..."];
+            const fillers = ["Hımm, bakıyorum...", "Bir saniye, hemen kontrol ediyorum...", "Tamam, üzerinde çalışıyorum...", "Anlaşıldı, inceliyorum..."];
             const randomFiller = fillers[Math.floor(Math.random() * fillers.length)];
             this.speakText(null, randomFiller, false);
         }
@@ -2033,72 +2033,55 @@ window.PruvaAiManager = class PruvaAiManager {
         this.app.state.isHandsFreeMode = !this.app.state.isHandsFreeMode;
         this.app.commit();
         if (this.app.state.isHandsFreeMode) {
-            this.showToast('Eller Serbest (Hands-Free) Modu Açıldı. Asistan sizi dinliyor...', 'info');
+            this.showToast('PAI Eller Serbest Modu Açıldı. Sizi dinliyorum...', 'info');
             this.startVoiceRecognition();
         } else {
-            this.showToast('Eller Serbest Modu Kapatıldı.', 'info');
+            this.showToast('PAI Eller Serbest Modu Kapatıldı.', 'info');
             if (this.isRecognizing && this.recognition) {
                 this.recognition.stop();
             }
-            window.speechSynthesis.cancel();
+            this.stopCurrentAudio();
         }
     }
 
-    getBestVoice() {
-        const voices = window.speechSynthesis.getVoices();
-        if (!voices || voices.length === 0) return null;
-        
-        const trVoices = voices.filter(v => v.lang.includes('tr') || v.lang.includes('TR'));
-        if (trVoices.length === 0) return voices[0];
-        
-        // Prioritize natural/online premium voices (e.g. Edge Natural voices like 'Microsoft Emel Online (Natural) - Turkish (Turkey)')
-        let bestVoice = trVoices.find(v => (v.name.includes('Natural') || v.name.includes('Online')) && (v.name.includes('Emel') || v.name.includes('Tolga')));
-        if (!bestVoice) bestVoice = trVoices.find(v => v.name.includes('Natural') || v.name.includes('Premium'));
-        if (!bestVoice) bestVoice = trVoices.find(v => v.name.includes('Yelda') || v.name.includes('Cem')); // Mac voices
-        if (!bestVoice) bestVoice = trVoices[0]; // Fallback to standard Turkish voice
-        
-        return bestVoice;
+    // Oynayan sesi durdur
+    stopCurrentAudio() {
+        if (this.currentAudio) {
+            this.currentAudio.pause();
+            this.currentAudio.currentTime = 0;
+            this.currentAudio = null;
+        }
+        this.currentUtteranceText = null;
     }
 
-    speakText(btnElement, rawText = null, autoListenAfter = false) {
+    // ─── PAI Edge-TTS ile İnsansı Ses Sentezi ───
+    async speakText(btnElement, rawText = null, autoListenAfter = false) {
         let text = rawText;
         if (btnElement) {
             text = btnElement.getAttribute('data-text');
         }
         if (!text) return;
-        
-        if (!('speechSynthesis' in window)) {
-            if (btnElement) this.showToast('Tarayıcınız sesli okumayı desteklemiyor.', 'warning');
-            return;
-        }
 
-        // HTML entity decode for speech
+        // HTML entity decode
         const textarea = document.createElement('textarea');
         textarea.innerHTML = text;
         const decodedText = textarea.value;
 
-        // If currently speaking this text, stop it
-        if (window.speechSynthesis.speaking && this.currentUtteranceText === decodedText) {
-            window.speechSynthesis.cancel();
-            this.currentUtteranceText = null;
-            if (btnElement) btnElement.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>';
+        // Aynı metin oynuyorsa durdur (toggle davranışı)
+        if (this.currentAudio && !this.currentAudio.paused && this.currentUtteranceText === decodedText) {
+            this.stopCurrentAudio();
+            if (btnElement) {
+                btnElement.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>';
+                btnElement.style.color = '';
+            }
             return;
         }
 
-        window.speechSynthesis.cancel(); // Cancel any previous speech
+        // Önceki sesi durdur
+        this.stopCurrentAudio();
         this.currentUtteranceText = decodedText;
 
-        const utterance = new SpeechSynthesisUtterance(decodedText);
-        utterance.lang = 'tr-TR';
-        utterance.rate = 1.0; 
-        utterance.pitch = 1.0; 
-        
-        // Set the best natural voice if available
-        const bestVoice = this.getBestVoice();
-        if (bestVoice) {
-            utterance.voice = bestVoice;
-        }
-
+        // Buton görselini güncelle (oynatılıyor)
         let originalSvg = '';
         if (btnElement) {
             originalSvg = btnElement.innerHTML;
@@ -2106,21 +2089,74 @@ window.PruvaAiManager = class PruvaAiManager {
             btnElement.style.color = 'var(--secondary)';
         }
 
-        utterance.onend = () => {
+        try {
+            // Auth token al
+            const firebaseUser = window.fbAuth?.currentUser;
+            const token = firebaseUser ? await firebaseUser.getIdToken() : '';
+
+            // Backend Edge-TTS endpoint'ine istek gönder
+            const response = await fetch('/api/tts/synthesize', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ text: decodedText })
+            });
+
+            if (!response.ok) {
+                const errData = await response.json().catch(() => ({}));
+                throw new Error(errData.message || 'Ses sentezleme başarısız.');
+            }
+
+            // MP3 verisini blob olarak al ve çal
+            const audioBlob = await response.blob();
+            const audioUrl = URL.createObjectURL(audioBlob);
+            const audio = new Audio(audioUrl);
+            this.currentAudio = audio;
+
+            audio.onended = () => {
+                URL.revokeObjectURL(audioUrl);
+                this.currentAudio = null;
+                this.currentUtteranceText = null;
+
+                if (btnElement) {
+                    btnElement.innerHTML = originalSvg;
+                    btnElement.style.color = '';
+                }
+
+                // PAI Jarvis döngüsü: Ses bitti → mikrofonu aç
+                if (autoListenAfter && this.app.state.isHandsFreeMode) {
+                    setTimeout(() => {
+                        this.startVoiceRecognition();
+                    }, 500);
+                }
+            };
+
+            audio.onerror = () => {
+                URL.revokeObjectURL(audioUrl);
+                this.currentAudio = null;
+                this.currentUtteranceText = null;
+                if (btnElement) {
+                    btnElement.innerHTML = originalSvg;
+                    btnElement.style.color = '';
+                }
+                console.error('[PAI TTS] Ses çalma hatası.');
+            };
+
+            await audio.play();
+        } catch (err) {
+            console.error('[PAI TTS] Hata:', err.message);
             this.currentUtteranceText = null;
             if (btnElement) {
                 btnElement.innerHTML = originalSvg;
                 btnElement.style.color = '';
             }
-            // Auto Listen loop for Hands-Free Mode
-            if (autoListenAfter && this.app.state.isHandsFreeMode) {
-                setTimeout(() => {
-                    this.startVoiceRecognition();
-                }, 500); // Wait half a second before listening again
+            // Sessizce hata logla, kullanıcıyı rahatsız etme (özellikle filler cümlelerde)
+            if (btnElement) {
+                this.showToast('Ses oluşturulamadı: ' + err.message, 'warning');
             }
-        };
-
-        window.speechSynthesis.speak(utterance);
+        }
     }
 
     startVoiceRecognition() {

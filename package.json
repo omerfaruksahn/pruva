@@ -19,10 +19,12 @@
   "dependencies": {
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
+    "edge-tts-universal": "^1.4.0",
     "express": "^5.2.1",
     "firebase": "^12.13.0",
     "firebase-admin": "^13.9.0",
     "lucide": "^1.14.0",
+    "pg": "^8.21.0",
     "resend": "^6.12.3"
   }
 }

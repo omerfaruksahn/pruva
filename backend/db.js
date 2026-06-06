@@ -1,5 +1,5 @@
 const { Pool } = require('pg');
-require('dotenv').config();
+require('dotenv').config({ path: require('path').join(__dirname, '.env') });
 
 // Dummy Data Mode Toggle
 const USE_DUMMY_DATA = process.env.USE_DUMMY_DATA === 'true';

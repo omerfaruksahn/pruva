@@ -76,6 +76,7 @@ app.use('/api/pricing', require('./routes/pricingActions'));
 app.use('/api/ai', aiLimiter, require('./routes/aiChat'));
 app.use('/api/rate-sheets', uploadLimiter, express.json({ limit: '50mb' }), express.urlencoded({ limit: '50mb', extended: true }), require('./routes/rateSheets'));
 app.use('/api/user-actions', require('./routes/userActions'));
+app.use('/api/tts', require('./routes/tts'));
 // Root route - serve index.html
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '..', 'index.html'));
