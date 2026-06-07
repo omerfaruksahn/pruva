@@ -795,23 +795,25 @@ window.PruvaAiManager = class PruvaAiManager {
                 this.loadConversations(1, false);
             }
             
-            // Outlook bağlantısı socket üzerinden gelirse (Cross-origin popup sorununu çözmek için)
-            if (data.type === 'OUTLOOK_CONNECTED' || data === 'OUTLOOK_CONNECTED') {
-                const email = data.email || (data.data && data.data.email) || '';
-                this.showToast(`Outlook başarıyla bağlandı: ${email} 🎉`, 'success');
-                
-                if (this.activeOutlookPopup && !this.activeOutlookPopup.closed) {
-                    this.activeOutlookPopup.close();
-                }
-                
-                this.app.state.outlookConnected = true;
-                this.app.state.outlookEmail = email;
-                if (this.app.store) this.app.store.save();
-                this.app.commit();
-                
-                // Konuşmaları yenile
-                this.loadConversations(1, false);
+        });
+
+        // Outlook bağlantısı socket üzerinden gelirse (Cross-origin popup sorununu çözmek için)
+        this.socket.on('OUTLOOK_CONNECTED', (data) => {
+            console.log('[PRUVA AI MANAGER] OUTLOOK_CONNECTED Event Alındı:', data);
+            const email = data.email || (data.data && data.data.email) || '';
+            this.showToast(`Outlook başarıyla bağlandı: ${email} 🎉`, 'success');
+            
+            if (this.activeOutlookPopup && !this.activeOutlookPopup.closed) {
+                this.activeOutlookPopup.close();
             }
+            
+            this.app.state.outlookConnected = true;
+            this.app.state.outlookEmail = email;
+            if (this.app.store) this.app.store.save();
+            this.app.commit();
+            
+            // Konuşmaları yenile
+            this.loadConversations(1, false);
         });
 
         this.socket.on('disconnect', () => {
