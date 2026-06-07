@@ -106,13 +106,23 @@ router.post('/analyze', auth, async (req, res) => {
           await handleResetHistory(client, rfqId, req.user.id, res);
           return;
         }
-      } else {
-        const latestRfq = await client.query(
-          "SELECT id FROM pricing_rfqs WHERE sender_email = $1 AND user_id = $2 ORDER BY created_at DESC LIMIT 1",
-          [email || '', req.user.id]
+        // Check if conversationId is an Outlook conversation_id
+        const convRfq = await client.query(
+          "SELECT id FROM pricing_rfqs WHERE conversation_id = $1 AND user_id = $2 ORDER BY created_at DESC LIMIT 1",
+          [conversationId, req.user.id]
         );
-        if (latestRfq.rows.length > 0) {
-          rfqId = latestRfq.rows[0].id;
+        
+        if (convRfq.rows.length > 0) {
+          rfqId = convRfq.rows[0].id;
+        } else {
+          // Fallback to sender email if not found by conversation_id
+          const latestRfq = await client.query(
+            "SELECT id FROM pricing_rfqs WHERE sender_email = $1 AND user_id = $2 ORDER BY created_at DESC LIMIT 1",
+            [email || '', req.user.id]
+          );
+          if (latestRfq.rows.length > 0) {
+            rfqId = latestRfq.rows[0].id;
+          }
         }
       }
       
@@ -321,6 +331,7 @@ router.get('/conversations', auth, async (req, res) => {
     const result = await db.query(`
       SELECT 
         r.id,
+        r.conversation_id,
         r.sender_email,
         r.sender_name,
         r.subject,
@@ -344,13 +355,14 @@ router.get('/conversations', auth, async (req, res) => {
     const convMap = {};
     result.rows.forEach(row => {
       const isCopilot = row.sender_email === 'copilot@pruva.ai';
-      // Copilot ise anahtarı 'copilot' yap, değilse rfq id (row.id) yap
-      const key = isCopilot ? 'copilot' : row.id;
+      // Copilot ise anahtarı 'copilot' yap, değilse conversation_id (veya row.id fallback) yap
+      const key = isCopilot ? 'copilot' : (row.conversation_id || row.id);
       
       if (!convMap[key]) {
         const company = isCopilot ? 'Pruva AI Co-pilot' : (row.customer_company || row.sender_name || row.sender_email.split('@')[0]);
         convMap[key] = {
-          id: isCopilot ? 'copilot' : row.id,
+          id: key, // Now uses conversation_id or id
+          rfqId: row.id, // Keep a reference to the latest rfq id for actions
           company: company,
           email: row.sender_email,
           subject: row.subject,
@@ -361,6 +373,7 @@ router.get('/conversations', auth, async (req, res) => {
           regions: row.active_regions || [],
           messages: [],
           lastMessage: row.subject,
+          isArchived: row.is_archived || false,
           time: new Date(row.created_at).toLocaleString('tr-TR', { hour: '2-digit', minute: '2-digit' })
         };
         
@@ -390,7 +403,7 @@ router.get('/conversations', auth, async (req, res) => {
     
     // İlgili action'ları rfq_id bazlı ekle
     const actions = await db.query(`
-      SELECT a.*, r.sender_email 
+      SELECT a.*, r.sender_email, r.conversation_id 
       FROM pricing_actions a 
       JOIN pricing_rfqs r ON r.id = a.rfq_id 
       WHERE a.user_id = $1
@@ -399,7 +412,7 @@ router.get('/conversations', auth, async (req, res) => {
     
     for (const action of actions.rows) {
       const isCopilot = action.sender_email === 'copilot@pruva.ai';
-      const key = isCopilot ? 'copilot' : action.rfq_id;
+      const key = isCopilot ? 'copilot' : (action.conversation_id || action.rfq_id);
       
       const conv = convMap[key];
       if (conv) {
@@ -423,12 +436,39 @@ router.get('/conversations', auth, async (req, res) => {
           }
         }
 
+        let text = action.description || action.body || action.preview || action.subject;
+        
+        if (action.action_type !== 'USER_MESSAGE' && action.action_type !== 'AI_RESPONSE') {
+          if (action.status === 'CANCELLED') {
+            type = 'ai_action';
+            text = '❌ Öneri reddedildi.';
+          } else if (action.status === 'COMPLETED') {
+            type = 'ai_action';
+            text = '✅ İşlem başarıyla onaylandı ve gönderildi.';
+            
+            // Onaylanmış bir mail ise, giden maili de ekleyelim
+            if (action.suggested_mail) {
+              let sentMailObj = typeof action.suggested_mail === 'string' ? JSON.parse(action.suggested_mail) : action.suggested_mail;
+              conv.messages.push({
+                sender: 'Pruva AI (Giden Mail)',
+                time: new Date(action.created_at).toLocaleString('tr-TR'),
+                timestamp: new Date(action.created_at),
+                type: 'outgoing',
+                text: sentMailObj.body || 'Giden mail içeriği',
+                action: action.action_type || action.type,
+                actionId: action.id,
+                attachments: processedAttachments
+              });
+            }
+          }
+        }
+
         conv.messages.push({
           sender: sender,
           time: new Date(action.created_at).toLocaleString('tr-TR'),
           timestamp: new Date(action.created_at),
           type: type,
-          text: action.description || action.body || action.preview || action.subject,
+          text: text,
           action: action.action_type || action.type,
           actionId: action.id,
           suggestedMail: action.suggested_mail,
@@ -462,7 +502,7 @@ router.get('/conversations', auth, async (req, res) => {
         time: 'Sistem',
         timestamp: new Date(0), // Her zaman ilk sırada
         type: 'incoming',
-        text: 'Merhaba! Ben Pruva AI Co-pilot. Bana dilediğiniz lojistik komutunu verebilirsiniz. Örneğin:<br><br>• <i>\'destek@pruvahub.com adresine [Firma Adı] adıyla tanıtım e-postası tasarla\'</i><br>• <i>\'Hamburg\'dan İzmir\'e TIR fiyatı al\'</i>'
+        text: "Merhaba! Ben Pruva AI Co-pilot. Bana dilediğiniz lojistik komutunu verebilirsiniz. Örneğin:\n\n• 'destek@pruvahub.com adresine [Firma Adı] adıyla tanıtım e-postası tasarla'\n• 'Hamburg\\'dan İzmir\\'e TIR fiyatı al'"
       });
     }
 
@@ -525,6 +565,63 @@ router.delete('/conversations/:id', auth, async (req, res) => {
     await client.query('ROLLBACK');
     console.error('Conversation delete error:', err);
     res.status(500).json({ error: 'Silme işlemi sırasında bir hata oluştu.' });
+  } finally {
+    client.release();
+  }
+});
+
+// @route   PUT api/ai/conversations/:id/archive
+// @desc    Konuşmayı (RFQ ve bağlı olduğu conversation_id) arşivler
+router.put('/conversations/:id/archive', auth, async (req, res) => {
+  const client = await db.getClient();
+  try {
+    const userId = req.user.id;
+    const convId = req.params.id; // Bu conversation_id veya rfq.id olabilir
+
+    await client.query('BEGIN');
+
+    if (convId !== 'copilot') {
+      // Hem id hem de conversation_id bazında arşivleyelim
+      await client.query(
+        "UPDATE pricing_rfqs SET is_archived = true WHERE (conversation_id = $1 OR id::text = $1) AND user_id = $2",
+        [convId, userId]
+      );
+    }
+
+    await client.query('COMMIT');
+    res.json({ success: true, message: 'Konuşma arşivlendi.' });
+  } catch (err) {
+    await client.query('ROLLBACK');
+    console.error('Conversation archive error:', err);
+    res.status(500).json({ error: 'Arşivleme işlemi sırasında bir hata oluştu.' });
+  } finally {
+    client.release();
+  }
+});
+
+// @route   PUT api/ai/conversations/:id/unarchive
+// @desc    Konuşmayı arşivden çıkarır
+router.put('/conversations/:id/unarchive', auth, async (req, res) => {
+  const client = await db.getClient();
+  try {
+    const userId = req.user.id;
+    const convId = req.params.id;
+
+    await client.query('BEGIN');
+
+    if (convId !== 'copilot') {
+      await client.query(
+        "UPDATE pricing_rfqs SET is_archived = false WHERE (conversation_id = $1 OR id::text = $1) AND user_id = $2",
+        [convId, userId]
+      );
+    }
+
+    await client.query('COMMIT');
+    res.json({ success: true, message: 'Konuşma arşivden çıkarıldı.' });
+  } catch (err) {
+    await client.query('ROLLBACK');
+    console.error('Conversation unarchive error:', err);
+    res.status(500).json({ error: 'Arşivden çıkarma işlemi sırasında bir hata oluştu.' });
   } finally {
     client.release();
   }

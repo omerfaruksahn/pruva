@@ -15,7 +15,7 @@ const escapeHTML = (str) => {
             "'": '&#39;',
             '"': '&quot;'
         }[tag] || tag)
-    );
+    ).replace(/\n/g, '<br>');
 };
 
 window.pruvaAiView = (state) => {
@@ -42,6 +42,13 @@ window.pruvaAiView = (state) => {
         if (!matchesSearch) return false;
 
         // Sekme Filtre Eşleşmesi
+        if (filterMode === 'ARCHIVED') {
+            return c.isArchived === true;
+        }
+
+        // Diğer sekmelerde arşivlenmiş olanları gizle
+        if (c.isArchived === true && c.id !== 'copilot') return false;
+
         if (filterMode === 'CUSTOMERS') {
             return c.id !== 'copilot' && !carrierEmails.has((c.email || '').toLowerCase());
         } else if (filterMode === 'CARRIERS') {
@@ -138,6 +145,7 @@ window.pruvaAiView = (state) => {
                         <option value="CUSTOMERS" ${filterMode === 'CUSTOMERS' ? 'selected' : ''}>🏢 Sadece Müşteriler</option>
                         <option value="CARRIERS" ${filterMode === 'CARRIERS' ? 'selected' : ''}>🚚 Sadece Taşıyıcılar</option>
                         <option value="PENDING" ${filterMode === 'PENDING' ? 'selected' : ''}>⏳ İşlem Bekleyenler</option>
+                        <option value="ARCHIVED" ${filterMode === 'ARCHIVED' ? 'selected' : ''}>📦 Arşivlenenler</option>
                     </select>
                 </div>
 
@@ -167,8 +175,14 @@ window.pruvaAiView = (state) => {
                             </div>
                             <div class="chat-item-details">
                                 <div class="chat-item-row1">
-                                    <span class="chat-item-name">${conv.company}</span>
-                                    <span class="chat-item-time">${conv.time}</span>
+                                    <span class="chat-item-name" title="${conv.subject || conv.company}" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 140px;">${conv.subject || conv.company}</span>
+                                    <div style="display: flex; align-items: center; gap: 4px;">
+                                        <span class="chat-item-time">${conv.time}</span>
+                                        ${conv.isArchived 
+                                            ? `<button class="chat-item-unarchive-btn" onclick="event.stopPropagation(); window.app.managers.pruvaAi.unarchiveConversation('${conv.id}')" title="Arşivden Çıkar" style="background: transparent; border: none; cursor: pointer; color: var(--text-secondary); font-size: 0.85rem; padding: 2px 4px; border-radius: 4px; opacity: 0.6; transition: opacity 0.2s;" onmouseover="this.style.opacity='1'; this.style.color='#10b981';" onmouseout="this.style.opacity='0.6'; this.style.color='var(--text-secondary)';">↩️</button>`
+                                            : `<button class="chat-item-archive-btn" onclick="event.stopPropagation(); window.app.managers.pruvaAi.archiveConversation('${conv.id}')" title="Arşivle / Kaldır" style="background: transparent; border: none; cursor: pointer; color: var(--text-secondary); font-size: 0.75rem; padding: 2px 4px; border-radius: 4px; opacity: 0.6; transition: opacity 0.2s;" onmouseover="this.style.opacity='1'; this.style.color='#ef4444';" onmouseout="this.style.opacity='0.6'; this.style.color='var(--text-secondary)';">✕</button>`
+                                        }
+                                    </div>
                                 </div>
                                 <div class="chat-item-row2">
                                     <span class="chat-item-snippet">${conv.lastMessage}</span>
@@ -215,7 +229,7 @@ window.pruvaAiView = (state) => {
                                 ${activeConv.logoLetter === '🤖' ? '<img src="/assets/pruva_robot.svg" style="width: 110%; height: 110%; object-fit: contain;">' : (activeConv.logoLetter || activeConv.company.charAt(0).toUpperCase())}
                             </div>
                             <div>
-                                <h4 style="margin: 0; font-size: 0.9rem; font-weight: 700; color: var(--text-primary);">${activeConv.id === 'copilot' ? 'P-AI Komut Merkezi' : activeConv.company}</h4>
+                                <h4 style="margin: 0; font-size: 0.9rem; font-weight: 700; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 300px;" title="${activeConv.id === 'copilot' ? 'P-AI Komut Merkezi' : (activeConv.subject || activeConv.company)}">${activeConv.id === 'copilot' ? 'P-AI Komut Merkezi' : (activeConv.subject || activeConv.company)}</h4>
                                 <div style="display: flex; align-items: center; gap: 6px; margin-top: 2px;">
                                     ${activeConv.id === 'copilot' ? `
                                         <div style="display: flex; align-items: center; gap: 4px;">

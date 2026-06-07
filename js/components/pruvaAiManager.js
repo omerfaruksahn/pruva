@@ -1964,6 +1964,78 @@ window.PruvaAiManager = class PruvaAiManager {
         }
     }
     
+    async archiveConversation(convId) {
+        if (convId === 'copilot') {
+            this.showToast('Copilot konuşması arşivlenemez.', 'warning');
+            return;
+        }
+        
+        try {
+            this.app.state.aiLoading = true;
+            this.app.commit();
+            
+            const token = await this.getAuthToken();
+            
+            const response = await fetch(CONFIG.API_URL + `/ai/conversations/${convId}/archive`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (!response.ok) {
+                const errData = await response.json().catch(() => ({}));
+                throw new Error(errData.error || 'Arşivleme işlemi başarısız oldu.');
+            }
+
+            // Normal konuşma: Listeden tamamen kaldır, copilot'a geç
+            this.app.state.activeConversationId = 'copilot';
+            
+            this.showToast('Konuşma arşivlendi!', 'success');
+            
+            // DB'den güncel listeyi çek
+            await this.loadState();
+        } catch (err) {
+            console.error('Konuşma arşivlenemedi:', err);
+            this.showToast('Arşivleme hatası: ' + err.message, 'danger');
+        } finally {
+            this.app.state.aiLoading = false;
+            this.app.commit();
+        }
+    }
+
+    async unarchiveConversation(convId) {
+        try {
+            this.app.state.aiLoading = true;
+            this.app.commit();
+            
+            const token = await this.getAuthToken();
+            
+            const response = await fetch(CONFIG.API_URL + `/ai/conversations/${convId}/unarchive`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (!response.ok) {
+                const errData = await response.json().catch(() => ({}));
+                throw new Error(errData.error || 'Arşivden çıkarma işlemi başarısız oldu.');
+            }
+            
+            this.showToast('Konuşma arşivden çıkarıldı!', 'success');
+            
+            // DB'den güncel listeyi çek
+            await this.loadState();
+        } catch (err) {
+            console.error('Konuşma arşivden çıkarılamadı:', err);
+            this.showToast('Arşivden çıkarma hatası: ' + err.message, 'danger');
+        } finally {
+            this.app.state.aiLoading = false;
+            this.app.commit();
+        }
+    }
+
     async clearConversationHistory(convId) {
         const isCopilot = convId === 'copilot';
         const confirmMsg = isCopilot 

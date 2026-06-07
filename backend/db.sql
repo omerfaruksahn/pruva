@@ -157,6 +157,8 @@ CREATE TABLE IF NOT EXISTS pricing_rfqs (
   missing_info_round INTEGER DEFAULT 0, -- kaçıncı eksik bilgi turu
   lost_reason TEXT, -- kaybetme nedeni (Faz 6 / Lost deal)
   competitor_price DECIMAL(10,2), -- rakip navlun fiyatı
+  conversation_id VARCHAR(500),
+  is_archived BOOLEAN DEFAULT false,
   created_at TIMESTAMP DEFAULT NOW(),
   updated_at TIMESTAMP DEFAULT NOW()
 );

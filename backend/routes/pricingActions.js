@@ -198,8 +198,8 @@ router.post('/actions/:id/reject', auth, async (req, res) => {
 
         // 2. Aksiyon durumunu 'CANCELLED' (Reddedildi) yap
         await db.query(
-            'UPDATE pricing_actions SET status = \'CANCELLED\' WHERE id = $1 AND user_id = $2',
-            [id, req.user.id]
+            'UPDATE pricing_actions SET status = $1 WHERE id = $2 AND user_id = $3',
+            ['CANCELLED', id, req.user.id]
         );
 
         res.json({ success: true, message: 'Aksiyon reddedildi.' });

@@ -224,6 +224,26 @@ module.exports = {
             }
             return { rows: [] };
         }
+        if (query.includes('update pricing_rfqs') && query.includes('is_archived = true')) {
+            const convId = params[0];
+            const userId = params[1];
+            dummyData.pricing_rfqs.forEach(r => {
+                if ((String(r.conversation_id) === String(convId) || String(r.id) === String(convId)) && r.user_id === userId) {
+                    r.is_archived = true;
+                }
+            });
+            return { rows: [] };
+        }
+        if (query.includes('update pricing_rfqs') && query.includes('is_archived = false')) {
+            const convId = params[0];
+            const userId = params[1];
+            dummyData.pricing_rfqs.forEach(r => {
+                if ((String(r.conversation_id) === String(convId) || String(r.id) === String(convId)) && r.user_id === userId) {
+                    r.is_archived = false;
+                }
+            });
+            return { rows: [] };
+        }
         if (query.includes('from pricing_actions')) {
             let match = [];
             if (query.includes('where id = $1') || query.includes('where a.id = $1')) {
@@ -459,14 +479,21 @@ module.exports = {
             const results = dummyData.pricing_actions.filter(a => !userId || a.user_id === userId);
             return { rows: results };
         }
-        if (query.includes('update pricing_actions') && query.includes('status')) {
+        if (query.includes('update pricing_actions') && query.includes('status = $1')) {
             const status = params[0];
-            const id = parseInt(params[params.length - 1]);
+            const id = parseInt(params[1]); // Assuming params is [status, id, user_id]
             const idx = dummyData.pricing_actions.findIndex(a => a.id === id);
             if (idx !== -1) {
                 dummyData.pricing_actions[idx].status = status;
-                if (params.length > 2 && params[1]) dummyData.pricing_actions[idx].subject = params[1];
-                if (params.length > 3 && params[2]) dummyData.pricing_actions[idx].body = params[2];
+            }
+            return { rows: [] };
+        }
+        if (query.includes('update pricing_actions') && query.includes("status = 'completed'")) {
+            const id = parseInt(params[1]); // params: [suggested_mail, id, user_id]
+            const idx = dummyData.pricing_actions.findIndex(a => a.id === id);
+            if (idx !== -1) {
+                dummyData.pricing_actions[idx].status = 'COMPLETED';
+                dummyData.pricing_actions[idx].suggested_mail = params[0];
             }
             return { rows: [] };
         }
@@ -550,6 +577,15 @@ module.exports = {
             return { rows: [] };
         }
  
+        // --- MSAL CACHE MOCK INTERCEPTORS ---
+        if (query.includes('from msal_cache')) {
+            return { rows: dummyData.msal_cache ? [{ cache_data: dummyData.msal_cache }] : [] };
+        }
+        if (query.includes('insert into msal_cache')) {
+            dummyData.msal_cache = params[0];
+            return { rows: [] };
+        }
+
         return { rows: [] };
     },
     getClient: async () => {

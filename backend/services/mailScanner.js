@@ -204,6 +204,7 @@ async function scanEmails(userId, searchQuery = null) {
                     sender_name: msg.sender && msg.sender.emailAddress ? msg.sender.emailAddress.name : '',
                     subject: msg.subject || '',
                     body: bodyContent,
+                    conversation_id: msg.conversationId || msg.id,
                     received_at: msg.receivedDateTime ? new Date(msg.receivedDateTime) : new Date()
                 };
             });
@@ -297,8 +298,8 @@ async function scanEmails(userId, searchQuery = null) {
                 INSERT INTO pricing_rfqs (
                     user_id, outlook_message_id, sender_email, sender_name, 
                     subject, body, received_at, category, transport_mode, 
-                    extracted_data, missing_fields, status
-                ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, 'PENDING')
+                    extracted_data, missing_fields, status, conversation_id
+                ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, 'PENDING', $12)
                 RETURNING id;
             `;
 
@@ -313,7 +314,8 @@ async function scanEmails(userId, searchQuery = null) {
                 analysis.category,
                 analysis.transport_mode,
                 JSON.stringify(analysis.extracted_data),
-                analysis.missing_fields
+                analysis.missing_fields,
+                mail.conversation_id
             ];
 
             const rfqResult = await db.query(insertRfqQuery, rfqParams);

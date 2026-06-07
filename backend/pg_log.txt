@@ -3,3 +3,7 @@
 2026-06-01 00:50:03.726 +03 [16524] LOG:  listening on IPv4 address "127.0.0.1", port 5432
 2026-06-01 00:50:03.772 +03 [16548] LOG:  database system was shut down at 2026-06-01 00:49:55 +03
 2026-06-01 00:50:03.812 +03 [16524] LOG:  database system is ready to accept connections
+ÖLÜMCÜL (FATAL):  "C:/Users/Ömer/.gemini/antigravity/scratch/my-first-react-site/backend/pg16/lib" dizini açýlamýyor: Not a directory
+ÝPUCU:This may indicate an incomplete PostgreSQL installation, or that the file "C:/Users/Ömer/.gemini/antigravity/scratch/my-first-react-site/backend/pg16/bin/postgres.exe" has been moved away from its proper location.
+ÖLÜMCÜL (FATAL):  "C:/Users/Ömer/.gemini/antigravity/scratch/my-first-react-site/backend/pg16/lib" dizini açýlamýyor: Not a directory
+ÝPUCU:This may indicate an incomplete PostgreSQL installation, or that the file "C:/Users/Ömer/.gemini/antigravity/scratch/my-first-react-site/backend/pg16/bin/postgres.exe" has been moved away from its proper location.
