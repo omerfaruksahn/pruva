@@ -370,14 +370,15 @@ router.get('/conversations', auth, async (req, res) => {
     
     const convMap = {};
     result.rows.forEach(row => {
-      const isCopilot = row.sender_email === 'copilot@pruva.ai';
-      // Copilot ise anahtarı 'copilot' yap, değilse conversation_id (veya row.id fallback) yap
-      const key = isCopilot ? 'copilot' : (row.conversation_id || row.id);
+      const email = (row.sender_email || '').toLowerCase().trim();
+      const isCopilot = email === 'copilot@pruva.ai';
+      // Müşteri bazlı gruplama yap (e-posta adresine göre)
+      const key = isCopilot ? 'copilot' : email;
       
       if (!convMap[key]) {
-        const company = isCopilot ? 'Pruva AI Co-pilot' : (row.customer_company || row.sender_name || row.sender_email.split('@')[0]);
+        const company = isCopilot ? 'Pruva AI Co-pilot' : (row.customer_company || row.sender_name || email.split('@')[0]);
         convMap[key] = {
-          id: key, // Now uses conversation_id or id
+          id: isCopilot ? 'copilot' : (row.customer_id || `rfq-${row.id}`),
           rfqId: row.id, // Keep a reference to the latest rfq id for actions
           company: company,
           email: row.sender_email,
@@ -427,8 +428,8 @@ router.get('/conversations', auth, async (req, res) => {
     `, [userId]);
     
     for (const action of actions.rows) {
-      const isCopilot = action.sender_email === 'copilot@pruva.ai';
-      const key = isCopilot ? 'copilot' : (action.conversation_id || action.rfq_id);
+      const actionEmail = (action.sender_email || '').toLowerCase().trim();
+      const key = actionEmail;
       
       const conv = convMap[key];
       if (conv) {

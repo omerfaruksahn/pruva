@@ -838,8 +838,28 @@ window.PruvaAiManager = class PruvaAiManager {
                 
                 if (append) {
                     // Ekstra sayfaları ekle (var olanları kopyalamamak için ID bazlı kontrol yapılabilir)
+                    const existingEmails = new Set((this.app.state.pricingConversations || []).map(c => c.email).filter(Boolean));
                     const existingIds = new Set((this.app.state.pricingConversations || []).map(c => c.id));
-                    const newConvs = apiConversations.filter(c => !existingIds.has(c.id));
+                    
+                    const newConvs = [];
+                    for (const c of apiConversations) {
+                        if (existingIds.has(c.id)) continue;
+                        
+                        if (c.email && existingEmails.has(c.email)) {
+                            // Merge older messages into existing conversation
+                            const existingConv = this.app.state.pricingConversations.find(ex => ex.email === c.email);
+                            if (existingConv) {
+                                const existingMsgTimestamps = new Set(existingConv.messages.map(m => m.timestamp));
+                                const newMessages = c.messages.filter(m => !existingMsgTimestamps.has(m.timestamp));
+                                existingConv.messages = [...newMessages, ...existingConv.messages];
+                                existingConv.messages.sort((a, b) => new Date(a.timestamp || a.time) - new Date(b.timestamp || b.time));
+                            }
+                        } else {
+                            newConvs.push(c);
+                            if (c.email) existingEmails.add(c.email);
+                            existingIds.add(c.id);
+                        }
+                    }
                     this.app.state.pricingConversations = [...(this.app.state.pricingConversations || []), ...newConvs];
                 } else {
                     this.app.state.pricingConversations = apiConversations;
