@@ -99,10 +99,14 @@ router.post('/analyze', auth, async (req, res) => {
       // Spesifik bir e-posta akışındayız. rfqId'yi tespit et
       if (typeof conversationId === 'number') {
         rfqId = conversationId;
-      } else if (typeof conversationId === 'string' && conversationId.startsWith('rfq-')) {
-        rfqId = parseInt(conversationId.replace('rfq-', ''));
-
-        if (message.trim().toUpperCase() === 'RESET_HISTORY' || message.trim().toUpperCase() === 'RESET HİSTORY' || message.trim().toUpperCase() === 'RESET HISTORY') {
+      } else if (typeof conversationId === 'string') {
+        const match = conversationId.match(/\d+/);
+        if (match) {
+            rfqId = parseInt(match[0]);
+        }
+      }
+      
+      if (message.trim().toUpperCase() === 'RESET_HISTORY' || message.trim().toUpperCase() === 'RESET HİSTORY' || message.trim().toUpperCase() === 'RESET HISTORY') {
           await handleResetHistory(client, rfqId, req.user.id, res);
           return;
         }
@@ -219,19 +223,7 @@ router.post('/analyze', auth, async (req, res) => {
         };
       }
       
-      // İlk olarak kullanıcının mesajını kaydet
-      await client.query(
-        `INSERT INTO pricing_actions (user_id, rfq_id, action_type, title, description, status)
-         VALUES ($1, $2, $3, $4, $5, $6)`,
-        [
-          req.user.id,
-          rfqId,
-          'USER_MESSAGE',
-          'Kullanıcı Komutu',
-          message,
-          'COMPLETED'
-        ]
-      );
+      // Sadece yapay zekanın cevabını kaydet (kullanıcının mesajı zaten yukarıda kaydedildi)
 
       // Sonra yapay zekanın cevabını kaydet
       await client.query(
