@@ -133,6 +133,12 @@ router.get('/callback', async (req, res) => {
         console.log(`[WEBHOOK SIM] Kullanıcı ${userId} için Webhook aboneliği simüle edildi: ${mockSubscriptionId}`);
 
         console.log(`[OUTLOOK SUCCESS] Kullanıcı ${userId} için Outlook bağlandı: ${email}`);
+        
+        // Socket.io ile frontend'e bildir (cross-origin window.opener sorununu aşmak için)
+        const io = req.app.get('io');
+        if (io) {
+            io.to(`user_${userId}`).emit('OUTLOOK_CONNECTED', { email: email });
+        }
 
         // Geriye dönük derin tarama (Initial Deep Scan) işlemini asenkron olarak arka planda başlat
         const mailScanner = require('../services/mailScanner');

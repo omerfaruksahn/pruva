@@ -794,6 +794,24 @@ window.PruvaAiManager = class PruvaAiManager {
                 // Konuşmaları sessizce yenile (sayfayı 1'e çek ve baştan yükle)
                 this.loadConversations(1, false);
             }
+            
+            // Outlook bağlantısı socket üzerinden gelirse (Cross-origin popup sorununu çözmek için)
+            if (data.type === 'OUTLOOK_CONNECTED' || data === 'OUTLOOK_CONNECTED') {
+                const email = data.email || (data.data && data.data.email) || '';
+                this.showToast(`Outlook başarıyla bağlandı: ${email} 🎉`, 'success');
+                
+                if (this.activeOutlookPopup && !this.activeOutlookPopup.closed) {
+                    this.activeOutlookPopup.close();
+                }
+                
+                this.app.state.outlookConnected = true;
+                this.app.state.outlookEmail = email;
+                if (this.app.store) this.app.store.save();
+                this.app.commit();
+                
+                // Konuşmaları yenile
+                this.loadConversations(1, false);
+            }
         });
 
         this.socket.on('disconnect', () => {
@@ -1599,16 +1617,22 @@ window.PruvaAiManager = class PruvaAiManager {
             const width = 600, height = 600;
             const left = (window.innerWidth - width) / 2;
             const top = (window.innerHeight - height) / 2;
-            const loginUrl = `/api/outlook/login?token=${token}`;
+            const backendBase = CONFIG.API_URL.replace(/\/api$/, '');
+            const loginUrl = `${backendBase}/api/outlook/login?token=${token}`;
             
             // Open OAuth login popup
             const popup = window.open(loginUrl, 'Outlook Bağlantısı', `width=${width},height=${height},left=${left},top=${top}`);
+            this.activeOutlookPopup = popup; // Socket.io üzerinden kapatabilmek için kaydet
             
-            // Listen for successful callback message from popup
+            // Listen for successful callback message from popup (Eğer cross-origin engeline takılmazsa)
             const handleMessage = async (event) => {
                 if (event.data && event.data.type === 'OUTLOOK_CONNECTED') {
                     this.showToast(`Outlook başarıyla bağlandı: ${event.data.email} 🎉`, 'success');
                     window.removeEventListener('message', handleMessage);
+                    
+                    if (this.activeOutlookPopup && !this.activeOutlookPopup.closed) {
+                        this.activeOutlookPopup.close();
+                    }
                     
                     // Update connection state on frontend immediately
                     this.app.state.outlookConnected = true;
@@ -1617,15 +1641,7 @@ window.PruvaAiManager = class PruvaAiManager {
                     this.app.commit();
                     
                     // Reload state after connection
-                    const headers = { 'Authorization': `Bearer ${token}` };
-                    const convRes = await fetch(CONFIG.API_URL + `/ai/conversations?_t=${Date.now()}`, { headers });
-                    if (convRes.ok) {
-                        const apiConversations = await convRes.json();
-                        this.app.state.pricingConversations = apiConversations;
-                        localStorage.setItem('pruva_pricing_conversations', JSON.stringify(apiConversations));
-                        if (this.app.store) this.app.store.save();
-                        this.app.commit();
-                    }
+                    this.loadConversations(1, false);
                 }
             };
             window.addEventListener('message', handleMessage);
