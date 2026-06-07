@@ -833,6 +833,9 @@ window.PruvaAiManager = class PruvaAiManager {
             if (res.ok) {
                 const apiConversations = await res.json();
                 
+                // P-AI Komut Merkezi (copilot) veritabanında tutulmadığı için lokal kopyasını koru
+                const existingCopilot = (this.app.state.pricingConversations || []).find(c => c.id === 'copilot');
+                
                 if (append) {
                     // Ekstra sayfaları ekle (var olanları kopyalamamak için ID bazlı kontrol yapılabilir)
                     const existingIds = new Set((this.app.state.pricingConversations || []).map(c => c.id));
@@ -840,6 +843,9 @@ window.PruvaAiManager = class PruvaAiManager {
                     this.app.state.pricingConversations = [...(this.app.state.pricingConversations || []), ...newConvs];
                 } else {
                     this.app.state.pricingConversations = apiConversations;
+                    if (existingCopilot) {
+                        this.app.state.pricingConversations.unshift(existingCopilot);
+                    }
                 }
 
                 // Sayfalama durumu state'te tutulur
@@ -1852,6 +1858,20 @@ window.PruvaAiManager = class PruvaAiManager {
             });
 
             if (response.ok) {
+                const aiResult = await response.json();
+                
+                // Copilot conversation is local-only, manually push AI response
+                if (activeConvId === 'copilot') {
+                    conversations[convIdx].messages.push({
+                        sender: 'Pruva AI',
+                        time: `Bugün ${new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}`,
+                        type: aiResult.action === 'GENERAL' ? 'incoming' : 'ai_suggestion',
+                        text: aiResult.summary,
+                        action: aiResult.action
+                    });
+                    conversations[convIdx].lastMessage = aiResult.summary;
+                }
+
                 // Sunucudan güncel mesajları veri tabanından canlı olarak çekelim ve UI'ı tazeleyelim
                 await this.loadConversations(1, false);
                 
