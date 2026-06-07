@@ -220,18 +220,18 @@ async function scanEmails(userId, searchQuery = null, initialDeepScan = false) {
 
     for (const mail of mailsToProcess) {
         try {
-            // Kendi gönderdiğimiz mailleri atla
-            const ownEmails = ['pruvahub@outlook.com', 'noreply@pruvahub.com'];
+            // Kendi gönderdiğimiz mailleri atla (Sadece noreply olanları atla, kullanıcı testi için kendi maillerine izin ver)
+            const ownEmails = ['noreply@pruvahub.com', 'system@pruvahub.com'];
             if (ownEmails.some(e => mail.sender_email.toLowerCase().includes(e.toLowerCase()))) {
-                console.log(`[MAIL SCANNER] Kendi gönderilen mail atlanıyor: ${mail.sender_email}`);
+                console.log(`[MAIL SCANNER] Sistem/Noreply mail atlanıyor: ${mail.sender_email}`);
                 continue;
             }
 
-            // Microsoft ve diğer sistem maillerini atla
-            const systemDomains = ['microsoft.com', 'microsoftemail.com', 'outlook.com', 'accountprotection.microsoft.com', 'google.com', 'linkedin.com'];
-            const isSystemMail = systemDomains.some(d => mail.sender_email.toLowerCase().endsWith('@' + d) || mail.sender_email.toLowerCase().includes('noreply') || mail.sender_email.toLowerCase().includes('no-reply'));
-            if (isSystemMail && !mail.sender_email.toLowerCase().includes('pruvahub')) {
-                console.log(`[MAIL SCANNER] Sistem maili atlanıyor: ${mail.sender_email}`);
+            // Microsoft ve diğer güvenlik maillerini atla (outlook.com ve gmail.com'u ÇIKARDIM ki test mailleri gelsin)
+            const systemDomains = ['accountprotection.microsoft.com', 'microsoftemail.com', 'linkedin.com', 'no-reply', 'noreply'];
+            const isSystemMail = systemDomains.some(d => mail.sender_email.toLowerCase().includes(d));
+            if (isSystemMail) {
+                console.log(`[MAIL SCANNER] Otomatik/Sistem maili atlanıyor: ${mail.sender_email}`);
                 continue;
             }
 

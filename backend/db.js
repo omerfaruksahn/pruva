@@ -38,6 +38,15 @@ if (!USE_DUMMY_DATA) {
     pool.query(`ALTER TABLE pricing_outlook_accounts ADD COLUMN IF NOT EXISTS last_scanned_message_id VARCHAR(500);`)
         .then(() => console.log('[DB] last_scanned_message_id sütunu kontrol edildi/eklendi.'))
         .catch(err => console.error('[DB MIGRATION ERROR]', err.message));
+
+    // Otomatik Migration: pricing_rfqs tablosuna conversation_id ve is_archived sütunlarını ekle (yoksa)
+    pool.query(`ALTER TABLE pricing_rfqs ADD COLUMN IF NOT EXISTS conversation_id VARCHAR(500);`)
+        .then(() => console.log('[DB] conversation_id sütunu kontrol edildi/eklendi.'))
+        .catch(err => console.error('[DB MIGRATION ERROR]', err.message));
+
+    pool.query(`ALTER TABLE pricing_rfqs ADD COLUMN IF NOT EXISTS is_archived BOOLEAN DEFAULT false;`)
+        .then(() => console.log('[DB] is_archived sütunu kontrol edildi/eklendi.'))
+        .catch(err => console.error('[DB MIGRATION ERROR]', err.message));
 } else {
     console.log('[DUMMY MODE] Sunucu dummy verilerle çalışıyor...');
 }
