@@ -95,8 +95,12 @@ async function sendEmail(userId, mailData) {
     }
   } catch (graphError) {
     console.warn('[Email] Graph gönderim başarısız:', graphError.message);
+    // If we are in production, we should probably throw this so the user knows!
+    if (process.env.NODE_ENV === 'production') {
+       throw new Error('Microsoft Outlook üzerinden e-posta gönderilemedi: ' + graphError.message);
+    }
   }
-  // 2) Resend API
+  // 2) Resend API (Fallback)
   try {
     if (process.env.RESEND_API_KEY) {
       return await sendViaResend(mailData);
@@ -109,6 +113,12 @@ async function sendEmail(userId, mailData) {
   console.log('  To:', mailData.to.join(', '));
   console.log('  Subject:', mailData.subject);
   console.log('  Body:', mailData.body.substring(0, 200));
+  
+  // Return dev-console but with a warning message so the frontend knows it was simulated!
+  if (process.env.NODE_ENV === 'production') {
+      throw new Error('E-posta gönderimi başarısız oldu (API hatası veya yetki eksikliği).');
+  }
+  
   return { method: 'dev-console', success: true, note: 'Email sadece console\'a loglandı (dev mode).' };
 }
 
