@@ -29,6 +29,11 @@ if (!USE_DUMMY_DATA) {
     pool.query(`ALTER TABLE pricing_actions ADD COLUMN IF NOT EXISTS attachments JSONB DEFAULT '[]'::jsonb;`)
         .then(() => console.log('[DB] attachments sütunu kontrol edildi/eklendi.'))
         .catch(err => console.error('[DB MIGRATION ERROR]', err.message));
+        
+    // Otomatik Migration: pricing_outlook_accounts tablosuna subscription_id sütununu ekle (yoksa)
+    pool.query(`ALTER TABLE pricing_outlook_accounts ADD COLUMN IF NOT EXISTS subscription_id VARCHAR(255);`)
+        .then(() => console.log('[DB] subscription_id sütunu kontrol edildi/eklendi.'))
+        .catch(err => console.error('[DB MIGRATION ERROR]', err.message));
 } else {
     console.log('[DUMMY MODE] Sunucu dummy verilerle çalışıyor...');
 }
