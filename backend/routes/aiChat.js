@@ -97,37 +97,41 @@ router.post('/analyze', auth, async (req, res) => {
       );
     } else if (conversationId) {
       // Spesifik bir e-posta akışındayız. rfqId'yi tespit et
-      if (typeof conversationId === 'number') {
-        rfqId = conversationId;
-      } else if (typeof conversationId === 'string') {
+      let isRfqIdDirect = false;
+      
+      if (typeof conversationId === 'string' && conversationId.startsWith('rfq-')) {
         const match = conversationId.match(/\d+/);
         if (match) {
             rfqId = parseInt(match[0]);
+            isRfqIdDirect = true;
         }
       }
       
       if (message.trim().toUpperCase() === 'RESET_HISTORY' || message.trim().toUpperCase() === 'RESET HİSTORY' || message.trim().toUpperCase() === 'RESET HISTORY') {
           await handleResetHistory(client, rfqId, req.user.id, res);
           return;
-        }
-        // Check if conversationId is an Outlook conversation_id
-        const convRfq = await client.query(
-          "SELECT id FROM pricing_rfqs WHERE conversation_id = $1 AND user_id = $2 ORDER BY created_at DESC LIMIT 1",
-          [conversationId, req.user.id]
-        );
+      }
         
-        if (convRfq.rows.length > 0) {
-          rfqId = convRfq.rows[0].id;
-        } else {
-          // Fallback to sender email if not found by conversation_id
-          const latestRfq = await client.query(
-            "SELECT id FROM pricing_rfqs WHERE sender_email = $1 AND user_id = $2 ORDER BY created_at DESC LIMIT 1",
-            [email || '', req.user.id]
+      if (!isRfqIdDirect) {
+          // If conversationId is not an 'rfq-X' string, it might be a customer_id or an Outlook string.
+          // Fallback 1: Try Outlook conversation_id
+          const convRfq = await client.query(
+            "SELECT id FROM pricing_rfqs WHERE conversation_id = $1 AND user_id = $2 ORDER BY created_at DESC LIMIT 1",
+            [String(conversationId), req.user.id]
           );
-          if (latestRfq.rows.length > 0) {
-            rfqId = latestRfq.rows[0].id;
+          
+          if (convRfq.rows.length > 0) {
+            rfqId = convRfq.rows[0].id;
+          } else if (email) {
+            // Fallback 2: Try sender_email
+            const latestRfq = await client.query(
+              "SELECT id FROM pricing_rfqs WHERE sender_email = $1 AND user_id = $2 ORDER BY created_at DESC LIMIT 1",
+              [email, req.user.id]
+            );
+            if (latestRfq.rows.length > 0) {
+              rfqId = latestRfq.rows[0].id;
+            }
           }
-        }
       }
       
       // Kullanıcının komutunu pricing_actions tablosunda saklayalım
