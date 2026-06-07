@@ -182,7 +182,7 @@ router.get('/callback', async (req, res) => {
         `);
     } catch (err) {
         console.error('[OUTLOOK CALLBACK ERR] Hata oluştu:', err);
-        res.status(500).send('Bağlantı esnasında sunucu hatası oluştu.');
+        res.status(500).send(`Bağlantı esnasında sunucu hatası oluştu: ${err.message}`);
     }
 });
 

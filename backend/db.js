@@ -30,9 +30,13 @@ if (!USE_DUMMY_DATA) {
         .then(() => console.log('[DB] attachments sütunu kontrol edildi/eklendi.'))
         .catch(err => console.error('[DB MIGRATION ERROR]', err.message));
         
-    // Otomatik Migration: pricing_outlook_accounts tablosuna subscription_id sütununu ekle (yoksa)
+    // Otomatik Migration: pricing_outlook_accounts tablosuna subscription_id ve last_scanned_message_id sütununu ekle (yoksa)
     pool.query(`ALTER TABLE pricing_outlook_accounts ADD COLUMN IF NOT EXISTS subscription_id VARCHAR(255);`)
         .then(() => console.log('[DB] subscription_id sütunu kontrol edildi/eklendi.'))
+        .catch(err => console.error('[DB MIGRATION ERROR]', err.message));
+        
+    pool.query(`ALTER TABLE pricing_outlook_accounts ADD COLUMN IF NOT EXISTS last_scanned_message_id VARCHAR(500);`)
+        .then(() => console.log('[DB] last_scanned_message_id sütunu kontrol edildi/eklendi.'))
         .catch(err => console.error('[DB MIGRATION ERROR]', err.message));
 } else {
     console.log('[DUMMY MODE] Sunucu dummy verilerle çalışıyor...');
