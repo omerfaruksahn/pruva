@@ -205,6 +205,7 @@ CREATE TABLE IF NOT EXISTS pricing_outlook_accounts (
   is_connected BOOLEAN DEFAULT true,
   last_scan_at TIMESTAMP,
   last_scanned_message_id VARCHAR(500),
+  subscription_id VARCHAR(255),
   created_at TIMESTAMP DEFAULT NOW()
 );
 

@@ -150,7 +150,17 @@ window.pruvaAiView = (state) => {
                 </div>
 
                 <!-- Konuşma Listesi (Scrollable) -->
-                <div class="chat-list-scroll">
+                <div class="chat-list-scroll" onscroll="
+                    if (this.scrollTop + this.clientHeight >= this.scrollHeight - 10) {
+                        const mgr = window.app?.managers?.pruvaAi;
+                        if (mgr && mgr.app.state.convHasMore && !mgr.app.state.aiLoading) {
+                            mgr.app.state.aiLoading = true;
+                            mgr.loadConversations((mgr.app.state.convPage || 1) + 1, true).then(() => {
+                                mgr.app.state.aiLoading = false;
+                            });
+                        }
+                    }
+                ">
                     <!-- PRUVA AI CO-PILOT PINNED CHANNEL -->
                     <div class="chat-list-item ${activeConvId === 'copilot' ? 'active' : ''}" onclick="window.pruvaAiManager.selectConversation('copilot')" style="background: ${activeConvId === 'copilot' ? 'rgba(37,99,235,0.08)' : 'transparent'}; border-left: 3px solid #2563eb; margin-bottom: 8px; border-radius: var(--radius-md);">
                         <div class="chat-avatar" style="background: transparent; display: flex; align-items: center; justify-content: center; overflow: visible;">

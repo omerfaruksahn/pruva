@@ -1,3 +1,5 @@
+import { io } from 'socket.io-client';
+
 /**
  * PRUVA — Pruva AI Manager
  * 
@@ -7,6 +9,7 @@
 window.PruvaAiManager = class PruvaAiManager {
     constructor(appInstance) {
         this.app = appInstance;
+        this.socket = null;
         
         // Varsayılan Değerler
         this.DEFAULT_TEMPLATES = {
@@ -228,6 +231,9 @@ window.PruvaAiManager = class PruvaAiManager {
                 'Authorization': `Bearer ${token}`
             };
 
+            // Socket.io Başlat
+            this.initSocket();
+
             // 1. Şablonları çek
             const tplRes = await fetch(CONFIG.API_URL + '/pricing/templates', { headers });
             if (tplRes.ok) {
@@ -269,21 +275,10 @@ window.PruvaAiManager = class PruvaAiManager {
 
             let needsCommit = false;
 
-            // 5. Konuşmaları (conversations) çek (Faz 3)
+            // 5. Konuşmaları (conversations) çek (Faz 3) - Sadece ilk sayfayı yükler
             try {
-                const convRes = await fetch(CONFIG.API_URL + `/ai/conversations?_t=${Date.now()}`, { headers });
-                if (convRes.ok) {
-                    const apiConversations = await convRes.json();
-                    if (apiConversations.length > 0) {
-                        this.app.state.pricingConversations = apiConversations;
-                        needsCommit = true;
-                    }
-                    // Mevcut aktif konuşmayı koru
-                    if (this.app.state.activeConversationId === null) {
-                        this.app.state.activeConversationId = 'copilot';
-                        needsCommit = true;
-                    }
-                }
+                await this.loadConversations(1, false);
+                needsCommit = true;
             } catch (err) {
                 console.warn('[PRUVA AI MANAGER] Konuşmalar yüklenemedi.');
             }
@@ -772,6 +767,75 @@ window.PruvaAiManager = class PruvaAiManager {
         if (maxRoundsEl) this.rules.maxRounds = parseInt(maxRoundsEl.value) || 3;
 
         this.saveRules();
+    }
+
+    initSocket() {
+        if (this.socket) return; // Zaten bağlı
+        
+        const userId = this.app.state.user?.id;
+        if (!userId) return;
+
+        // Socket.io sunucusuna bağlan (backend URL)
+        this.socket = io(CONFIG.API_URL.replace('/api', ''));
+        
+        this.socket.on('connect', () => {
+            console.log('[PRUVA AI MANAGER] Socket bağlandı, odaya katılınıyor...');
+            this.socket.emit('join', userId);
+        });
+
+        // Backend'den gelen olayları dinle
+        this.socket.on('NEW_AI_ACTION', (data) => {
+            console.log('[PRUVA AI MANAGER] Socket.io Event Alındı:', data);
+            
+            // Eğer yeni mail tarandıysa, konuşmaları (1. sayfasını) yeniden yükle ve UI'ı güncelle
+            if (data.type === 'NEW_EMAILS_SCANNED' || data.type === 'INITIAL_SCAN_COMPLETE') {
+                this.showToast(data.message || 'Yeni bildirim alındı', 'info');
+                
+                // Konuşmaları sessizce yenile (sayfayı 1'e çek ve baştan yükle)
+                this.loadConversations(1, false);
+            }
+        });
+
+        this.socket.on('disconnect', () => {
+            console.warn('[PRUVA AI MANAGER] Socket bağlantısı koptu.');
+        });
+    }
+
+    async loadConversations(page = 1, append = false) {
+        try {
+            const token = await this.getAuthToken();
+            if (!token) return;
+
+            const res = await fetch(CONFIG.API_URL + `/ai/conversations?page=${page}&limit=20&_t=${Date.now()}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (res.ok) {
+                const apiConversations = await res.json();
+                
+                if (append) {
+                    // Ekstra sayfaları ekle (var olanları kopyalamamak için ID bazlı kontrol yapılabilir)
+                    const existingIds = new Set((this.app.state.pricingConversations || []).map(c => c.id));
+                    const newConvs = apiConversations.filter(c => !existingIds.has(c.id));
+                    this.app.state.pricingConversations = [...(this.app.state.pricingConversations || []), ...newConvs];
+                } else {
+                    this.app.state.pricingConversations = apiConversations;
+                }
+
+                // Sayfalama durumu state'te tutulur
+                this.app.state.convPage = page;
+                this.app.state.convHasMore = apiConversations.length === 20;
+
+                // Mevcut aktif konuşmayı koru
+                if (this.app.state.activeConversationId === null) {
+                    this.app.state.activeConversationId = 'copilot';
+                }
+                
+                this.app.commit();
+            }
+        } catch (err) {
+            console.warn('[PRUVA AI MANAGER] Konuşmalar sayfa yüklenemedi:', err);
+        }
     }
 
     renderCarriers() {

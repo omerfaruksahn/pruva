@@ -4,6 +4,8 @@ require('dotenv').config();
 
 let schedulerInterval = null;
 
+let schedulerApp = null;
+
 async function scanAllConnectedAccounts() {
   console.log('[SCHEDULER] Bağlı Outlook e-posta hesapları için tarama başlatılıyor...');
   try {
@@ -28,6 +30,18 @@ async function scanAllConnectedAccounts() {
         console.log(`[SCHEDULER] Kullanıcı ${userId} için tarama başlatılıyor...`);
         const scanResult = await mailScanner.scanEmails(userId);
         console.log(`[SCHEDULER] Kullanıcı ${userId} tarama tamamlandı:`, scanResult.message);
+        
+        // Yeni e-posta bulunduysa anlık bildirim fırlat
+        if (scanResult.processed_count > 0 && schedulerApp) {
+            const io = schedulerApp.get('io');
+            if (io) {
+                io.to(`user_${userId}`).emit('NEW_AI_ACTION', {
+                    type: 'NEW_EMAILS_SCANNED',
+                    count: scanResult.processed_count,
+                    message: `${scanResult.processed_count} adet yeni e-posta yapay zeka tarafından işlendi.`
+                });
+            }
+        }
       } catch (scanErr) {
         console.error(`[SCHEDULER ERR] Kullanıcı ${userId} taranırken hata:`, scanErr.message);
       }
@@ -37,7 +51,8 @@ async function scanAllConnectedAccounts() {
   }
 }
 
-function startEmailScheduler() {
+function startEmailScheduler(app) {
+  schedulerApp = app;
   if (schedulerInterval) {
     console.log('[SCHEDULER] E-posta zamanlayıcı zaten çalışıyor.');
     return;

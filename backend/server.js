@@ -77,6 +77,7 @@ app.use('/api/ai', aiLimiter, require('./routes/aiChat'));
 app.use('/api/rate-sheets', uploadLimiter, express.json({ limit: '50mb' }), express.urlencoded({ limit: '50mb', extended: true }), require('./routes/rateSheets'));
 app.use('/api/user-actions', require('./routes/userActions'));
 app.use('/api/tts', require('./routes/tts'));
+app.use('/api/webhooks', require('./routes/webhooks'));
 // Root route - serve index.html
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '..', 'index.html'));
@@ -105,12 +106,41 @@ exec('node init_db.js', (err, stdout, stderr) => {
     else console.log('[INIT DB SUCCESS]', stdout);
 });
 
-const server = app.listen(PORT, () => {
+const http = require('http');
+const { Server } = require('socket.io');
+
+const server = http.createServer(app);
+const io = new Server(server, {
+    cors: {
+        origin: process.env.NODE_ENV === 'production' ? ALLOWED_ORIGINS : true,
+        methods: ["GET", "POST"]
+    }
+});
+
+// Soketleri user bazlı odalara al
+io.on('connection', (socket) => {
+    console.log('[SOCKET] Yeni bağlantı:', socket.id);
+    
+    socket.on('join', (userId) => {
+        if (userId) {
+            socket.join(`user_${userId}`);
+            console.log(`[SOCKET] Kullanıcı odasına katıldı: user_${userId}`);
+        }
+    });
+
+    socket.on('disconnect', () => {
+        console.log('[SOCKET] Bağlantı koptu:', socket.id);
+    });
+});
+
+app.set('io', io); // Route'larda io'ya erişebilmek için
+
+server.listen(PORT, () => {
     console.log(`[SERVER] ${PORT} portunda yayında...`);
     console.log(`[SERVER] Frontend: http://localhost:${PORT}`);
     // E-posta arka plan zamanlayıcısını otomatik olarak başlat
-    startEmailScheduler();
+    startEmailScheduler(app);
 });
 
-module.exports = server;
+module.exports = { server, io };
 

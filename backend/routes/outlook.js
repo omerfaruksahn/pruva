@@ -118,12 +118,38 @@ router.get('/callback', async (req, res) => {
             SET home_account_id = EXCLUDED.home_account_id,
                 email = EXCLUDED.email,
                 is_connected = true,
-                last_scan_at = NOW();
+                last_scan_at = NOW()
+            RETURNING id;
         `;
         
-        await db.query(upsertQuery, [userId, homeAccountId, email]);
+        const accountResult = await db.query(upsertQuery, [userId, homeAccountId, email]);
+        const accountId = accountResult.rows[0].id;
+
+        // [SIMÜLASYON] Webhook Subscription Oluşturma
+        // Gerçekte burada MS Graph API'ye POST /subscriptions atılır
+        // ve dönen subscriptionId veritabanına kaydedilir.
+        const mockSubscriptionId = 'sub_' + Math.random().toString(36).substr(2, 9);
+        await db.query('UPDATE pricing_outlook_accounts SET subscription_id = $1 WHERE id = $2', [mockSubscriptionId, accountId]);
+        console.log(`[WEBHOOK SIM] Kullanıcı ${userId} için Webhook aboneliği simüle edildi: ${mockSubscriptionId}`);
 
         console.log(`[OUTLOOK SUCCESS] Kullanıcı ${userId} için Outlook bağlandı: ${email}`);
+
+        // Geriye dönük derin tarama (Initial Deep Scan) işlemini asenkron olarak arka planda başlat
+        const mailScanner = require('../services/mailScanner');
+        mailScanner.scanEmails(userId, null, true).then((resData) => {
+            if (resData && resData.processed_count > 0) {
+                const io = req.app.get('io');
+                if (io) {
+                    io.to(`user_${userId}`).emit('NEW_AI_ACTION', {
+                        type: 'INITIAL_SCAN_COMPLETE',
+                        count: resData.processed_count,
+                        message: `${resData.processed_count} adet eski e-posta tarandı ve sisteme eklendi.`
+                    });
+                }
+            }
+        }).catch(err => {
+            console.error('[INITIAL DEEP SCAN ERR] Hata oluştu:', err);
+        });
 
         // Başarılı olduğunda pencereyi kapatıp frontend'e mesaj atan şık script
         res.send(`

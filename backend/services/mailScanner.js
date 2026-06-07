@@ -134,9 +134,10 @@ async function analyzeMailContent(bodyText, emailSubject = '') {
 
 // runHeuristicAnalysis tamamen silinmiştir.
 
-// Mail Tarama Servisi (Ana Fonksiyon)
-async function scanEmails(userId, searchQuery = null) {
-    console.log(`[MAIL SCANNER] Tarama başlatıldı. Kullanıcı ID: ${userId}, Search Query: ${searchQuery}`);
+// @param {string|null} searchQuery
+// @param {boolean} initialDeepScan - Eğer true ise geriye dönük derin tarama yapar
+async function scanEmails(userId, searchQuery = null, initialDeepScan = false) {
+    console.log(`[MAIL SCANNER] Tarama başlatıldı. Kullanıcı ID: ${userId}, Search Query: ${searchQuery}, Deep Scan: ${initialDeepScan}`);
 
     let mailsToProcess = [];
 
@@ -172,8 +173,9 @@ async function scanEmails(userId, searchQuery = null) {
             });
             const accessToken = tokenResponse.accessToken;
 
-            // Microsoft Graph API'den gelen mailleri çek (En son 10 mail)
-            let graphUrl = "https://graph.microsoft.com/v1.0/me/messages?$top=10&$orderby=receivedDateTime desc";
+            // Microsoft Graph API'den gelen mailleri çek (En son 10 veya 100 mail)
+            let topCount = initialDeepScan ? 100 : 10;
+            let graphUrl = `https://graph.microsoft.com/v1.0/me/messages?$top=${topCount}&$orderby=receivedDateTime desc`;
             if (searchQuery) {
                 graphUrl = `https://graph.microsoft.com/v1.0/me/messages?$search="${encodeURIComponent(searchQuery)}"&$top=50`;
             }
@@ -427,7 +429,8 @@ async function scanEmails(userId, searchQuery = null) {
     return {
         success: true,
         message: `Gerçek Outlook taraması tamamlandı. ${processedCount} yeni e-posta başarıyla işlendi ve kaydedildi.`,
-        found_emails: searchResults
+        found_emails: searchResults,
+        processed_count: processedCount
     };
 }
 

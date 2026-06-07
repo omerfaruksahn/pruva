@@ -314,6 +314,9 @@ router.post('/upload', auth, upload.single('file'), async (req, res) => {
 router.get('/conversations', auth, async (req, res) => {
   try {
     const userId = req.user.id;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+    const offset = (page - 1) * limit;
     
     // Otomatik olarak kullanıcının ürettiği sahte (mock) mailleri temizle (Self-healing)
     try {
@@ -342,6 +345,7 @@ router.get('/conversations', auth, async (req, res) => {
         r.created_at,
         r.extracted_data,
         r.missing_fields,
+        r.is_archived,
         c.company_name as customer_company,
         c.id as customer_id,
         c.customer_type,
@@ -350,7 +354,8 @@ router.get('/conversations', auth, async (req, res) => {
       LEFT JOIN pricing_customers c ON LOWER(c.email) = LOWER(r.sender_email) AND c.user_id = $1
       WHERE r.user_id = $1 AND (r.category IS DISTINCT FROM 'OTHER' OR r.sender_email = 'copilot@pruva.ai')
       ORDER BY r.created_at DESC
-    `, [userId]);
+      LIMIT $2 OFFSET $3
+    `, [userId, limit, offset]);
     
     const convMap = {};
     result.rows.forEach(row => {
