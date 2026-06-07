@@ -653,16 +653,15 @@ router.get('/conversations', auth, async (req, res) => {
       ORDER BY r.created_at DESC
     `, [userId]);
     
-    // thread_key'e göre grupla (conversation_id öncelikli, yoksa email)
+    // E-posta adresine göre grupla (çünkü AI yeni thread başlatıyor, aynı müşterinin tüm yazışmaları aynı chat'te toplanmalı)
     const convMap = {};
     result.rows.forEach(row => {
-      const email = (row.sender_email || '').toLowerCase();
-      const threadKey = row.conversation_id || email;
+      const email = (row.sender_email || '').toLowerCase().trim();
       
-      if (!convMap[threadKey]) {
+      if (!convMap[email]) {
         const isCopilot = email === 'copilot@pruva.ai';
         const company = isCopilot ? 'Pruva AI Co-pilot' : (row.customer_company || row.sender_name || email.split('@')[0]);
-        convMap[threadKey] = {
+        convMap[email] = {
           id: isCopilot ? 'copilot' : (row.customer_id || `rfq-${row.id}`),
           company: company,
           email: row.sender_email, // Preserve original email for replies
@@ -679,7 +678,7 @@ router.get('/conversations', auth, async (req, res) => {
       
       // Her RFQ'yu mesaj olarak ekle
       const isCopilot = email === 'copilot@pruva.ai';
-      convMap[threadKey].messages.push({
+      convMap[email].messages.push({
         sender: isCopilot ? 'Kullanıcı' : (row.sender_name || email),
         time: new Date(row.created_at).toLocaleString('tr-TR'),
         timestamp: new Date(row.created_at),
@@ -688,12 +687,12 @@ router.get('/conversations', auth, async (req, res) => {
       });
       
       // Son mesajı ve zamanı güncelle
-      if (!convMap[threadKey].time || new Date(row.created_at) > new Date(convMap[threadKey].time)) {
-        convMap[threadKey].lastMessage = row.subject;
-        convMap[threadKey].time = new Date(row.created_at).toLocaleString('tr-TR', { 
+      if (!convMap[email].time || new Date(row.created_at) > new Date(convMap[email].time)) {
+        convMap[email].lastMessage = row.subject;
+        convMap[email].time = new Date(row.created_at).toLocaleString('tr-TR', { 
           hour: '2-digit', minute: '2-digit' 
         });
-        convMap[threadKey].status = row.status;
+        convMap[email].status = row.status;
       }
     });
     
@@ -707,9 +706,8 @@ router.get('/conversations', auth, async (req, res) => {
     `, [userId]);
     
     actions.rows.forEach(action => {
-      const actionEmail = (action.sender_email || '').toLowerCase();
-      const threadKey = action.conversation_id || actionEmail;
-      const conv = convMap[threadKey];
+      const actionEmail = (action.sender_email || '').toLowerCase().trim();
+      const conv = convMap[actionEmail];
       if (conv) {
         let type = action.status === 'PENDING' ? 'ai_suggestion' : 'ai_action';
         let sender = 'Pruva AI';
