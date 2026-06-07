@@ -282,19 +282,36 @@ module.exports = {
         }
         if (query.includes('insert into pricing_actions')) {
             const id = Date.now() + Math.floor(Math.random() * 1000);
-            const newAction = {
-                id,
-                user_id: params[0],
-                rfq_id: params[1],
-                action_type: params[2],
-                title: params[3],
-                description: params[4],
-                suggested_mail: typeof params[5] === 'string' ? JSON.parse(params[5]) : params[5],
-                carriers_to_contact: typeof params[6] === 'string' ? JSON.parse(params[6]) : params[6],
-                status: 'PENDING',
-                created_at: new Date(),
-                updated_at: new Date()
-            };
+            
+            let newAction;
+            // Eger USER_MESSAGE (6 parametreli) ise
+            if (params.length === 6) {
+                newAction = {
+                    id,
+                    user_id: params[0],
+                    rfq_id: params[1],
+                    action_type: params[2],
+                    title: params[3],
+                    description: params[4],
+                    status: params[5],
+                    created_at: new Date(),
+                    updated_at: new Date()
+                };
+            } else {
+                newAction = {
+                    id,
+                    user_id: params[0],
+                    rfq_id: params[1],
+                    action_type: params[2],
+                    title: params[3],
+                    description: params[4],
+                    suggested_mail: typeof params[5] === 'string' ? JSON.parse(params[5] || 'null') : params[5],
+                    carriers_to_contact: typeof params[6] === 'string' ? JSON.parse(params[6] || 'null') : params[6],
+                    status: params[7] || 'PENDING',
+                    created_at: new Date(),
+                    updated_at: new Date()
+                };
+            }
             dummyData.pricing_actions.push(newAction);
             return { rows: [{ id }] };
         }
