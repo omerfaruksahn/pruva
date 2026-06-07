@@ -1972,11 +1972,15 @@ window.PruvaAiManager = class PruvaAiManager {
             const finalSubject = suggestedMail.subject || suggestionMsg.text || 'Pruva AI Navlun Bildirimi';
             const finalBody = suggestedMail.body || suggestionMsg.suggestedMessage || actionMsg;
             const finalAttachments = suggestedMail.attachments || [];
-            await fetch(CONFIG.API_URL + '/pricing/send-email', {
+            const response = await fetch(CONFIG.API_URL + '/pricing/send-email', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify({ to: finalTo, subject: finalSubject, body: finalBody, attachments: finalAttachments })
             });
+            if (!response.ok) {
+                const errData = await response.json();
+                throw new Error(errData.error || 'E-posta gönderimi başarısız oldu.');
+            }
             const actionId = suggestionMsg.actionId;
             if (actionId) {
                 await fetch(CONFIG.API_URL + `/pricing/actions/${actionId}/approve`, {

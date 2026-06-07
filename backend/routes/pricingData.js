@@ -790,7 +790,7 @@ router.post('/send-email', auth, async (req, res) => {
     res.json({ success: true, ...result });
   } catch (error) {
     console.error('Send email error:', error);
-    res.status(500).json({ error: 'E-posta gönderilemedi.' });
+    res.status(500).json({ error: error.message || 'E-posta gönderilemedi.' });
   }
 });
 
