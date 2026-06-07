@@ -655,7 +655,7 @@ router.get('/conversations', auth, async (req, res) => {
     // sender_email'e göre grupla → konuşma listesi oluştur
     const convMap = {};
     result.rows.forEach(row => {
-      const email = row.sender_email;
+      const email = (row.sender_email || '').toLowerCase();
       if (!convMap[email]) {
         const isCopilot = email === 'copilot@pruva.ai';
         const company = isCopilot ? 'Pruva AI Co-pilot' : (row.customer_company || row.sender_name || email.split('@')[0]);
@@ -704,7 +704,8 @@ router.get('/conversations', auth, async (req, res) => {
     `, [userId]);
     
     actions.rows.forEach(action => {
-      const conv = convMap[action.sender_email];
+      const actionEmail = (action.sender_email || '').toLowerCase();
+      const conv = convMap[actionEmail];
       if (conv) {
         let type = action.status === 'PENDING' ? 'ai_suggestion' : 'ai_action';
         let sender = 'Pruva AI';
