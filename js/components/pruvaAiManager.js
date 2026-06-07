@@ -1758,7 +1758,7 @@ window.PruvaAiManager = class PruvaAiManager {
         this.app.state.activeConversationId = activeConvId;
         
         // Eğer aktif konuşma listede yoksa, oluştur (Co-pilot veya diğer durumlar için)
-        let convIdx = conversations.findIndex(c => c.id === activeConvId);
+        let convIdx = conversations.findIndex(c => c.id === activeConvId || String(c.id) === String(activeConvId));
         if (convIdx === -1) {
             const isCopilot = activeConvId === 'copilot';
             const newConv = {
@@ -1853,7 +1853,7 @@ window.PruvaAiManager = class PruvaAiManager {
 
             if (response.ok) {
                 // Sunucudan güncel mesajları veri tabanından canlı olarak çekelim ve UI'ı tazeleyelim
-                await this.loadState();
+                await this.loadConversations(1, false);
                 
                 // Hands-Free Mode Auto-Read
                 if (this.app.state.isHandsFreeMode) {

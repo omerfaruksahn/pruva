@@ -219,6 +219,21 @@ router.post('/analyze', auth, async (req, res) => {
         };
       }
       
+      // İlk olarak kullanıcının mesajını kaydet
+      await client.query(
+        `INSERT INTO pricing_actions (user_id, rfq_id, action_type, title, description, status)
+         VALUES ($1, $2, $3, $4, $5, $6)`,
+        [
+          req.user.id,
+          rfqId,
+          'USER_MESSAGE',
+          'Kullanıcı Komutu',
+          message,
+          'COMPLETED'
+        ]
+      );
+
+      // Sonra yapay zekanın cevabını kaydet
       await client.query(
         `INSERT INTO pricing_actions (user_id, rfq_id, action_type, title, description, suggested_mail, carriers_to_contact, status)
          VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
