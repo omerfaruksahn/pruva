@@ -160,6 +160,12 @@ async function scanEmails(userId, searchQuery = null, initialDeepScan = false) {
                 return { success: false, message: 'Outlook istemcisi başlatılamadı. .env dosyası yapılandırılmamış olabilir.' };
             }
 
+            // MSAL In-memory cache boş kalabilir (sunucu restart vb.). Manuel yükleyelim:
+            const cacheResult = await db.query('SELECT cache_data FROM msal_cache WHERE id = 1');
+            if (cacheResult.rows.length > 0 && cacheResult.rows[0].cache_data) {
+                cca.getTokenCache().deserialize(cacheResult.rows[0].cache_data);
+            }
+
             const account = await cca.getTokenCache().getAccountByHomeId(home_account_id);
             if (!account) {
                 console.log('[MAIL SCANNER] MSAL account not found in cache.');

@@ -85,6 +85,13 @@ async function sendEmail(userId, mailData) {
     if (accountResult.rows.length > 0) {
       const { cca } = require('../outlookConfig');
       if (cca) {
+        // Sunucu yeniden başladığında MSAL in-memory cache boş kalabilir.
+        // Bu yüzden getAccountByHomeId çağrısı null dönebilir. Manuel olarak cache'i DB'den yükleyelim:
+        const cacheResult = await db.query('SELECT cache_data FROM msal_cache WHERE id = 1');
+        if (cacheResult.rows.length > 0 && cacheResult.rows[0].cache_data) {
+            cca.getTokenCache().deserialize(cacheResult.rows[0].cache_data);
+        }
+
         const homeAccountId = accountResult.rows[0].home_account_id;
         const account = await cca.getTokenCache().getAccountByHomeId(homeAccountId);
         if (account) {
