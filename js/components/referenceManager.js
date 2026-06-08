@@ -9,7 +9,7 @@ window.ReferenceManager = class ReferenceManager {
         if (!file) return;
 
         if (file.size > 5 * 1024 * 1024) {
-            alert('Dosya boyutu 5MB\'dan küçük olmalıdır.');
+            alert(window.i18n.t('comp.reference.file_size_error'));
             return;
         }
 
@@ -27,12 +27,12 @@ window.ReferenceManager = class ReferenceManager {
                 if (file.type.startsWith('image/')) {
                     preview.innerHTML = `
                         <img src="${e.target.result}" style="max-height: 120px; border-radius: 8px; margin-bottom: 8px;">
-                        <p style="font-size: 0.75rem; color: var(--success); margin: 0;">✅ ${file.name} yüklendi</p>
+                        <p style="font-size: 0.75rem; color: var(--success); margin: 0;">✅ ${file.name} ${window.i18n.t('comp.reference.file_uploaded')}</p>
                     `;
                 } else {
                     preview.innerHTML = `
                         <div style="font-size: 2rem; margin-bottom: 8px;">📄</div>
-                        <p style="font-size: 0.75rem; color: var(--success); margin: 0;">✅ ${file.name} yüklendi</p>
+                        <p style="font-size: 0.75rem; color: var(--success); margin: 0;">✅ ${file.name} ${window.i18n.t('comp.reference.file_uploaded')}</p>
                     `;
                 }
                 
@@ -52,7 +52,7 @@ window.ReferenceManager = class ReferenceManager {
         const transport = document.getElementById('ref-transport')?.value;
 
         if (!company || !sector || !duration || !transport || !this._pendingRefDoc) {
-            window.notificationManager?.showToast('Lütfen tüm alanları doldurun ve belge yükleyin.', 'warning');
+            window.notificationManager?.showToast(window.i18n.t('comp.reference.fill_all_fields'), 'warning');
             return;
         }
 
@@ -61,7 +61,7 @@ window.ReferenceManager = class ReferenceManager {
         if (!user.references) user.references = [];
 
         if (user.references.find(r => r.companyName.toLowerCase() === company.toLowerCase() && r.status !== 'rejected')) {
-            window.notificationManager?.showToast(`${company} için zaten bir referansınız mevcut.`, 'warning');
+            window.notificationManager?.showToast(`${company} ${window.i18n.t('comp.reference.reference_exists')}`, 'warning');
             return;
         }
 
@@ -88,16 +88,16 @@ window.ReferenceManager = class ReferenceManager {
 
         this.app.store.save();
         this.app.router.render();
-        window.notificationManager?.showToast('Referansınız admin onayına gönderildi.', 'match');
+        window.notificationManager?.showToast(window.i18n.t('comp.reference.sent_for_approval'), 'match');
         window.notificationManager?.add({
             id: Date.now(), type: 'info',
-            text: `${this.app.state.currentUser} yeni bir referans ekledi: ${company}.`,
+            text: `${this.app.state.currentUser} ${window.i18n.t('comp.reference.new_reference_added')} ${company}.`,
             date: Date.now(), read: false, targetRole: 'admin', view: 'admin-dashboard'
         });
     }
 
     removeReference(refId) {
-        if (!confirm('Bu referansı kaldırmak istiyor musunuz?')) return;
+        if (!confirm(window.i18n.t('comp.reference.confirm_remove'))) return;
         const user = window.app.store.getCurrentUser();
         if (!user?.references) return;
         user.references = user.references.filter(r => r.id != refId);
@@ -109,7 +109,7 @@ window.ReferenceManager = class ReferenceManager {
         }
         this.app.store.save();
         this.app.router.render();
-        window.notificationManager?.showToast('Referans kaldırıldı.', 'info');
+        window.notificationManager?.showToast(window.i18n.t('comp.reference.reference_removed'), 'info');
     }
 
     approveReference(userId, refId) {
@@ -120,9 +120,9 @@ window.ReferenceManager = class ReferenceManager {
             this.app.store.save();
             this.app.router.render();
             if (window.notificationManager) {
-                window.notificationManager.showToast(`✅ ${ref.companyName} onaylandı.`, 'success');
+                window.notificationManager.showToast(`✅ ${ref.companyName} ${window.i18n.t('comp.reference.approved')}`, 'success');
                 window.notificationManager.add({
-                    id: Date.now(), type: 'success', text: `✅ Referansınız onaylandı: ${ref.companyName}`,
+                    id: Date.now(), type: 'success', text: `✅ ${window.i18n.t('comp.reference.reference_approved')} ${ref.companyName}`,
                     date: Date.now(), read: false, targetUser: user.name, view: 'carrier-dashboard'
                 });
             }
@@ -137,20 +137,20 @@ window.ReferenceManager = class ReferenceManager {
             this.app.store.save();
             this.app.router.render();
             if (window.notificationManager) {
-                window.notificationManager.showToast(`❌ ${ref.companyName} reddedildi.`, 'info');
+                window.notificationManager.showToast(`❌ ${ref.companyName} ${window.i18n.t('comp.reference.rejected')}`, 'info');
             }
         }
     }
 
     previewRefDoc(userId, refId) {
         if (this.app.state.userRole !== 'admin') {
-            alert('Gizlilik Politikası: Referans belgeleri sadece sistem yöneticileri tarafından doğrulanabilir. Diğer kullanıcılar sadece onay durumunu görebilir.');
+            alert(window.i18n.t('comp.reference.privacy_policy_admin_only'));
             return;
         }
         const user = this.app.state.users.find(u => u.id == userId);
         const ref = user?.references?.find(r => r.id == refId);
         if (ref?.documentUrl) {
-            window.utils.showImageModal(ref.documentUrl, `${ref.companyName} Belgesi`);
+            window.utils.showImageModal(ref.documentUrl, `${ref.companyName} ${window.i18n.t('comp.reference.document')}`);
         }
     }
 
@@ -164,7 +164,7 @@ window.ReferenceManager = class ReferenceManager {
             <div id="references-modal" class="modal-overlay" style="display: flex;">
                 <div class="modal-content" style="max-width: 500px; text-align: left; padding: 30px;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
-                        <h2 style="margin: 0; font-size: 1.25rem; font-weight: 800; letter-spacing: -0.5px;">${companyName} Referansları</h2>
+                        <h2 style="margin: 0; font-size: 1.25rem; font-weight: 800; letter-spacing: -0.5px;">${companyName} <span data-i18n="comp.reference.references">Referansları</span></h2>
                         <button onclick="document.getElementById('references-modal').remove()" style="background: var(--bg-page); border: none; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-muted); transition: all 0.2s;">&times;</button>
                     </div>
                     
@@ -177,26 +177,26 @@ window.ReferenceManager = class ReferenceManager {
                                         <div style="font-size: 0.75rem; color: var(--text-secondary); display: flex; align-items: center; gap: 6px;">
                                             <span style="background: #e0f2fe; color: #0369a1; padding: 2px 8px; border-radius: 4px; font-weight: 600;">${ref.sector}</span>
                                             <span style="color: #cbd5e1;">•</span>
-                                            <span>${ref.transportType === 'sea' ? 'Deniz' : ref.transportType === 'land' ? 'Kara' : 'Hava'}</span>
+                                            <span>${ref.transportType === 'sea' ? window.i18n.t('comp.reference.sea') : ref.transportType === 'land' ? window.i18n.t('comp.reference.land') : window.i18n.t('comp.reference.air')}</span>
                                         </div>
                                     </div>
                                     <div style="font-size: 0.65rem; color: #27ae60; font-weight: 700; display: flex; align-items: center; gap: 4px; background: #e6ffec; padding: 4px 10px; border-radius: 20px; border: 1px solid #b7eb8f;">
-                                        <i data-lucide="shield-check" style="width: 12px; height: 12px;"></i> DOĞRULANDI
+                                        <i data-lucide="shield-check" style="width: 12px; height: 12px;"></i> <span data-i18n="comp.reference.verified">DOĞRULANDI</span>
                                     </div>
                                 </div>
                                 <div style="margin-top: 15px; padding-top: 12px; border-top: 1px dashed var(--border-dim); display: flex; justify-content: space-between; align-items: center;">
                                     <div style="display: flex; align-items: center; gap: 6px; font-size: 0.75rem; color: var(--text-muted);">
                                         <i data-lucide="calendar" style="width: 14px; height: 14px;"></i>
-                                        Süre: <strong>${ref.duration}</strong>
+                                        <span data-i18n="comp.reference.duration">Süre:</span> <strong>${ref.duration}</strong>
                                     </div>
                                     ${this.app.state.userRole === 'admin' ? `
-                                        <button onclick="window.referenceManager.previewRefDoc('${carrier.id}', '${ref.id}')" class="btn-outline" style="padding: 5px 12px; font-size: 0.7rem; border-radius: 8px; background: white;">
+                                        <button onclick="window.referenceManager.previewRefDoc('${carrier.id}', '${ref.id}')" class="btn-outline" style="padding: 5px 12px; font-size: 0.7rem; border-radius: 8px; background: white;" data-i18n="comp.reference.review_doc_admin">
                                             Belgeyi İncele (Admin)
                                         </button>
                                     ` : `
                                         <div style="font-size: 0.7rem; color: var(--text-muted); display: flex; align-items: center; gap: 4px; opacity: 0.8;">
                                             <i data-lucide="lock" style="width: 12px; height: 12px;"></i>
-                                            Gizlilik Korumalı
+                                            <span data-i18n="comp.reference.privacy_protected">Gizlilik Korumalı</span>
                                         </div>
                                     `}
                                 </div>
@@ -239,7 +239,7 @@ window.ReferenceManager = class ReferenceManager {
             } catch (error) {
                 console.error('[ReferenceManager] submitReview failed:', error);
                 if (window.notificationManager) {
-                    window.notificationManager.showToast('Değerlendirme kaydedilemedi.', 'error');
+                    window.notificationManager.showToast(window.i18n.t('comp.reference.review_save_error'), 'error');
                 }
                 return;
             }
@@ -247,12 +247,12 @@ window.ReferenceManager = class ReferenceManager {
             this.app.store.save();
             this.app.router.render();
             if (window.notificationManager) {
-                window.notificationManager.showToast('⭐ Değerlendirmeniz kaydedildi. Teşekkürler!', 'success');
+                window.notificationManager.showToast(`⭐ ${window.i18n.t('comp.reference.review_saved')}`, 'success');
                 // Karşı tarafa bildirim gönder
                 window.notificationManager.add({
                     id: Date.now(),
                     type: 'info',
-                    text: `⭐ ${this.app.state.currentUser} sizi değerlendirdi: ${ad.origin} → ${ad.destination}`,
+                    text: `⭐ ${this.app.state.currentUser} ${window.i18n.t('comp.reference.you_were_reviewed')} ${ad.origin} → ${ad.destination}`,
                     date: Date.now(),
                     read: false,
                     targetUser: targetName

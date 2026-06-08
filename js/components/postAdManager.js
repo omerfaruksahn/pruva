@@ -15,28 +15,28 @@ window.PostAdManager = class PostAdManager {
             <button type="button" onclick="this.parentElement.remove(); window.postAdManager.updateGlobalDetailsVisibility();" style="position: absolute; top: 10px; right: 10px; background: none; border: none; color: #ff4d4d; cursor: pointer; font-size: 1.2rem;">&times;</button>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;" class="grid-2col">
                 <div class="form-group">
-                    <label style="font-size: 0.75rem;">Yük Tipi <span class="required">*</span></label>
+                    <label style="font-size: 0.75rem;" data-i18n="comp.post_ad.cargo_type">Yük Tipi <span class="required">*</span></label>
                     <select name="cargoType[]" class="form-control" onchange="window.postAdManager.handleRowTypeChange(this)" required>
-                        <option value="Parsiyel">Parsiyel (Koli/Palet)</option>
-                        <option value="Konteyner">Konteyner</option>
-                        <option value="Komple">Komple Tır</option>
+                        <option value="Parsiyel" data-i18n="comp.post_ad.partial">Parsiyel (Koli/Palet)</option>
+                        <option value="Konteyner" data-i18n="comp.post_ad.container">Konteyner</option>
+                        <option value="Komple" data-i18n="comp.post_ad.full_truck">Komple Tır</option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label style="font-size: 0.75rem;">Malın Cinsi <span class="required">*</span></label>
+                    <label style="font-size: 0.75rem;" data-i18n="comp.post_ad.goods_type">Malın Cinsi <span class="required">*</span></label>
                     <div class="autocomplete-wrapper">
-                        <input type="text" name="goodsType[]" class="form-control goods-type-input" placeholder="Seçiniz veya yazınız..." autocomplete="off" required>
+                        <input type="text" name="goodsType[]" class="form-control goods-type-input" placeholder="Seçiniz veya yazınız..." data-i18n="[placeholder]comp.post_ad.select_or_type" autocomplete="off" required>
                         <div class="autocomplete-results"></div>
                     </div>
                 </div>
             </div>
             <div class="row-dynamic-fields">
                 <div class="cargo-dims-grid" style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; align-items: end;">
-                    <div><label style="font-size: 0.65rem;">En (cm) <span class="required">*</span></label><input type="number" name="width[]" class="form-control" oninput="window.postAdManager.updateCBM(this)" required min="1"></div>
-                    <div><label style="font-size: 0.65rem;">Boy (cm) <span class="required">*</span></label><input type="number" name="length[]" class="form-control" oninput="window.postAdManager.updateCBM(this)" required min="1"></div>
-                    <div><label style="font-size: 0.65rem;">Yük. (cm) <span class="required">*</span></label><input type="number" name="height[]" class="form-control" oninput="window.postAdManager.updateCBM(this)" required min="1"></div>
-                    <div><label style="font-size: 0.65rem;">Adet <span class="required">*</span></label><input type="number" name="qty[]" class="form-control" value="1" oninput="window.postAdManager.updateCBM(this)" required min="1"></div>
-                    <div><label style="font-size: 0.65rem;">CBM</label><input type="text" name="cbm_box[]" class="form-control cbm-value" value="0.00" readonly style="background: var(--bg-page); font-weight: bold; text-align: center;"></div>
+                    <div><label style="font-size: 0.65rem;" data-i18n="comp.post_ad.width">En (cm) <span class="required">*</span></label><input type="number" name="width[]" class="form-control" oninput="window.postAdManager.updateCBM(this)" required min="1"></div>
+                    <div><label style="font-size: 0.65rem;" data-i18n="comp.post_ad.length">Boy (cm) <span class="required">*</span></label><input type="number" name="length[]" class="form-control" oninput="window.postAdManager.updateCBM(this)" required min="1"></div>
+                    <div><label style="font-size: 0.65rem;" data-i18n="comp.post_ad.height">Yük. (cm) <span class="required">*</span></label><input type="number" name="height[]" class="form-control" oninput="window.postAdManager.updateCBM(this)" required min="1"></div>
+                    <div><label style="font-size: 0.65rem;" data-i18n="comp.post_ad.qty">Adet <span class="required">*</span></label><input type="number" name="qty[]" class="form-control" value="1" oninput="window.postAdManager.updateCBM(this)" required min="1"></div>
+                    <div><label style="font-size: 0.65rem;" data-i18n="comp.post_ad.cbm">CBM</label><input type="text" name="cbm_box[]" class="form-control cbm-value" value="0.00" readonly style="background: var(--bg-page); font-weight: bold; text-align: center;"></div>
                 </div>
             </div>
             <!-- Satır Fotoğraf Alanı -->
@@ -45,7 +45,7 @@ window.PostAdManager = class PostAdManager {
                 <div style="display: flex; align-items: center; gap: 8px; position: relative;">
                     <button type="button" class="btn-outline photo-add-btn" onclick="this.nextElementSibling.click()" style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; padding: 0; border-radius: 8px;">+</button>
                     <input type="file" class="row-photos-input" multiple accept="image/*" style="display: none;" onchange="window.postAdManager.handleRowPhotoUpload(event, this)">
-                    <span style="font-size: 0.75rem; color: var(--text-secondary); font-weight: 600;">Fotoğraflar <span style="font-size: 0.65rem; font-weight: normal; color: #999;">(Max 4 Foto)</span></span>
+                    <span style="font-size: 0.75rem; color: var(--text-secondary); font-weight: 600;"><span data-i18n="comp.post_ad.photos">Fotoğraflar</span> <span style="font-size: 0.65rem; font-weight: normal; color: #999;" data-i18n="comp.post_ad.max_4_photos">(Max 4 Foto)</span></span>
                 </div>
             </div>
         `;
@@ -71,25 +71,25 @@ window.PostAdManager = class PostAdManager {
         if (type === 'Parsiyel') {
             dynamicArea.innerHTML = `
                 <div class="cargo-dims-grid" style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; align-items: end;">
-                    <div><label style="font-size: 0.65rem;">En (cm) <span class="required">*</span></label><input type="number" name="width[]" class="form-control" oninput="window.postAdManager.updateCBM(this)" required min="1"></div>
-                    <div><label style="font-size: 0.65rem;">Boy (cm) <span class="required">*</span></label><input type="number" name="length[]" class="form-control" oninput="window.postAdManager.updateCBM(this)" required min="1"></div>
-                    <div><label style="font-size: 0.65rem;">Yük. (cm) <span class="required">*</span></label><input type="number" name="height[]" class="form-control" oninput="window.postAdManager.updateCBM(this)" required min="1"></div>
-                    <div><label style="font-size: 0.65rem;">Adet <span class="required">*</span></label><input type="number" name="qty[]" class="form-control" value="1" oninput="window.postAdManager.updateCBM(this)" required min="1"></div>
-                    <div><label style="font-size: 0.65rem;">CBM</label><input type="text" name="cbm_box[]" class="form-control cbm-value" value="0.00" readonly style="background: var(--bg-page); font-weight: bold; text-align: center;"></div>
+                    <div><label style="font-size: 0.65rem;" data-i18n="comp.post_ad.width">En (cm) <span class="required">*</span></label><input type="number" name="width[]" class="form-control" oninput="window.postAdManager.updateCBM(this)" required min="1"></div>
+                    <div><label style="font-size: 0.65rem;" data-i18n="comp.post_ad.length">Boy (cm) <span class="required">*</span></label><input type="number" name="length[]" class="form-control" oninput="window.postAdManager.updateCBM(this)" required min="1"></div>
+                    <div><label style="font-size: 0.65rem;" data-i18n="comp.post_ad.height">Yük. (cm) <span class="required">*</span></label><input type="number" name="height[]" class="form-control" oninput="window.postAdManager.updateCBM(this)" required min="1"></div>
+                    <div><label style="font-size: 0.65rem;" data-i18n="comp.post_ad.qty">Adet <span class="required">*</span></label><input type="number" name="qty[]" class="form-control" value="1" oninput="window.postAdManager.updateCBM(this)" required min="1"></div>
+                    <div><label style="font-size: 0.65rem;" data-i18n="comp.post_ad.cbm">CBM</label><input type="text" name="cbm_box[]" class="form-control cbm-value" value="0.00" readonly style="background: var(--bg-page); font-weight: bold; text-align: center;"></div>
                 </div>`;
         } else if (type === 'Konteyner') {
             const containerOptions = lk.cargoTypes.Konteyner.map(c => `<option>${c}</option>`).join('');
             dynamicArea.innerHTML = `
                 <div class="cargo-summary-grid" style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 10px;">
                     <select name="containerType[]" class="form-control" required>${containerOptions}</select>
-                    <input type="number" name="qty[]" placeholder="Adet *" class="form-control" value="1" required min="1">
-                    <input type="number" name="weight[]" placeholder="Kg/Birim *" class="form-control" required min="1">
+                    <input type="number" name="qty[]" placeholder="Adet *" data-i18n="[placeholder]comp.post_ad.qty_placeholder" class="form-control" value="1" required min="1">
+                    <input type="number" name="weight[]" placeholder="Kg/Birim *" data-i18n="[placeholder]comp.post_ad.weight_placeholder" class="form-control" required min="1">
                 </div>`;
         } else {
             dynamicArea.innerHTML = `
                 <div class="grid-2col" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                    <input type="number" name="weight[]" placeholder="Toplam Kg *" class="form-control" required min="1">
-                    <textarea name="notes[]" class="form-control" placeholder="Özel notlar... (İsteğe Bağlı)" style="height: 40px; grid-column: span 2;"></textarea>
+                    <input type="number" name="weight[]" placeholder="Toplam Kg *" data-i18n="[placeholder]comp.post_ad.total_weight" class="form-control" required min="1">
+                    <textarea name="notes[]" class="form-control" placeholder="Özel notlar... (İsteğe Bağlı)" data-i18n="[placeholder]comp.post_ad.notes_placeholder" style="height: 40px; grid-column: span 2;"></textarea>
                 </div>`;
         }
         this.updateGlobalDetailsVisibility();
@@ -142,7 +142,7 @@ window.PostAdManager = class PostAdManager {
         if (!row.uploadedPhotos) row.uploadedPhotos = [];
 
         if (row.uploadedPhotos.length + files.length > 4) {
-            alert('Bu yük için en fazla 4 fotoğraf yükleyebilirsiniz.');
+            alert(window.i18n.t('post_ad.err_max_photos'));
             return;
         }
 
@@ -190,7 +190,7 @@ window.PostAdManager = class PostAdManager {
         today.setHours(0, 0, 0, 0);
         const deadlineDate = new Date(deadline);
         if (deadlineDate < today) {
-            alert('⛔ Yükleme tarihi geçmiş bir tarih olamaz! Lütfen bugün veya ilerisini seçin.');
+            alert(window.i18n.t('post_ad.err_past_date'));
             return;
         }
 
@@ -198,7 +198,7 @@ window.PostAdManager = class PostAdManager {
         const originalBtnText = submitBtn ? submitBtn.innerHTML : 'İlan Ver';
 
         if (submitBtn) {
-            submitBtn.innerHTML = 'Yükleniyor... <div style="display:inline-block; width:12px; height:12px; border:2px solid white; border-top:2px solid transparent; border-radius:50%; animation:spin 1s linear infinite; margin-left:5px;"></div>';
+            submitBtn.innerHTML = window.i18n.t('post_ad.loading') + ' <div style="display:inline-block; width:12px; height:12px; border:2px solid white; border-top:2px solid transparent; border-radius:50%; animation:spin 1s linear infinite; margin-left:5px;"></div>';
             submitBtn.disabled = true;
         }
 
@@ -207,7 +207,7 @@ window.PostAdManager = class PostAdManager {
         const rows = document.querySelectorAll('.cargo-row-item');
         let rowTotalCBM = 0;
 
-        if (submitBtn) submitBtn.innerHTML = 'Fotoğraflar Yükleniyor... <div style="display:inline-block; width:12px; height:12px; border:2px solid white; border-top:2px solid transparent; border-radius:50%; animation:spin 1s linear infinite; margin-left:5px;"></div>';
+        if (submitBtn) submitBtn.innerHTML = window.i18n.t('post_ad.uploading_photos') + ' <div style="display:inline-block; width:12px; height:12px; border:2px solid white; border-top:2px solid transparent; border-radius:50%; animation:spin 1s linear infinite; margin-left:5px;"></div>';
 
         for (let i = 0; i < rows.length; i++) {
             const row = rows[i];
@@ -296,7 +296,7 @@ window.PostAdManager = class PostAdManager {
                 window.notificationManager.add({
                     id: Date.now(),
                     type: 'match',
-                    text: `İlanınız başarıyla yayınlandı! İlan No: ${window.utils.formatAdNumber(newAd.id)}`,
+                    text: `${window.i18n.t('post_ad.success_published')} ${window.i18n.t('post_ad.ad_no')}: ${window.utils.formatAdNumber(newAd.id)}`,
                     date: Date.now(),
                     read: false,
                     targetUser: this.app.state.currentUser,
@@ -307,7 +307,7 @@ window.PostAdManager = class PostAdManager {
             this.app.router.navigate('marketplace');
         } catch (error) {
             console.error("Firestore İlan Ekleme Hatası:", error);
-            alert("İlan kaydedilirken bir hata oluştu: " + error.message);
+            alert(window.i18n.t('post_ad.error_saving') + ": " + error.message);
         } finally {
             if (submitBtn) {
                 submitBtn.innerHTML = originalBtnText;
@@ -326,7 +326,7 @@ window.PostAdManager = class PostAdManager {
                 window.notificationManager.add({
                     id: Date.now(),
                     type: 'match',
-                    text: `🎯 İlgi alanınıza uygun yeni fırsat: ${ad.origin} → ${ad.destination}`,
+                    text: `🎯 ${window.i18n.t('post_ad.new_opportunity')}: ${ad.origin} → ${ad.destination}`,
                     date: Date.now(),
                     read: false,
                     targetPlan: 'premium' // Ekstra güvenlik
@@ -337,7 +337,7 @@ window.PostAdManager = class PostAdManager {
                 window.notificationManager.add({
                     id: Date.now(),
                     type: 'info',
-                    text: `🚀 İlanınız yayında! Rotadaki ${Math.floor(Math.random() * 10) + 3} taşıyıcıya anlık bildirim gönderildi.`,
+                    text: `🚀 ${window.i18n.t('post_ad.ad_live')}! ${window.i18n.t('post_ad.notif_sent_prefix')} ${Math.floor(Math.random() * 10) + 3} ${window.i18n.t('post_ad.notif_sent_suffix')}`,
                     date: Date.now(),
                     read: false,
                     targetUser: this.app.state.currentUser
@@ -347,7 +347,7 @@ window.PostAdManager = class PostAdManager {
                 window.notificationManager.add({
                     id: Date.now() + 1,
                     type: 'match',
-                    text: `🎯 Yeni ilan: ${ad.origin} → ${ad.destination} (${ad.goodsType})`,
+                    text: `🎯 ${window.i18n.t('post_ad.new_ad')}: ${ad.origin} → ${ad.destination} (${ad.goodsType})`,
                     date: Date.now(),
                     read: false,
                     targetRole: 'carrier',
@@ -360,8 +360,8 @@ window.PostAdManager = class PostAdManager {
                 window.notificationManager.add({
                     id: Date.now() + 2,
                     type: 'info',
-                    text: `📦 Yeni İlan: ${ad.origin} → ${ad.destination}`,
-                    subtext: `Yükleyici: ${ad.owner} | Tip: ${ad.cargoType}`,
+                    text: `📦 ${window.i18n.t('post_ad.new_ad')}: ${ad.origin} → ${ad.destination}`,
+                    subtext: `${window.i18n.t('post_ad.loader')}: ${ad.owner} | ${window.i18n.t('post_ad.type')}: ${ad.cargoType}`,
                     date: Date.now(),
                     read: false,
                     targetRole: 'admin',

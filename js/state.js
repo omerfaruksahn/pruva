@@ -22,8 +22,8 @@ const PERSISTENCE_MAP = [
     { key: 'pruva_messages',         path: 'messages',         type: 'json' },
     { key: 'pruva_securityLogs',     path: 'securityLogs',     type: 'json' },
     { key: 'pruva_favorites',        path: 'favorites',        type: 'json' },
-    { key: 'pruva_eduReadModules',   path: 'eduReadModules',   type: 'json' },
-
+    { key: 'pruva_campusLibrary',        path: 'campusLibrary',        type: 'json' },
+    { key: 'pruva_campusCart',           path: 'campusCart',           type: 'json' },
     // Auth & Identity
     { key: 'pruva_isLoggedIn',       path: 'isLoggedIn',       type: 'json' },
     { key: 'pruva_currentUser',      path: 'currentUser',      type: 'string' },
@@ -39,10 +39,10 @@ const PERSISTENCE_MAP = [
     { key: 'pruva_adminActiveTab',       path: 'adminActiveTab',       type: 'string' },
     { key: 'pruva_loaderActiveTab',      path: 'loaderActiveTab',      type: 'string' },
     { key: 'pruva_carrierActiveTab',     path: 'carrierActiveTab',     type: 'string' },
-    { key: 'pruva_currentEduModuleIndex', path: 'currentEduModuleIndex', type: 'int' },
-    { key: 'pruva_eduViewMode',          path: 'eduViewMode',          type: 'string' },
-    { key: 'pruva_eduCategory',          path: 'eduCategory',          type: 'string' },
-    
+    { key: 'pruva_campusViewMode',       path: 'campusViewMode',       type: 'string' },
+    { key: 'pruva_campusCategory',       path: 'campusCategory',       type: 'string' },
+    { key: 'pruva_campusSelectedProduct',path: 'campusSelectedProduct',type: 'string' },
+    { key: 'pruva_campusSelectedInst',   path: 'campusSelectedInst',   type: 'string' },    
     // Outlook Connection
     { key: 'pruva_outlookConnected',     path: 'outlookConnected',     type: 'json' },
     { key: 'pruva_outlookEmail',         path: 'outlookEmail',         type: 'string' },
@@ -74,8 +74,8 @@ function getDefaults() {
         messages: [],           // { id, adId, from, to, text, date }
         securityLogs: [],       // { id, user, originalText, type, date }
         favorites: [],
-        eduReadModules: [],
-
+        campusLibrary: [],
+        campusCart: [],
         // Auth & Identity
         isLoggedIn: false,
         currentUser: 'Misafir',
@@ -98,9 +98,10 @@ function getDefaults() {
         loaderActiveTab: 'open-ads',
         carrierActiveTab: 'my-bids',
         marketplacePage: 1,
-        currentEduModuleIndex: 0,
-        eduViewMode: 'portal',
-        eduCategory: 'all',
+        campusViewMode: 'storefront', // storefront, product_detail, instructor_profile, library
+        campusCategory: 'all',
+        campusSelectedProduct: null,
+        campusSelectedInst: null,
     };
 }
 

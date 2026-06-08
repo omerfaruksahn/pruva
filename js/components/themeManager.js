@@ -21,7 +21,7 @@ window.ThemeManager = {
         this.apply();
         
         if (window.notificationManager) {
-            window.notificationManager.showToast(this.isDark ? 'Gece Modu Aktif' : 'Gündüz Modu Aktif', 'info');
+            window.notificationManager.showToast(this.isDark ? window.i18n.t('comp.theme.night_mode') : window.i18n.t('comp.theme.day_mode'), 'info');
         }
         
         // UI'daki tüm ikonları güncelle

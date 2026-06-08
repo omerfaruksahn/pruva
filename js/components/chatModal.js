@@ -20,7 +20,7 @@ window.chatModalComponent = (state, adId, partnerName, chatId) => {
                         <div style="display: flex; align-items: center; gap: 6px; opacity: 0.85; font-size: 0.75rem; color: rgba(255, 255, 255, 0.9);">
                             <div style="width: 6px; height: 6px; border-radius: 50%; background: var(--success); box-shadow: 0 0 5px var(--success);"></div>
                             <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px;">
-                                ${isSystemChat ? 'Doğrulanmış Hesap' : (ad ? `İlan: ${ad.origin} ➔ ${ad.destination}` : 'Yük Detayı')}
+                                ${isSystemChat ? window.i18n.t('comp.chat_modal.verified_account') : (ad ? window.i18n.t('comp.chat_modal.listing_route').replace('{origin}', ad.origin).replace('{dest}', ad.destination) : window.i18n.t('comp.chat_modal.load_detail'))}
                             </span>
                         </div>
                     </div>
@@ -34,7 +34,7 @@ window.chatModalComponent = (state, adId, partnerName, chatId) => {
             <div style="background: rgba(245, 158, 11, 0.06); border-bottom: 1px solid rgba(245, 158, 11, 0.12); padding: 10px 20px; display: flex; align-items: center; gap: 10px;">
                 <i data-lucide="shield-alert" style="width: 16px; height: 16px; color: var(--warning); flex-shrink: 0;"></i>
                 <p style="margin: 0; font-size: 0.75rem; color: var(--warning); line-height: 1.4; font-weight: 500; opacity: 0.95;">
-                    Pruva güvenliği için iletişim bilgilerini paylaşmak yasaktır. Platform üzerinden anlaşma sağlandığında iletişim bilgileri otomatik iletilir.
+                    ${window.i18n.t('comp.chat_modal.privacy_warning')}
                 </p>
             </div>
  
@@ -44,21 +44,21 @@ window.chatModalComponent = (state, adId, partnerName, chatId) => {
                     <div style="width: 48px; height: 48px; border-radius: 50%; background: var(--bg-elevated); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; margin-bottom: 12px; animation: pulse 2s infinite;">
                         <i data-lucide="message-square" style="width: 22px; height: 22px; color: var(--text-secondary);"></i>
                     </div>
-                    <p style="font-size: 0.85rem; font-weight: 500; margin: 0; color: var(--text-secondary);">Bağlantı kuruluyor...</p>
+                    <p style="font-size: 0.85rem; font-weight: 500; margin: 0; color: var(--text-secondary);">${window.i18n.t('comp.chat_modal.connecting')}</p>
                 </div>
             </div>
  
             <!-- Premium Input Area -->
             <div style="padding: 16px 20px 24px; background: var(--bg-surface); border-top: 1px solid var(--border); box-shadow: 0 -4px 20px rgba(0,0,0,0.02);">
                 <div style="display: flex; gap: 12px; align-items: flex-end; background: var(--bg-page); border-radius: 20px; padding: 6px 6px 6px 16px; border: 1px solid var(--border); transition: border-color 0.2s ease, box-shadow 0.2s ease;" id="chat-input-wrapper">
-                    <textarea id="chat-input" placeholder="Mesajınızı yazın..." style="flex: 1; border: none; background: transparent; padding: 10px 0; font-family: inherit; font-size: 0.9rem; color: var(--text-primary); resize: none; min-height: 24px; max-height: 100px; outline: none; line-height: 1.4;" onfocus="document.getElementById('chat-input-wrapper').style.borderColor='var(--secondary)'; document.getElementById('chat-input-wrapper').style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)'" onblur="document.getElementById('chat-input-wrapper').style.borderColor='var(--border)'; document.getElementById('chat-input-wrapper').style.boxShadow='none'" oninput="this.style.height = ''; this.style.height = Math.min(this.scrollHeight, 100) + 'px';" onkeypress="if(event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); window.chatManager.sendMessage('${chatId}'); }"></textarea>
+                    <textarea id="chat-input" placeholder="${window.i18n.t('comp.chat_modal.placeholder')}" style="flex: 1; border: none; background: transparent; padding: 10px 0; font-family: inherit; font-size: 0.9rem; color: var(--text-primary); resize: none; min-height: 24px; max-height: 100px; outline: none; line-height: 1.4;" onfocus="document.getElementById('chat-input-wrapper').style.borderColor='var(--secondary)'; document.getElementById('chat-input-wrapper').style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)'" onblur="document.getElementById('chat-input-wrapper').style.borderColor='var(--border)'; document.getElementById('chat-input-wrapper').style.boxShadow='none'" oninput="this.style.height = ''; this.style.height = Math.min(this.scrollHeight, 100) + 'px';" onkeypress="if(event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); window.chatManager.sendMessage('${chatId}'); }"></textarea>
                     
                     <button style="background: var(--primary-gradient); border: none; color: white; width: 40px; height: 40px; border-radius: 16px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.2s ease, box-shadow 0.2s ease; flex-shrink: 0;" onclick="window.chatManager.sendMessage('${chatId}')" onmouseover="this.style.transform='scale(1.04)'; this.style.boxShadow='0 4px 12px rgba(59,130,246,0.2)'" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none'">
                         <i data-lucide="send" style="width: 18px; height: 18px;"></i>
                     </button>
                 </div>
                 <div style="text-align: center; margin-top: 8px;">
-                    <span style="font-size: 0.65rem; color: var(--text-muted);">Enter ile gönderin, Shift + Enter ile alt satıra geçin</span>
+                    <span style="font-size: 0.65rem; color: var(--text-muted);">${window.i18n.t('comp.chat_modal.enter_hint')}</span>
                 </div>
             </div>
         </div>

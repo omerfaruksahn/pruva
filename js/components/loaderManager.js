@@ -5,22 +5,22 @@ window.LoaderManager = class LoaderManager {
     }
 
     async archiveShipment(adId) {
-        if (!confirm('Bu ilanı arşive kaldırmak istediğinize emin misiniz?')) return;
+        if (!confirm(window.i18n.t('comp.loader.confirm_archive'))) return;
         
         const updates = { status: 'archived' };
         try {
             await this.app.store.updateAd(adId, updates);
             if (window.notificationManager) {
-                window.notificationManager.showToast('İlan başarıyla arşivlendi.', 'success');
+                window.notificationManager.showToast(window.i18n.t('comp.loader.ad_archived'), 'success');
             }
             this.app.router.render();
         } catch (error) {
-            if (window.notificationManager) window.notificationManager.showToast('İşlem başarısız.', 'error');
+            if (window.notificationManager) window.notificationManager.showToast(window.i18n.t('comp.loader.operation_failed'), 'error');
         }
     }
 
     async cancelAcceptedShipment(adId) {
-        if (!confirm('DİKKAT: Kabul edilmiş bir sevkiyatı iptal etmek, taşıyıcı firma mağdur olacağı için profilinizden -0.3 ceza puanı düşülmesine sebep olacaktır. Devam etmek istiyor musunuz?')) return;
+        if (!confirm(window.i18n.t('comp.loader.confirm_cancel'))) return;
         
         const ad = this.app.store.findAd(adId);
         if (!ad) return;
@@ -46,7 +46,7 @@ window.LoaderManager = class LoaderManager {
                 origin: ad.origin,
                 destination: ad.destination,
                 scores: { cat1: 0, cat2: 0, cat3: 0 },
-                comment: 'Sistem Notu: Kabul edilmiş sevkiyatı tek taraflı iptal ettiği için ceza uygulandı.'
+                comment: window.i18n.t('comp.loader.sys_note_cancel_penalty')
             });
             await this.app.store.updateUser(loaderName, { performance: loader.performance });
         }
@@ -61,7 +61,7 @@ window.LoaderManager = class LoaderManager {
         const newTimeline = [...(ad.operationTimeline || [])];
         newTimeline.unshift({
             type: 'error',
-            text: 'Sevkiyat Yükveren tarafından tek taraflı İptal Edildi.',
+            text: window.i18n.t('comp.loader.timeline_loader_cancelled'),
             date: new Date().toLocaleString('tr-TR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
         });
         updates.operationTimeline = newTimeline;
@@ -71,15 +71,15 @@ window.LoaderManager = class LoaderManager {
             this.app.store.save();
             this.app.router.render();
             if (window.notificationManager) {
-                window.notificationManager.showToast('Sevkiyat iptal edildi ve ceza puanı yansıtıldı.', 'warning');
+                window.notificationManager.showToast(window.i18n.t('comp.loader.cancel_penalty_applied'), 'warning');
                 
                 // Taşıyıcıya bildirim gönder
                 if (ad.acceptedBid && ad.acceptedBid.company) {
                     window.notificationManager.add({
                         id: Date.now(),
                         type: 'error',
-                        text: `🚨 Sevkiyat İptal Edildi: Yükveren ${loaderName}, sevkiyatı tek taraflı iptal etti!`,
-                        subtext: `İlan: ${ad.origin} → ${ad.destination} | Yük sahibine ceza puanı uygulandı.`,
+                        text: window.i18n.t('comp.loader.notif_cancel').replace('{loader}', loaderName),
+                        subtext: window.i18n.t('comp.loader.notif_cancel_sub').replace('{origin}', ad.origin).replace('{dest}', ad.destination),
                         date: Date.now(),
                         read: false,
                         targetUser: ad.acceptedBid.company,
@@ -88,7 +88,7 @@ window.LoaderManager = class LoaderManager {
                 }
             }
         } catch (error) {
-            if (window.notificationManager) window.notificationManager.showToast('İptal işlemi başarısız: ' + error.message, 'error');
+            if (window.notificationManager) window.notificationManager.showToast(window.i18n.t('comp.loader.operation_failed') + ': ' + error.message, 'error');
         }
     }
 
@@ -100,7 +100,7 @@ window.LoaderManager = class LoaderManager {
         const selectedBid = visibleBids[bidIndex];
         
         if (!selectedBid) {
-            if (window.notificationManager) window.notificationManager.showToast('Teklif bulunamadı.', 'error');
+            if (window.notificationManager) window.notificationManager.showToast(window.i18n.t('comp.loader.bid_not_found'), 'error');
             return;
         }
 
@@ -108,19 +108,19 @@ window.LoaderManager = class LoaderManager {
             <div id="accept-bid-modal" class="modal-overlay" style="display: flex;" onclick="if(event.target === this) this.remove()">
                 <div class="modal-content" style="max-width: 450px;" onclick="event.stopPropagation()">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                        <h2 style="margin: 0; font-size: 1.3rem; color: var(--primary);">Teklifi Onayla</h2>
+                        <h2 style="margin: 0; font-size: 1.3rem; color: var(--primary);">${window.i18n.t('comp.loader.accept_bid_title')}</h2>
                         <button onclick="document.getElementById('accept-bid-modal').remove()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">&times;</button>
                     </div>
                     <p style="margin-bottom: 15px; font-size: 0.9rem; color: var(--text-secondary);">
-                        <strong>${selectedBid.company}</strong> firmasının teklifini onaylıyorsunuz. Eğer taşıyıcı ile mesajlarda farklı bir fiyatta anlaştıysanız, lütfen aşağıya anlaşılan son tutarı girin. (Örn: $2400)
+                        ${window.i18n.t('comp.loader.accept_bid_desc').replace('{company}', selectedBid.company)}
                     </p>
                     <div class="form-group">
-                        <label style="font-weight: 600; font-size: 0.85rem;">Anlaşılan Tutar</label>
+                        <label style="font-weight: 600; font-size: 0.85rem;">${window.i18n.t('comp.loader.agreed_price')}</label>
                         <input type="text" id="agreed-price-input" class="form-control" value="${selectedBid.price}" style="margin-top: 5px; font-size: 1.1rem; font-weight: 700; color: var(--primary);">
                     </div>
                     <div style="display: flex; gap: 12px; margin-top: 25px;">
-                        <button class="btn-outline" style="flex: 1; padding: 12px;" onclick="document.getElementById('accept-bid-modal').remove()">Vazgeç</button>
-                        <button class="btn-primary" style="flex: 2; padding: 12px;" onclick="window.loaderManager.confirmAcceptBid('${adId}', ${bidIndex})">Teklifi Onayla</button>
+                        <button class="btn-outline" style="flex: 1; padding: 12px;" onclick="document.getElementById('accept-bid-modal').remove()">${window.i18n.t('comp.loader.cancel_btn')}</button>
+                        <button class="btn-primary" style="flex: 2; padding: 12px;" onclick="window.loaderManager.confirmAcceptBid('${adId}', ${bidIndex})">${window.i18n.t('comp.loader.accept_bid_btn')}</button>
                     </div>
                 </div>
             </div>
@@ -147,7 +147,7 @@ window.LoaderManager = class LoaderManager {
         if (modal) modal.remove();
 
         const transitTimeStr = selectedBid.time || '15';
-        const match = transitTimeStr.match(/\\d+/);
+        const match = transitTimeStr.match(/\d+/);
         const daysToDeliver = match ? parseInt(match[0]) : 15;
         const edd = new Date();
         edd.setDate(edd.getDate() + daysToDeliver);
@@ -158,14 +158,14 @@ window.LoaderManager = class LoaderManager {
             estimatedDeliveryDate: edd.getTime(),
             delayCount: 0,
             operationTimeline: [
-                { type: 'info', text: 'Operasyon Başladı. Taşıyıcı yola çıkmaya hazır.', date: new Date().toLocaleString('tr-TR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) }
+                { type: 'info', text: window.i18n.t('comp.loader.timeline_op_started'), date: new Date().toLocaleString('tr-TR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) }
             ]
         };
         
         try {
             await this.app.store.updateAd(adId, updates);
         } catch (error) {
-            if (window.notificationManager) window.notificationManager.showToast('İşlem başarısız: ' + error.message, 'error');
+            if (window.notificationManager) window.notificationManager.showToast(window.i18n.t('comp.loader.operation_failed') + ': ' + error.message, 'error');
             return;
         }
 
@@ -173,12 +173,12 @@ window.LoaderManager = class LoaderManager {
         this.app.store.save();
         this.app.router.render();
         if (window.notificationManager) {
-            window.notificationManager.showToast('✅ Teklif Onaylandı! Sevkiyat Başladı.', 'success');
+            window.notificationManager.showToast(window.i18n.t('comp.loader.bid_accepted_success'), 'success');
             window.notificationManager.add({
                 id: Date.now(),
                 type: 'success',
-                text: `🚚 Sevkiyat Başladı: ${ad.origin} → ${ad.destination}`,
-                subtext: `Taşıyıcı: ${selectedBid.company} | Ücret: ${selectedBid.price}`,
+                text: window.i18n.t('comp.loader.notif_started').replace('{origin}', ad.origin).replace('{dest}', ad.destination),
+                subtext: window.i18n.t('comp.loader.notif_started_sub').replace('{company}', selectedBid.company).replace('{price}', selectedBid.price),
                 date: Date.now(),
                 read: false,
                 targetRole: 'admin',
@@ -188,8 +188,8 @@ window.LoaderManager = class LoaderManager {
             window.notificationManager.add({
                 id: Date.now() + 1,
                 type: 'success',
-                text: `🎉 Teklifiniz kabul edildi! ${ad.origin} → ${ad.destination}`,
-                subtext: `Yükleyici: ${ad.owner} | Ücret: ${selectedBid.price}`,
+                text: window.i18n.t('comp.loader.notif_carrier_accepted').replace('{origin}', ad.origin).replace('{dest}', ad.destination),
+                subtext: window.i18n.t('comp.loader.notif_carrier_accepted_sub').replace('{owner}', ad.owner).replace('{price}', selectedBid.price),
                 date: Date.now(),
                 read: false,
                 targetUser: selectedBid.company,
@@ -199,15 +199,15 @@ window.LoaderManager = class LoaderManager {
     }
 
     async cancelAd(adId) {
-        if (!confirm('Bu ilanı yayından kaldırmak istediğinize emin misiniz? Bu işlem geri alınamaz.')) return;
+        if (!confirm(window.i18n.t('comp.loader.confirm_remove_ad'))) return;
         
         try {
             await this.app.store.removeAd(adId);
             this.app.router.render();
-            if (window.notificationManager) window.notificationManager.showToast('🗑️ İlan Yayından Kaldırıldı.', 'info');
+            if (window.notificationManager) window.notificationManager.showToast(window.i18n.t('comp.loader.ad_removed'), 'info');
         } catch (error) {
             console.error('[LoaderManager] cancelAd failed:', error);
-            if (window.notificationManager) window.notificationManager.showToast('İlan kaldırılamadı: ' + error.message, 'error');
+            if (window.notificationManager) window.notificationManager.showToast(window.i18n.t('comp.loader.operation_failed') + ': ' + error.message, 'error');
         }
     }
 
@@ -217,7 +217,7 @@ window.LoaderManager = class LoaderManager {
             const newTimeline = [...(ad.operationTimeline || [])];
             newTimeline.unshift({
                 type: 'success',
-                text: 'Teslimat Alıcı Tarafından Onaylandı',
+                text: window.i18n.t('comp.loader.timeline_delivery_confirmed'),
                 date: new Date().toLocaleString('tr-TR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
             });
 
@@ -227,7 +227,7 @@ window.LoaderManager = class LoaderManager {
                     operationTimeline: newTimeline
                 });
             } catch (error) {
-                if (window.notificationManager) window.notificationManager.showToast('Onay işlemi başarısız.', 'error');
+                if (window.notificationManager) window.notificationManager.showToast(window.i18n.t('comp.loader.operation_failed'), 'error');
                 return;
             }
             
@@ -235,13 +235,13 @@ window.LoaderManager = class LoaderManager {
             this.app.router.render();
             
             if (window.notificationManager) {
-                window.notificationManager.showToast('✅ Teslimat onaylandı. İşlem tamamlandı.', 'success');
+                window.notificationManager.showToast(window.i18n.t('comp.loader.delivery_confirmed'), 'success');
                 
                 // Taşıyıcıya bildirim
                 window.notificationManager.add({
                     id: Date.now(),
                     type: 'success',
-                    text: `✅ Teslimatınız onaylandı! Artık karşı tarafı değerlendirebilirsiniz: ${ad.origin} ➔ ${ad.destination}`,
+                    text: window.i18n.t('comp.loader.notif_carrier_delivered').replace('{origin}', ad.origin).replace('{dest}', ad.destination),
                     date: Date.now(),
                     read: false,
                     targetUser: ad.acceptedBid.company,
@@ -252,8 +252,8 @@ window.LoaderManager = class LoaderManager {
                 window.notificationManager.add({
                     id: Date.now() + 1,
                     type: 'success',
-                    text: `🏁 İşlem Tamamlandı: ${ad.origin} → ${ad.destination}`,
-                    subtext: `Yükleyici: ${ad.owner} | Taşıyıcı: ${ad.acceptedBid.company}`,
+                    text: window.i18n.t('comp.loader.notif_admin_completed').replace('{origin}', ad.origin).replace('{dest}', ad.destination),
+                    subtext: window.i18n.t('comp.loader.notif_admin_completed_sub').replace('{owner}', ad.owner).replace('{carrier}', ad.acceptedBid.company),
                     date: Date.now(),
                     read: false,
                     targetRole: 'admin',
@@ -274,7 +274,7 @@ window.LoaderManager = class LoaderManager {
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                         <div>
                             <h2 style="margin: 0; font-size: 1.3rem; color: #e74c3c; display: flex; align-items: center; gap: 8px;">
-                                <i data-lucide="alert-triangle" style="width: 22px; height: 22px;"></i> Sorun Bildir
+                                <i data-lucide="alert-triangle" style="width: 22px; height: 22px;"></i> ${window.i18n.t('comp.loader.report_issue_title')}
                             </h2>
                             <p style="margin: 5px 0 0; font-size: 0.85rem; color: #666;">${ad.origin} ➔ ${ad.destination}</p>
                         </div>
@@ -282,24 +282,24 @@ window.LoaderManager = class LoaderManager {
                     </div>
                     
                     <div class="form-group">
-                        <label style="font-weight: 600; font-size: 0.85rem;">Sorun Kategorisi</label>
+                        <label style="font-weight: 600; font-size: 0.85rem;">${window.i18n.t('comp.loader.issue_category')}</label>
                         <select id="issue-category" class="form-control" style="margin-top: 5px;">
-                            <option value="delay">Gecikme / Süre Aşımı</option>
-                            <option value="damage">Hasar / Kayıp</option>
-                            <option value="communication">İletişim Sorunu</option>
-                            <option value="documents">Evrak Eksikliği</option>
-                            <option value="other">Diğer</option>
+                            <option value="delay">${window.i18n.t('comp.loader.issue_delay')}</option>
+                            <option value="damage">${window.i18n.t('comp.loader.issue_damage')}</option>
+                            <option value="communication">${window.i18n.t('comp.loader.issue_comm')}</option>
+                            <option value="documents">${window.i18n.t('comp.loader.issue_docs')}</option>
+                            <option value="other">${window.i18n.t('comp.loader.issue_other')}</option>
                         </select>
                     </div>
                     
                     <div class="form-group" style="margin-top: 15px;">
-                        <label style="font-weight: 600; font-size: 0.85rem;">Detaylı Açıklama</label>
-                        <textarea id="issue-description" class="form-control" rows="4" placeholder="Yaşadığınız sorunu detaylı olarak açıklayın..." style="margin-top: 5px;"></textarea>
+                        <label style="font-weight: 600; font-size: 0.85rem;">${window.i18n.t('comp.loader.issue_desc_lbl')}</label>
+                        <textarea id="issue-description" class="form-control" rows="4" placeholder="${window.i18n.t('comp.loader.issue_placeholder')}" style="margin-top: 5px;"></textarea>
                     </div>
                     
                     <div style="display: flex; gap: 12px; margin-top: 25px;">
-                        <button class="btn-outline" style="flex: 1; padding: 12px;" onclick="document.getElementById('report-issue-modal').remove()">Vazgeç</button>
-                        <button class="btn-primary" style="flex: 2; padding: 12px; background: #e74c3c;" onclick="window.loaderManager.submitIssueReport(${adId})">Bildirimi Gönder</button>
+                        <button class="btn-outline" style="flex: 1; padding: 12px;" onclick="document.getElementById('report-issue-modal').remove()">${window.i18n.t('comp.loader.cancel_btn')}</button>
+                        <button class="btn-primary" style="flex: 2; padding: 12px; background: #e74c3c;" onclick="window.loaderManager.submitIssueReport(${adId})">${window.i18n.t('comp.loader.submit_issue')}</button>
                     </div>
                 </div>
             </div>
@@ -317,7 +317,7 @@ window.LoaderManager = class LoaderManager {
         const description = document.getElementById('issue-description')?.value?.trim();
         
         if (!description) {
-            if (window.notificationManager) window.notificationManager.showToast('Lütfen sorunu açıklayın.', 'warning');
+            if (window.notificationManager) window.notificationManager.showToast(window.i18n.t('comp.loader.issue_empty'), 'warning');
             return;
         }
 
@@ -328,14 +328,14 @@ window.LoaderManager = class LoaderManager {
             window.notificationManager.add({
                 id: Date.now(),
                 type: 'warning',
-                text: `⚠️ Sorun Bildirimi: ${ad ? ad.origin + ' → ' + ad.destination : 'İlan #' + adId}`,
-                subtext: `Kategori: ${category} | Bildiren: ${this.app.state.currentUser}`,
+                text: window.i18n.t('comp.loader.notif_issue').replace('{target}', ad ? ad.origin + ' → ' + ad.destination : 'İlan #' + adId),
+                subtext: window.i18n.t('comp.loader.notif_issue_sub').replace('{cat}', category).replace('{user}', this.app.state.currentUser),
                 date: Date.now(),
                 read: false,
                 targetRole: 'admin',
                 view: 'admin-dashboard'
             });
-            window.notificationManager.showToast('✅ Sorun bildiriminiz yönetime iletildi.', 'success');
+            window.notificationManager.showToast(window.i18n.t('comp.loader.issue_reported'), 'success');
         }
         
         // Modalı kapat
@@ -353,7 +353,7 @@ window.LoaderManager = class LoaderManager {
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                         <div>
                             <h2 style="margin: 0; font-size: 1.3rem; color: var(--secondary); display: flex; align-items: center; gap: 8px;">
-                                <i data-lucide="file-text" style="width: 22px; height: 22px;"></i> Sevkiyat Evrak Yükleme
+                                <i data-lucide="file-text" style="width: 22px; height: 22px;"></i> ${window.i18n.t('comp.loader.doc_upload_title')}
                             </h2>
                             <p style="margin: 5px 0 0; font-size: 0.85rem; color: #666;">${ad.origin} ➔ ${ad.destination}</p>
                         </div>
@@ -361,15 +361,15 @@ window.LoaderManager = class LoaderManager {
                     </div>
                     
                     <div class="form-group">
-                        <label style="font-weight: 600; font-size: 0.85rem;">Evrak Türü</label>
+                        <label style="font-weight: 600; font-size: 0.85rem;">${window.i18n.t('comp.loader.doc_type')}</label>
                         <select id="doc-type-select" class="form-control" style="margin-top: 5px;">
-                            <option value="cmr">CMR Belgesi</option>
-                            <option value="invoice">Fatura</option>
-                            <option value="packing_list">Çeki Listesi</option>
-                            <option value="bill_of_lading">Konşimento (B/L)</option>
-                            <option value="customs">Gümrük Beyannamesi</option>
-                            <option value="insurance">Sigorta Poliçesi</option>
-                            <option value="other">Diğer</option>
+                            <option value="cmr">${window.i18n.t('comp.loader.doc_type_cmr')}</option>
+                            <option value="invoice">${window.i18n.t('comp.loader.doc_type_invoice')}</option>
+                            <option value="packing_list">${window.i18n.t('comp.loader.doc_type_packing')}</option>
+                            <option value="bill_of_lading">${window.i18n.t('comp.loader.doc_type_bl')}</option>
+                            <option value="customs">${window.i18n.t('comp.loader.doc_type_customs')}</option>
+                            <option value="insurance">${window.i18n.t('comp.loader.doc_type_insurance')}</option>
+                            <option value="other">${window.i18n.t('comp.loader.issue_other')}</option>
                         </select>
                     </div>
                     
@@ -377,15 +377,15 @@ window.LoaderManager = class LoaderManager {
                         <div id="doc-upload-preview" style="display: none;"></div>
                         <div id="doc-upload-placeholder">
                             <div style="font-size: 2rem; margin-bottom: 10px; color: var(--text-muted);"><i data-lucide="file-up" style="width: 48px; height: 48px; margin: 0 auto;"></i></div>
-                            <p style="font-size: 0.85rem; color: var(--text-secondary); margin: 0;">Dosya yüklemek için tıklayın</p>
-                            <p style="font-size: 0.7rem; color: var(--text-muted); margin-top: 5px;">JPG, PNG veya PDF • Max 10MB</p>
+                            <p style="font-size: 0.85rem; color: var(--text-secondary); margin: 0;">${window.i18n.t('comp.loader.doc_click_to_upload')}</p>
+                            <p style="font-size: 0.7rem; color: var(--text-muted); margin-top: 5px;">${window.i18n.t('comp.loader.doc_limits')}</p>
                         </div>
                     </div>
                     <input type="file" id="doc-file-input" accept="image/*,.pdf" style="display: none;" onchange="window.loaderManager.handleDocPreview(event)">
                     
                     <div style="display: flex; gap: 12px; margin-top: 25px;">
-                        <button class="btn-outline" style="flex: 1; padding: 12px;" onclick="document.getElementById('doc-upload-modal').remove()">Vazgeç</button>
-                        <button id="doc-submit-btn" class="btn-primary" style="flex: 2; padding: 12px; background: var(--secondary);" onclick="window.loaderManager.submitDocument(${adId})">Evrakı Yükle</button>
+                        <button class="btn-outline" style="flex: 1; padding: 12px;" onclick="document.getElementById('doc-upload-modal').remove()">${window.i18n.t('comp.loader.cancel_btn')}</button>
+                        <button id="doc-submit-btn" class="btn-primary" style="flex: 2; padding: 12px; background: var(--secondary);" onclick="window.loaderManager.submitDocument(${adId})">${window.i18n.t('comp.loader.doc_submit')}</button>
                     </div>
                 </div>
             </div>
@@ -403,7 +403,7 @@ window.LoaderManager = class LoaderManager {
         if (!file) return;
 
         if (file.size > 10 * 1024 * 1024) {
-            if (window.notificationManager) window.notificationManager.showToast('Dosya boyutu 10MB\'dan küçük olmalıdır.', 'warning');
+            if (window.notificationManager) window.notificationManager.showToast(window.i18n.t('comp.loader.doc_size_error'), 'warning');
             return;
         }
 
@@ -420,7 +420,7 @@ window.LoaderManager = class LoaderManager {
                     <div style="font-size: 2rem;">${file.type.startsWith('image/') ? '🖼️' : '📄'}</div>
                     <div style="text-align: left;">
                         <p style="font-size: 0.85rem; font-weight: 600; color: var(--text-primary); margin: 0;">${file.name}</p>
-                        <p style="font-size: 0.7rem; color: #27ae60; margin: 3px 0 0; font-weight: 600;">✅ Dosya hazır</p>
+                        <p style="font-size: 0.7rem; color: #27ae60; margin: 3px 0 0; font-weight: 600;">${window.i18n.t('comp.loader.doc_ready')}</p>
                     </div>
                 </div>
             `;
@@ -433,7 +433,7 @@ window.LoaderManager = class LoaderManager {
 
     async submitDocument(adId) {
         if (!this._pendingDocFile) {
-            if (window.notificationManager) window.notificationManager.showToast('Lütfen bir dosya seçin.', 'warning');
+            if (window.notificationManager) window.notificationManager.showToast(window.i18n.t('comp.loader.doc_select_first'), 'warning');
             return;
         }
 
@@ -441,7 +441,7 @@ window.LoaderManager = class LoaderManager {
         const submitBtn = document.getElementById('doc-submit-btn');
         
         if (submitBtn) {
-            submitBtn.innerHTML = 'Yükleniyor... <div style="display:inline-block; width:12px; height:12px; border:2px solid white; border-top:2px solid transparent; border-radius:50%; animation:spin 1s linear infinite; margin-left:5px;"></div>';
+            submitBtn.innerHTML = window.i18n.t('comp.loader.doc_uploading') + ' <div style="display:inline-block; width:12px; height:12px; border:2px solid white; border-top:2px solid transparent; border-radius:50%; animation:spin 1s linear infinite; margin-left:5px;"></div>';
             submitBtn.disabled = true;
         }
 
@@ -469,14 +469,14 @@ window.LoaderManager = class LoaderManager {
             if (modal) modal.remove();
 
             if (window.notificationManager) {
-                window.notificationManager.showToast('✅ Evrak başarıyla yüklendi.', 'success');
+                window.notificationManager.showToast(window.i18n.t('comp.loader.doc_uploaded'), 'success');
             }
         } catch (error) {
             console.error('[LoaderManager] Document upload failed:', error);
-            if (window.notificationManager) window.notificationManager.showToast('Evrak yüklenemedi: ' + error.message, 'error');
+            if (window.notificationManager) window.notificationManager.showToast(window.i18n.t('comp.loader.operation_failed') + ': ' + error.message, 'error');
         } finally {
             if (submitBtn) {
-                submitBtn.innerHTML = 'Evrakı Yükle';
+                submitBtn.innerHTML = window.i18n.t('comp.loader.doc_submit');
                 submitBtn.disabled = false;
             }
         }
@@ -486,7 +486,7 @@ window.LoaderManager = class LoaderManager {
         const ad = this.app.store.findAd(adId);
         if (!ad || !ad.acceptedBid) return;
 
-        if (!confirm('Taşıyıcının gelmediğini onaylıyor musunuz? Bu işlem ilanı tekrar tekliflere açacaktır.')) return;
+        if (!confirm(window.i18n.t('comp.loader.confirm_noshow'))) return;
 
         const updates = {
             acceptedBid: null
@@ -509,7 +509,7 @@ window.LoaderManager = class LoaderManager {
         const newTimeline = [...(ad.operationTimeline || [])];
         newTimeline.unshift({
             type: 'error',
-            text: 'Taşıyıcı iptal etti/gelmedi. İlan yeniden tekliflere açıldı.',
+            text: window.i18n.t('comp.loader.timeline_noshow'),
             date: new Date().toLocaleString('tr-TR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
         });
         updates.operationTimeline = newTimeline;
@@ -519,10 +519,10 @@ window.LoaderManager = class LoaderManager {
             this.app.store.save();
             this.app.router.render();
             if (window.notificationManager) {
-                window.notificationManager.showToast('✅ İlan tekrar tekliflere açıldı.', 'success');
+                window.notificationManager.showToast(window.i18n.t('comp.loader.ad_reopened'), 'success');
             }
         } catch (error) {
-            if (window.notificationManager) window.notificationManager.showToast('İşlem başarısız: ' + error.message, 'error');
+            if (window.notificationManager) window.notificationManager.showToast(window.i18n.t('comp.loader.operation_failed') + ': ' + error.message, 'error');
         }
     }
 

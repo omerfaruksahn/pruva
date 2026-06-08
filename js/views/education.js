@@ -1,402 +1,271 @@
 window.educationView = (state) => {
-    const { chapters } = window.educationContent;
-    
-    if (state.eduViewMode === 'portal') {
-        return renderPortal(state, chapters);
-    } else {
-        return renderPlayer(state, chapters);
-    }
-};
+    const app = window.app || { state };
+        // State kontrolleri
+        const viewState = app.state || {};
+        const viewMode = viewState.campusViewMode || 'storefront'; // storefront, product_detail, library
+        const category = viewState.campusCategory || 'all';
+        const selectedId = viewState.campusSelectedProduct;
+        const library = viewState.campusLibrary || [];
 
-const renderPortal = (state, chapters) => {
-    const categories = [
-        { id: 'all', name: 'Tümü' },
-        { id: 'logistics', name: 'Lojistik' },
-        { id: 'maritime', name: 'Denizcilik' },
-        { id: 'customs', name: 'Gümrük' },
-        { id: 'trade', name: 'Dış Ticaret' },
-        { id: 'tech', name: 'Lojistik Tech' }
-    ];
-
-    const mainProgress = Math.round((state.eduReadModules.length / chapters.length) * 100);
-    const displayCourses = [
-        {
-            id: 'edu-1',
-            title: 'Uluslararası Nakliye ve Navlun Yönetimi',
-            category: 'Lojistik',
-            instructor: 'Kaptan Ömer',
-            rating: '4.9 (3.2K)',
-            duration: '18 Saat',
-            level: 'İleri',
-            progress: mainProgress,
-            icon: 'anchor',
-            color: '#0ea5e9',
-            price: 'Aktif'
-        },
-        {
-            id: 'edu-2',
-            title: 'Temel Deniz Ticareti ve Liman Operasyonları',
-            category: 'Denizcilik',
-            instructor: 'Alperen Kaptan',
-            rating: '4.8 (1.5K)',
-            duration: '12 Saat',
-            level: 'Orta',
-            progress: 0,
-            icon: 'ship',
-            color: '#10b981',
-            price: 'Yakında'
-        },
-        {
-            id: 'edu-3',
-            title: 'Gümrük Mevzuatı ve Dış Ticaret',
-            category: 'Gümrük',
-            instructor: 'Mustafa Yılmaz (Gümrük Müşaviri)',
-            rating: '4.9 (2.1K)',
-            duration: '15 Saat',
-            level: 'İleri',
-            progress: 0,
-            icon: 'shield',
-            color: '#f59e0b',
-            price: 'Yakında'
-        },
-        {
-            id: 'edu-4',
-            title: 'Dijital Lojistik Teknolojileri',
-            category: 'Lojistik Tech',
-            instructor: 'Dr. Selen Can',
-            rating: '4.7 (950)',
-            duration: '8 Saat',
-            level: 'Başlangıç',
-            progress: 0,
-            icon: 'cpu',
-            color: '#8b5cf6',
-            price: 'Yakında'
+        // Data kontrolleri
+        const content = window.campusContent;
+        if (!content) {
+            return `
+                <div class="education-container">
+                    <div class="campus-main-content">
+                        <div class="campus-empty-state">
+                            <i data-lucide="alert-circle"></i>
+                            <h3>İçerik Yüklenemedi</h3>
+                            <p>Pruva Kampüs verilerine şu an ulaşılamıyor. Lütfen sayfayı yenileyin.</p>
+                            <button class="campus-btn campus-btn-primary" onclick="location.reload()">Yenile</button>
+                        </div>
+                    </div>
+                </div>
+            `;
         }
-    ];
 
-    const ongoingCourses = [
-        { title: 'Gümrük Mevzuatı Temel Eğitimi', progress: 72, icon: 'shield' },
-        { title: 'Lojistik 4.0 ve Dijitalleşme', progress: 45, icon: 'cpu' },
-        { title: 'Tedarik Zinciri Yönetimi', progress: 60, icon: 'layers' }
-    ];
+        // Seçili Ürün
+        const selectedProduct = selectedId ? content.products.find(p => p.id === selectedId) : null;
 
-    const upcomingEvents = [
-        { day: '24', month: 'MAY', title: 'Navlun Piyasası Analizi', time: '20:00 - 21:30', instructor: 'Murat KARABULUT' },
-        { day: '25', month: 'MAY', title: 'Blockchain ve Lojistik', time: '19:00 - 20:30', instructor: 'Melis DURAN' }
-    ];
-
-    return `
-    <div class="education-container">
-        <div class="edu-portal fade-in-up">
-            <!-- Main Content Area -->
-            <main class="edu-main-content">
-                
-                <!-- Search Bar -->
-                <div class="edu-search-bar">
-                    <div class="search-wrapper">
-                        <i data-lucide="search"></i>
-                        <input type="text" placeholder="Eğitim, rota veya konu ara...">
-                        <kbd>⌘ K</kbd>
-                    </div>
+        // Navigasyon (Vitrin vs Kütüphanem)
+        const renderHeader = () => `
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                <div style="display: flex; gap: 1rem;">
+                    <button class="campus-filter-pill ${viewMode !== 'library' ? 'active' : ''}" onclick="window.utils.setCampusView('storefront')" style="font-size: 1.1rem; padding: 12px 24px;">
+                        <i data-lucide="compass"></i> Mağazayı Keşfet
+                    </button>
+                    <button class="campus-filter-pill ${viewMode === 'library' ? 'active' : ''}" onclick="window.utils.setCampusView('library')" style="font-size: 1.1rem; padding: 12px 24px;">
+                        <i data-lucide="library"></i> Kütüphanem
+                    </button>
                 </div>
+            </div>
+        `;
 
-                <!-- Hero Section (Flat Maritime) -->
-                <section class="edu-hero flat-maritime">
-                    <div class="hero-text">
-                        <div class="hero-badge"><i data-lucide="compass"></i> Pruva Akademi</div>
-                        <h1>Rotanı <span class="text-gradient">Bilgiyle Çiz.</span></h1>
-                        <p>Lojistik ve dış ticaret dünyasında uzmanlaşmak için en güncel eğitimler. Pruva ile kariyerinde yelkenleri tazele.</p>
-                        <div class="hero-actions">
-                            <button class="hero-btn primary" onclick="window.utils.setEduViewMode('player')">
-                                Eğitime Başla <i data-lucide="play-circle"></i>
-                            </button>
-                            <button class="hero-btn secondary">
-                                Müfredatı İncele
-                            </button>
-                        </div>
-                    </div>
-                    <div class="hero-visual">
-                        <!-- Minimal Vector-style Compass/Ship element -->
-                        <div class="maritime-abstract">
-                            <div class="wave wave-1"></div>
-                            <div class="wave wave-2"></div>
-                            <i data-lucide="navigation" class="floating-icon"></i>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- Stats Row -->
-                <section class="edu-stats-flat">
-                    <div class="stat-box">
-                        <div class="stat-val">300+</div>
-                        <div class="stat-lbl">Modül</div>
-                    </div>
-                    <div class="stat-divider"></div>
-                    <div class="stat-box">
-                        <div class="stat-val">25K+</div>
-                        <div class="stat-lbl">Kaptan</div>
-                    </div>
-                    <div class="stat-divider"></div>
-                    <div class="stat-box">
-                        <div class="stat-val">150+</div>
-                        <div class="stat-lbl">Eğitmen</div>
-                    </div>
-                    <div class="stat-divider"></div>
-                    <div class="stat-box">
-                        <div class="stat-val">50+</div>
-                        <div class="stat-lbl">Sertifika</div>
-                    </div>
-                </section>
-
-                <!-- Category Filters -->
-                <section class="edu-filters">
-                    ${categories.map(cat => `
-                        <button class="filter-pill ${state.eduCategory === cat.id ? 'active' : ''}" onclick="window.utils.setEduCategory('${cat.id}')">
-                            ${cat.name}
-                        </button>
-                    `).join('')}
-                </section>
-
-                <!-- Popular Courses -->
-                <section class="edu-popular">
-                    <div class="section-header">
-                        <h2>Popüler Eğitimler</h2>
-                        <span class="view-all">Tümünü Keşfet <i data-lucide="chevron-right"></i></span>
-                    </div>
-                    <div class="course-grid-flat">
-                        ${displayCourses.map(course => `
-                            <div class="course-card-flat" onclick="window.utils.setEduViewMode('player')">
-                                <div class="card-icon-box" style="background: ${course.color}15; color: ${course.color};">
-                                    <i data-lucide="${course.icon}"></i>
-                                </div>
-                                <div class="card-body">
-                                    <div class="card-top">
-                                        <span class="card-cat">${course.category}</span>
-                                        <div class="card-rating"><i data-lucide="star"></i> ${course.rating}</div>
-                                    </div>
-                                    <h3 class="card-title">${course.title}</h3>
-                                    <div class="card-instructor">
-                                        <div class="mini-avatar"></div>
-                                        <span>${course.instructor}</span>
-                                    </div>
-                                    <div class="card-progress-flat">
-                                        <div class="prog-label">İlerleme <span>%${course.progress}</span></div>
-                                        <div class="prog-track"><div class="prog-fill" style="width: ${course.progress}%; background: ${course.color};"></div></div>
-                                    </div>
-                                    <div class="card-footer-flat">
-                                        <span><i data-lucide="lock"></i> Kilidi Aç</span>
-                                        <span class="card-price" style="margin-left: auto; color: white; font-weight: 800; font-size: 1rem;">${course.price}</span>
-                                    </div>
-                                </div>
-                            </div>
-                        `).join('')}
-                    </div>
-                </section>
-
-                <!-- Ongoing Courses -->
-                <section class="edu-ongoing">
-                    <div class="section-header">
-                        <h2>Devam Eden Yolculuklar</h2>
-                    </div>
-                    <div class="ongoing-grid-flat">
-                        ${ongoingCourses.map(course => `
-                            <div class="ongoing-item-flat" onclick="window.utils.setEduViewMode('player')">
-                                <div class="oi-icon"><i data-lucide="${course.icon}"></i></div>
-                                <div class="oi-info">
-                                    <h4>${course.title}</h4>
-                                    <div class="oi-progress">
-                                        <div class="oi-track"><div class="oi-fill" style="width: ${course.progress}%"></div></div>
-                                        <span>%${course.progress}</span>
-                                    </div>
-                                </div>
-                                <button class="oi-btn"><i data-lucide="play"></i></button>
-                            </div>
-                        `).join('')}
-                    </div>
-                </section>
-            </main>
-
-            <!-- Sidebar -->
-            <aside class="edu-sidebar-flat">
-                
-                <!-- Live Simulator Console -->
-                <div id="academy-live-simulator">
-                    ${window.academySimulator.render()}
-                </div>
-
-                <!-- Performance -->
-                <div class="sidebar-widget">
-                    <h3>Genel Performans</h3>
-                    <div class="perf-circle">
-                        <svg viewBox="0 0 100 100">
-                            <circle cx="50" cy="50" r="45" class="bg"></circle>
-                            <circle cx="50" cy="50" r="45" class="fg" style="stroke-dasharray: 283; stroke-dashoffset: ${283 - (283 * 0.68)};"></circle>
-                        </svg>
-                        <div class="perf-val">68<span>%</span></div>
-                    </div>
-                    <div class="perf-stats">
-                        <div class="ps-item"><span>Tamamlanan</span><strong>23</strong></div>
-                        <div class="ps-item"><span>Devam Eden</span><strong>7</strong></div>
-                    </div>
-                </div>
-
-                <!-- Upcoming Events -->
-                <div class="sidebar-widget">
-                    <div class="sw-header">
-                        <h3>Canlı Oturumlar</h3>
-                        <i data-lucide="calendar"></i>
-                    </div>
-                    <div class="event-list-flat">
-                        ${upcomingEvents.map(event => `
-                            <div class="event-card-flat">
-                                <div class="ec-date"><strong>${event.day}</strong><span>${event.month}</span></div>
-                                <div class="ec-body">
-                                    <h4>${event.title}</h4>
-                                    <p>${event.time}</p>
-                                </div>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-
-                <!-- CTA -->
-                <div class="sidebar-widget cta-widget">
-                    <div class="cta-icon"><i data-lucide="award"></i></div>
-                    <h4>Sertifikalarını Al</h4>
-                    <p>Eğitimlerini tamamla, profesyonel sertifikanı hemen indir.</p>
-                    <button class="cta-btn">Görüntüle</button>
-                </div>
-
-            </aside>
-        </div>
-    </div>
-    `;
-};
-
-const renderPlayer = (state, chapters) => {
-    const currentIndex = state.currentEduModuleIndex || 0;
-    const currentChapter = chapters[currentIndex];
-    const isFirst = currentIndex === 0;
-    const isLast = currentIndex === chapters.length - 1;
-
-    return `
-    <div class="education-container player-flat">
-        <header class="player-header-flat">
-            <div class="ph-left">
-                <button class="back-btn" onclick="window.utils.setEduViewMode('portal')">
-                    <i data-lucide="chevron-left"></i> <span>Portala Dön</span>
+        // ---------------------------------------------------------
+        // 1. STOREFRONT (VİTRİN)
+        // ---------------------------------------------------------
+        const renderStorefront = () => {
+            // Kategori Filtreleri
+            const filtersHTML = content.categories.map(cat => `
+                <button class="campus-filter-pill ${category === cat.id ? 'active' : ''}" onclick="window.utils.setCampusCategory('${cat.id}')">
+                    <i data-lucide="${cat.icon}"></i> ${cat.name}
                 </button>
-                <div class="ph-divider"></div>
-                <div class="ph-title">
-                    <span>Müfredat</span> / <strong>${currentChapter.title.split('. ')[1] || currentChapter.title}</strong>
-                </div>
-            </div>
-            <div class="ph-right">
-                <div class="ph-progress">
-                    <div class="ph-track"><div class="ph-fill" style="width: ${((state.eduReadModules.length / chapters.length) * 100)}%"></div></div>
-                    <span>%${Math.round((state.eduReadModules.length / chapters.length) * 100)}</span>
-                </div>
-            </div>
-        </header>
+            `).join('');
 
-        <div class="player-body-flat">
-            <aside class="player-nav-flat">
-                <div class="nav-scroll">
-                    ${chapters.map((ch, idx) => `
-                        <div class="nav-item-flat ${idx === currentIndex ? 'active' : ''} ${state.eduReadModules.includes(ch.id) ? 'done' : ''}" onclick="window.utils.setEduModule(${idx})">
-                            <div class="nav-num">${state.eduReadModules.includes(ch.id) ? '<i data-lucide="check"></i>' : (idx + 1)}</div>
-                            <div class="nav-txt">${ch.title.split('. ')[1] || ch.title}</div>
-                        </div>
-                    `).join('')}
-                </div>
-            </aside>
+            // Ürünleri Filtrele
+            const filteredProducts = category === 'all' 
+                ? content.products 
+                : content.products.filter(p => p.categoryId === category);
 
-            <main class="player-main-flat">
-                <div class="module-wrapper-flat fade-in-up">
-                    <div class="mw-header">
-                        <div class="mw-meta">
-                            <span class="mw-badge">${currentChapter.badge}</span>
-                            <span class="mw-time"><i data-lucide="clock"></i> ${currentChapter.readTime}</span>
-                        </div>
-                        <h1>${currentChapter.title.split('. ')[1] || currentChapter.title}</h1>
-                    </div>
+            // Öne Çıkan Ürün (Hero)
+            const featured = content.products[0];
 
-                    <div class="mw-content">
-                        ${currentChapter.sections.map(sec => `
-                            <div class="mw-section">
-                                ${sec.title ? `<h2>${sec.title}</h2>` : ''}
-                                <p>${sec.content}</p>
-                                
-                                ${sec.highlights ? `
-                                    <ul class="mw-highlights">
-                                        ${sec.highlights.map(h => `
-                                            <li><i data-lucide="check-circle-2"></i> ${h}</li>
-                                        `).join('')}
-                                    </ul>
-                                ` : ''}
-
-                                ${sec.glossary ? `
-                                    <div class="mw-glossary">
-                                        ${sec.glossary.map(item => `
-                                            <div class="mg-item">
-                                                <strong>${item.term}</strong>
-                                                <span>${item.desc}</span>
-                                            </div>
-                                        `).join('')}
-                                    </div>
-                                ` : ''}
-                            </div>
-                        `).join('')}
-                    </div>
-
-                    <footer class="mw-footer">
-                        <button class="nav-btn-flat" ${isFirst ? 'disabled' : ''} onclick="window.utils.setEduModule(${currentIndex - 1})">
-                            <i data-lucide="arrow-left"></i> Önceki
+            return `
+                <!-- HERO SECTION -->
+                ${category === 'all' ? `
+                <div class="campus-hero">
+                    <div class="campus-hero-content">
+                        <div class="campus-badge"><i data-lucide="sparkles"></i> Haftanın Öne Çıkanı</div>
+                        <h1 class="campus-hero-title">
+                            Geleceğin <br><span class="gradient-text">Lojistik Uzmanı</span> Olun
+                        </h1>
+                        <p class="campus-hero-desc">
+                            Pruva Kampüs ile sektörün en iyi uzmanlarından, pratik ve teorik eğitimleri alın. Kariyerinize bugün yön verin.
+                        </p>
+                        <button class="campus-btn campus-btn-primary" onclick="window.utils.viewCampusProduct('${featured.id}')" style="font-size: 1.2rem; padding: 16px 32px;">
+                            <i data-lucide="play-circle"></i> Hemen İncele
                         </button>
+                    </div>
+                    <div class="campus-hero-visual">
+                        <div class="campus-glass-icon">
+                            <i data-lucide="rocket"></i>
+                        </div>
+                    </div>
+                </div>
+                ` : ''}
+
+                <!-- FILTERS -->
+                <div class="campus-filters">
+                    ${filtersHTML}
+                </div>
+
+                <!-- GRID -->
+                <div class="campus-grid">
+                    ${filteredProducts.map(p => {
+                        const instructor = content.instructors.find(i => i.id === p.instructorId);
+                        const typeIcon = p.type === 'book' ? 'book-open' : p.type === 'article' ? 'file-text' : 'video';
+                        const typeLabel = p.type === 'book' ? 'E-Kitap' : p.type === 'article' ? 'Makale' : 'Video Eğitim';
                         
-                        <div class="mw-status">
-                            ${state.eduReadModules.includes(currentChapter.id) ? `
-                                <span class="status-done"><i data-lucide="check-circle"></i> Tamamlandı</span>
+                        return `
+                        <div class="campus-card" onclick="window.utils.viewCampusProduct('${p.id}')">
+                            <div class="campus-card-cover" style="background-image: url('${p.coverImage}')">
+                                <div class="campus-card-overlay"></div>
+                                <div class="campus-card-badge" style="background: ${p.type === 'video' ? 'var(--campus-accent)' : 'var(--campus-secondary)'}">
+                                    <i data-lucide="${typeIcon}" style="width: 14px; height: 14px; display: inline-block; vertical-align: middle; margin-right: 4px;"></i>
+                                    ${typeLabel}
+                                </div>
+                            </div>
+                            <div class="campus-card-body">
+                                <h3 class="campus-card-title">${p.title}</h3>
+                                <div class="campus-card-instructor">
+                                    <img src="${instructor.avatar}" alt="${instructor.name}">
+                                    <span>${instructor.name}</span>
+                                </div>
+                                <div class="campus-card-footer">
+                                    <div class="campus-card-rating">
+                                        <i data-lucide="star" style="fill: currentColor; width: 16px; height: 16px;"></i> 4.9
+                                    </div>
+                                    <div class="campus-card-price">${p.price === 0 ? 'Ücretsiz' : p.price + '₺'}</div>
+                                </div>
+                            </div>
+                        </div>
+                        `;
+                    }).join('')}
+                </div>
+            `;
+        };
+
+
+        // ---------------------------------------------------------
+        // 2. PRODUCT DETAIL
+        // ---------------------------------------------------------
+        const renderProductDetail = () => {
+            if (!selectedProduct) return `<div class="campus-empty-state">Ürün bulunamadı.</div>`;
+            const p = selectedProduct;
+            const instructor = content.instructors.find(i => i.id === p.instructorId);
+            const isOwned = library.includes(p.id);
+
+            return `
+                <button class="campus-btn campus-btn-secondary" onclick="window.utils.setCampusView('storefront')" style="margin-bottom: 2rem;">
+                    <i data-lucide="arrow-left"></i> Mağazaya Dön
+                </button>
+
+                <div class="campus-detail-layout">
+                    <div class="campus-detail-left">
+                        <div class="campus-detail-cover" style="background-image: url('${p.coverImage}')"></div>
+                        
+                        <div class="campus-buy-panel">
+                            <div class="campus-buy-price">${p.price === 0 ? 'Ücretsiz' : p.price + ' ₺'}</div>
+                            ${isOwned ? `
+                                <button class="campus-btn campus-btn-primary" style="width: 100%; justify-content: center; background: var(--campus-accent);" onclick="window.utils.setCampusView('library')">
+                                    <i data-lucide="check-circle"></i> Kütüphanemde
+                                </button>
                             ` : `
-                                <button class="complete-btn-flat" onclick="window.utils.markEduModuleRead('${currentChapter.id}')"><span>Tamamlandı Olarak İşaretle</span></button>
+                                <button class="campus-btn campus-btn-primary" style="width: 100%; justify-content: center;" onclick="window.utils.addToLibrary('${p.id}')">
+                                    <i data-lucide="shopping-cart"></i> Satın Al / Ekle
+                                </button>
                             `}
+                            <p style="margin-top: 1rem; color: var(--campus-text-muted); font-size: 0.85rem;">
+                                ${p.type === 'video' ? 'Ömür Boyu Erişim • Sınırsız Tekrar' : 'Anında İndirilebilir PDF/EPUB'}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="campus-detail-right">
+                        <div class="campus-detail-tags">
+                            <span class="campus-detail-tag"><i data-lucide="${p.type === 'video' ? 'video' : 'book'}" style="width: 14px; display:inline-block; vertical-align:middle; margin-right:4px;"></i> ${p.type.toUpperCase()}</span>
+                            <span class="campus-detail-tag"><i data-lucide="globe" style="width: 14px; display:inline-block; vertical-align:middle; margin-right:4px;"></i> Türkçe</span>
+                        </div>
+                        
+                        <h1 class="campus-detail-title">${p.title}</h1>
+                        
+                        <div class="campus-instructor-profile">
+                            <img src="${instructor.avatar}" alt="${instructor.name}">
+                            <div class="campus-instructor-info">
+                                <h4>${instructor.name}</h4>
+                                <p>${instructor.title}</p>
+                            </div>
                         </div>
 
-                        <button class="nav-btn-flat primary" ${isLast ? 'disabled' : ''} onclick="window.utils.setEduModule(${currentIndex + 1})">
-                            Sonraki <i data-lucide="arrow-right"></i>
+                        <h3 class="campus-section-title"><i data-lucide="info"></i> İçerik Hakkında</h3>
+                        <p class="campus-detail-desc">${p.description}</p>
+
+                        <h3 class="campus-section-title"><i data-lucide="check-square"></i> Neler Öğreneceksiniz?</h3>
+                        <ul class="campus-feature-list">
+                            <li class="campus-feature-item"><i data-lucide="check" style="color: var(--campus-accent)"></i> Lojistik sektöründe güncel trendler</li>
+                            <li class="campus-feature-item"><i data-lucide="check" style="color: var(--campus-accent)"></i> Gerçek dünya senaryoları ile analiz</li>
+                            <li class="campus-feature-item"><i data-lucide="check" style="color: var(--campus-accent)"></i> Operasyonel maliyet düşürme taktikleri</li>
+                            <li class="campus-feature-item"><i data-lucide="check" style="color: var(--campus-accent)"></i> Global tedarik zinciri yönetimi</li>
+                        </ul>
+                    </div>
+                </div>
+            `;
+        };
+
+        // ---------------------------------------------------------
+        // 3. LIBRARY
+        // ---------------------------------------------------------
+        const renderLibrary = () => {
+            const myItems = content.products.filter(p => library.includes(p.id));
+
+            if (myItems.length === 0) {
+                return `
+                    <div class="campus-library-header">
+                        <h1 class="campus-library-title"><i data-lucide="library"></i> Kütüphanem</h1>
+                    </div>
+                    <div class="campus-empty-state">
+                        <i data-lucide="book-dashed"></i>
+                        <h3>Kütüphaneniz Henüz Boş</h3>
+                        <p>Pruva Kampüs mağazasından ilginizi çeken eğitimleri ve kitapları alarak kendinizi geliştirmeye başlayın.</p>
+                        <button class="campus-btn campus-btn-primary" onclick="window.utils.setCampusView('storefront')">
+                            Mağazayı Keşfet
                         </button>
-                    </footer>
-                </div>
-            </main>
+                    </div>
+                `;
+            }
 
-            <!-- Desktop Simulator Sidebar -->
-            <aside class="player-simulator-sidebar">
-                <div id="academy-live-simulator">
-                    ${window.academySimulator.render()}
+            return `
+                <div class="campus-library-header">
+                    <h1 class="campus-library-title"><i data-lucide="library"></i> Kütüphanem</h1>
+                    <span class="campus-filter-pill" style="cursor:default;">${myItems.length} İçerik</span>
                 </div>
-            </aside>
-        </div>
 
-        <!-- Mobile Floating Terminal Drawer -->
-        <button class="mobile-simulator-fab" onclick="window.academySimulator_toggleMobileDrawer(true)">
-            <i data-lucide="terminal"></i> <span>Simülatör</span>
-        </button>
+                <div class="campus-grid">
+                    ${myItems.map(p => {
+                        const typeIcon = p.type === 'book' ? 'book-open' : p.type === 'article' ? 'file-text' : 'video';
+                        const progress = Math.floor(Math.random() * 60) + 10; // Demo progress
+                        const gradient = p.type === 'video' ? 'linear-gradient(90deg, #10b981, #059669)' : 'linear-gradient(90deg, #38bdf8, #2563eb)';
 
-        <div class="mobile-simulator-sheet-overlay" id="mobile-sim-overlay" onclick="window.academySimulator_toggleMobileDrawer(false)"></div>
-        <div class="mobile-simulator-sheet" id="mobile-sim-sheet">
-            <div class="sheet-header">
-                <div style="display: flex; align-items: center; gap: 8px;">
-                    <i data-lucide="terminal" style="color: var(--edu-primary); width: 18px; height: 18px;"></i>
-                    <h4 style="margin: 0; font-weight: 800; font-size: 1rem; color: var(--edu-text);">Simülatör Konsolu</h4>
+                        return `
+                        <div class="campus-card">
+                            <div class="campus-card-cover" style="background-image: url('${p.coverImage}'); height: 140px;">
+                                <div class="campus-card-overlay"></div>
+                                <div class="campus-card-badge" style="background: var(--campus-primary)">
+                                    <i data-lucide="${typeIcon}" style="width: 14px; height: 14px; display: inline-block; vertical-align: middle;"></i>
+                                </div>
+                            </div>
+                            <div class="campus-card-body">
+                                <h3 class="campus-card-title" style="font-size: 1.1rem; margin-bottom: 1rem;">${p.title}</h3>
+                                
+                                <div style="margin-top: auto;">
+                                    <div style="display:flex; justify-content:space-between; font-size: 0.8rem; color: var(--campus-text-muted);">
+                                        <span>İlerleme</span>
+                                        <span>%${progress}</span>
+                                    </div>
+                                    <div class="campus-progress-bg">
+                                        <div class="campus-progress-fill" style="width: ${progress}%; background: ${gradient};"></div>
+                                    </div>
+                                    <button class="campus-btn campus-btn-secondary" style="width: 100%; justify-content: center; margin-top: 1rem; padding: 8px;">
+                                        ${p.type === 'video' ? '<i data-lucide="play"></i> İzlemeye Devam Et' : '<i data-lucide="book-open"></i> Okumaya Devam Et'}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        `;
+                    }).join('')}
                 </div>
-                <button class="close-sheet-btn" onclick="window.academySimulator_toggleMobileDrawer(false)">
-                    <i data-lucide="x"></i>
-                </button>
+            `;
+        };
+
+        // Ana Render Çıktısı
+        return `
+            <div class="education-container">
+                <div class="campus-main-content">
+                    ${renderHeader()}
+                    ${viewMode === 'storefront' ? renderStorefront() : ''}
+                    ${viewMode === 'product_detail' ? renderProductDetail() : ''}
+                    ${viewMode === 'library' ? renderLibrary() : ''}
+                </div>
             </div>
-            <div class="sheet-body">
-                <div id="academy-live-simulator-mobile"></div>
-            </div>
-        </div>
-    </div>
-    `;
+        `;
 };

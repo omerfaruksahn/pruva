@@ -77,10 +77,10 @@ window.pricingReportsView = (state) => {
             <div class="hero-left-meta">
                 <div class="hero-badge" style="background: rgba(139, 92, 246, 0.15); color: #8b5cf6;">
                     <span class="pulse-green-dot" style="background-color: #8b5cf6; box-shadow: 0 0 8px #8b5cf6;"></span>
-                    Pricing AI Raporlama Dashboard'u
+                    <span data-i18n="pricing_reports.hero_badge">Pricing AI Raporlama Dashboard'u</span>
                 </div>
-                <h2>Navlun Analitikleri ve Lojistik Zekası</h2>
-                <p>Teklif kazanma oranlarını, navlun fiyat geçmişlerini, taşıyıcı kullanım dağılımlarını ve kaybedilen tekliflerin rakip fiyat analizlerini tek ekrandan inceleyin.</p>
+                <h2 data-i18n="pricing_reports.hero_title">Navlun Analitikleri ve Lojistik Zekası</h2>
+                <p data-i18n="pricing_reports.hero_desc">Teklif kazanma oranlarını, navlun fiyat geçmişlerini, taşıyıcı kullanım dağılımlarını ve kaybedilen tekliflerin rakip fiyat analizlerini tek ekrandan inceleyin.</p>
             </div>
             <div class="hero-right-visual">
                 <div class="ai-bot-avatar" style="background: linear-gradient(135deg, #8b5cf6, #ec4899); box-shadow: 0 4px 20px rgba(139, 92, 246, 0.4);">
@@ -95,32 +95,32 @@ window.pricingReportsView = (state) => {
                 <div class="summary-card-icon">📈</div>
                 <div class="summary-card-details">
                     <span class="summary-card-value">${totalRfqs || 45}</span>
-                    <span class="summary-card-label">Toplam Taranan RFQ</span>
-                    <span style="font-size: 0.68rem; color: #10b981; margin-top: 4px; font-weight: 700;">▲ %28 (Geçen aya göre)</span>
+                    <span class="summary-card-label" data-i18n="pricing_reports.stat_rfq">Toplam Taranan RFQ</span>
+                    <span style="font-size: 0.68rem; color: #10b981; margin-top: 4px; font-weight: 700;" data-i18n="pricing_reports.stat_rfq_trend">▲ %28 (Geçen aya göre)</span>
                 </div>
             </div>
             <div class="summary-card green">
                 <div class="summary-card-icon">🎯</div>
                 <div class="summary-card-details">
                     <span class="summary-card-value">%${winRate}</span>
-                    <span class="summary-card-label">Teklif Kazanma Oranı</span>
-                    <span style="font-size: 0.68rem; color: #10b981; margin-top: 4px; font-weight: 700;">▲ %4.2 (Trend yukarı)</span>
+                    <span class="summary-card-label" data-i18n="pricing_reports.stat_win">Teklif Kazanma Oranı</span>
+                    <span style="font-size: 0.68rem; color: #10b981; margin-top: 4px; font-weight: 700;" data-i18n="pricing_reports.stat_win_trend">▲ %4.2 (Trend yukarı)</span>
                 </div>
             </div>
             <div class="summary-card yellow">
                 <div class="summary-card-icon">🚢</div>
                 <div class="summary-card-details">
                     <span class="summary-card-value">$1,920</span>
-                    <span class="summary-card-label">Ort. Navlun (40HC FCL)</span>
-                    <span style="font-size: 0.68rem; color: #ef4444; margin-top: 4px; font-weight: 700;">▼ %12 (Trend aşağı)</span>
+                    <span class="summary-card-label" data-i18n="pricing_reports.stat_avg_freight">Ort. Navlun (40HC FCL)</span>
+                    <span style="font-size: 0.68rem; color: #ef4444; margin-top: 4px; font-weight: 700;" data-i18n="pricing_reports.stat_avg_trend">▼ %12 (Trend aşağı)</span>
                 </div>
             </div>
             <div class="summary-card purple" style="background: rgba(236, 72, 153, 0.05); border-color: rgba(236, 72, 153, 0.2);">
                 <div class="summary-card-icon" style="color: #ec4899;">⚠️</div>
                 <div class="summary-card-details">
                     <span class="summary-card-value" style="color: #ec4899;">${cancelledRfqs || 12}</span>
-                    <span class="summary-card-label" style="color: var(--text-secondary);">Kaybedilen Fırsat</span>
-                    <span style="font-size: 0.68rem; color: var(--text-muted); margin-top: 4px;">Analiz formu doldurulmuş</span>
+                    <span class="summary-card-label" style="color: var(--text-secondary);" data-i18n="pricing_reports.stat_lost">Kaybedilen Fırsat</span>
+                    <span style="font-size: 0.68rem; color: var(--text-muted); margin-top: 4px;" data-i18n="pricing_reports.stat_lost_desc">Analiz formu doldurulmuş</span>
                 </div>
             </div>
         </div>
@@ -131,7 +131,7 @@ window.pricingReportsView = (state) => {
             <!-- 1. En Aktif 5 Güzergah (Bar Chart) -->
             <div class="editor-card" style="padding: 20px; background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-lg);">
                 <h3 style="font-size: 1rem; color: var(--text-primary); margin: 0 0 15px 0; font-weight: 700; display: flex; align-items: center; gap: 8px;">
-                    <span>📊 En Aktif 5 Güzergah Hacmi</span>
+                    <span data-i18n="pricing_reports.chart_routes_title">📊 En Aktif 5 Güzergah Hacmi</span>
                 </h3>
                 <div style="display: flex; flex-direction: column; gap: 16px; margin-top: 20px;">
                     ${activeRoutes.map(([route, count]) => {
@@ -140,7 +140,7 @@ window.pricingReportsView = (state) => {
                             <div>
                                 <div style="display: flex; justify-content: space-between; font-size: 0.78rem; margin-bottom: 6px; font-weight: 600;">
                                     <span style="color: var(--text-primary);">${route}</span>
-                                    <span style="color: var(--primary); font-weight: 700;">${count} Talep</span>
+                                    <span style="color: var(--primary); font-weight: 700;">${count} <span data-i18n="pricing_reports.requests">Talep</span></span>
                                 </div>
                                 <div style="width: 100%; height: 8px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 99px; overflow: hidden;">
                                     <div style="width: ${pct}%; height: 100%; background: linear-gradient(90deg, var(--primary), #8b5cf6); border-radius: 99px;"></div>
@@ -154,7 +154,7 @@ window.pricingReportsView = (state) => {
             <!-- 2. Aylık Teklif Trendi (Line Chart - Simple CSS) -->
             <div class="editor-card" style="padding: 20px; background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-lg);">
                 <h3 style="font-size: 1rem; color: var(--text-primary); margin: 0 0 15px 0; font-weight: 700; display: flex; align-items: center; gap: 8px;">
-                    <span>📈 Son 6 Ay Teklif Dağılımı</span>
+                    <span data-i18n="pricing_reports.chart_trend_title">📈 Son 6 Ay Teklif Dağılımı</span>
                 </h3>
                 <div style="display: flex; align-items: flex-end; justify-content: space-between; height: 150px; padding: 20px 10px 10px 10px; margin-top: 20px; border-bottom: 1px solid var(--border);">
                     ${monthlyTrend.map(t => {
@@ -177,13 +177,13 @@ window.pricingReportsView = (state) => {
             
             <!-- Taşıyıcı Kullanım Payları -->
             <div class="editor-card" style="padding: 20px; background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-lg); height: fit-content;">
-                <h3 style="font-size: 1rem; color: var(--text-primary); margin: 0 0 15px 0; font-weight: 700;">🚢 Taşıyıcı Hacim Payları</h3>
+                <h3 style="font-size: 1rem; color: var(--text-primary); margin: 0 0 15px 0; font-weight: 700;" data-i18n="pricing_reports.chart_carriers_title">🚢 Taşıyıcı Hacim Payları</h3>
                 <div style="display: flex; flex-direction: column; gap: 16px; margin-top: 15px;">
                     ${topCarriers.map(c => `
                         <div>
                             <div style="display: flex; justify-content: space-between; font-size: 0.78rem; margin-bottom: 4px;">
                                 <strong style="color: var(--text-primary);">${c.name}</strong>
-                                <span style="color: var(--text-secondary); font-weight: 600;">%${c.pct} (${c.count} Yükleme)</span>
+                                <span style="color: var(--text-secondary); font-weight: 600;">%${c.pct} (${c.count} <span data-i18n="pricing_reports.loadings">Yükleme</span>)</span>
                             </div>
                             <div style="width: 100%; height: 6px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 99px; overflow: hidden;">
                                 <div style="width: ${c.pct}%; height: 100%; background: ${c.color}; border-radius: 99px;"></div>
@@ -192,7 +192,7 @@ window.pricingReportsView = (state) => {
                     `).join('')}
                 </div>
                 
-                <div style="margin-top: 20px; font-size: 0.72rem; color: var(--text-muted); background: rgba(255,255,255,0.01); border: 1px solid var(--border); padding: 12px; border-radius: var(--radius-md); line-height: 1.4;">
+                <div style="margin-top: 20px; font-size: 0.72rem; color: var(--text-muted); background: rgba(255,255,255,0.01); border: 1px solid var(--border); padding: 12px; border-radius: var(--radius-md); line-height: 1.4;" data-i18n="pricing_reports.ai_note">
                     💡 <strong>AI Notu:</strong> MSC son 30 günde Şangay-Ambarlı hattında en hızlı yanıt veren (%100 yanıt oranı) ve en ucuz all-in teklif sunan armatör olmuştur.
                 </div>
             </div>
@@ -202,9 +202,9 @@ window.pricingReportsView = (state) => {
                 <div class="editor-header" style="border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 16px;">
                     <div class="editor-title-area">
                         <h3 style="font-size: 1.1rem; color: var(--text-primary); display: flex; align-items: center; gap: 8px;">
-                            <span style="color: #ef4444;">💔 Kaybedilen Teklifler & Rakip Gaps</span>
+                            <span style="color: #ef4444;" data-i18n="pricing_reports.lost_title">💔 Kaybedilen Teklifler & Rakip Gaps</span>
                         </h3>
-                        <span style="font-size: 0.8rem; color: var(--text-secondary);">Tekliflerin kaybedilme nedenleri, rakip fiyat farkları ve operasyonel aksaklık analizleri</span>
+                        <span style="font-size: 0.8rem; color: var(--text-secondary);" data-i18n="pricing_reports.lost_desc">Tekliflerin kaybedilme nedenleri, rakip fiyat farkları ve operasyonel aksaklık analizleri</span>
                     </div>
                 </div>
  
@@ -215,13 +215,13 @@ window.pricingReportsView = (state) => {
                         return `
                             <div style="padding: 14px; border: 1px solid var(--border); border-radius: var(--radius-md); background: rgba(255,255,255,0.01); display: flex; flex-direction: column; gap: 8px;">
                                 <div style="display: flex; justify-content: space-between; align-items: center;">
-                                    <strong style="color: var(--text-primary); font-size: 0.85rem;">📍 Güzergah: ${deal.pol} → ${deal.pod}</strong>
+                                    <strong style="color: var(--text-primary); font-size: 0.85rem;"><span data-i18n="pricing_reports.route_lbl">📍 Güzergah:</span> ${deal.pol} → ${deal.pod}</strong>
                                     <span style="background: rgba(239, 68, 68, 0.1); color: #ef4444; font-size: 0.72rem; padding: 3px 8px; border-radius: 4px; font-weight: 700;">
-                                        Fark: +$${gap} (Biz: $${ourPrice} vs Rakip: $${deal.competitor_price})
+                                        <span data-i18n="pricing_reports.diff_lbl">Fark:</span> +$${gap} (<span data-i18n="pricing_reports.us_lbl">Biz:</span> $${ourPrice} <span data-i18n="pricing_reports.competitor_lbl">vs Rakip:</span> $${deal.competitor_price})
                                     </span>
                                 </div>
                                 <div style="font-size: 0.78rem; color: var(--text-secondary); line-height: 1.4; border-top: 1px dashed var(--border); padding-top: 6px; font-style: italic;">
-                                    <strong>Kaybetme Nedeni:</strong> ${deal.lost_reason}
+                                    <strong data-i18n="pricing_reports.reason_lbl">Kaybetme Nedeni:</strong> ${deal.lost_reason}
                                 </div>
                             </div>
                         `;

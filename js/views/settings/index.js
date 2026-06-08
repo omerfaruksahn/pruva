@@ -122,7 +122,7 @@ window.settingsView = (state) => {
                 <div class="settings-profile-summary">
                     <div class="avatar-wrapper">
                         <div class="avatar-big">${userAvatarHTML}</div>
-                        <div class="avatar-edit-btn" title="Fotoğraf Değiştir" onclick="window.handleAvatarUpload()">
+                        <div class="avatar-edit-btn" title="Fotoğraf Değiştir" onclick="window.handleAvatarUpload()" data-i18n-title="settings.avatar_edit_btn">
                             <i data-lucide="camera" style="width: 16px; height: 16px;"></i>
                         </div>
                     </div>
@@ -131,38 +131,38 @@ window.settingsView = (state) => {
                         <p>${user.email}</p>
                         <div class="role-badge">
                             <i data-lucide="shield" style="width: 12px; height: 12px; margin-right: 6px;"></i>
-                            ${user.role === 'loader' ? 'Yükleyici' : user.role === 'carrier' ? 'Taşıyıcı' : 'Yönetici'}
+                            <span data-i18n="roles.${user.role || 'user'}">${user.role === 'loader' ? 'Yükleyici' : user.role === 'carrier' ? 'Taşıyıcı' : 'Yönetici'}</span>
                         </div>
                     </div>
                 </div>
 
                 <div class="settings-menu">
-                    <div class="settings-menu-group-header">Kişisel Ayarlar</div>
+                    <div class="settings-menu-group-header" data-i18n="settings.personal_settings_group">Kişisel Ayarlar</div>
                     <div class="settings-menu-item active" data-tab="profile" onclick="window.switchSettingsTab('profile')">
-                        <i data-lucide="user"></i> Profil Bilgileri
+                        <i data-lucide="user"></i> <span data-i18n="settings.profile_info">Profil Bilgileri</span>
                         <i data-lucide="chevron-right" class="menu-chevron"></i>
                     </div>
                     <div class="settings-menu-item" data-tab="security" onclick="window.switchSettingsTab('security')">
-                        <i data-lucide="lock"></i> Güvenlik
+                        <i data-lucide="lock"></i> <span data-i18n="settings.sidebar_security">Güvenlik</span>
                         <i data-lucide="chevron-right" class="menu-chevron"></i>
                     </div>
                     
-                    <div class="settings-menu-group-header" style="margin-top: 15px;">Kurumsal Ayarlar</div>
+                    <div class="settings-menu-group-header" style="margin-top: 15px;" data-i18n="settings.company_settings_group">Kurumsal Ayarlar</div>
                     <div class="settings-menu-item" data-tab="company" onclick="window.switchSettingsTab('company')">
-                        <i data-lucide="building"></i> Şirket Detayları
+                        <i data-lucide="building"></i> <span data-i18n="settings.company_details">Şirket Detayları</span>
                         <i data-lucide="chevron-right" class="menu-chevron"></i>
                     </div>
                     <div class="settings-menu-item" data-tab="notifications" onclick="window.switchSettingsTab('notifications')">
-                        <i data-lucide="bell"></i> Bildirimler
+                        <i data-lucide="bell"></i> <span data-i18n="settings.sidebar_notifications">Bildirimler</span>
                         <i data-lucide="chevron-right" class="menu-chevron"></i>
                     </div>
                     <div class="settings-menu-item" data-tab="membership" onclick="window.switchSettingsTab('membership')">
-                        <i data-lucide="credit-card"></i> Üyelik ve Planlar
+                        <i data-lucide="credit-card"></i> <span data-i18n="settings.membership_plans">Üyelik ve Planlar</span>
                         <i data-lucide="chevron-right" class="menu-chevron"></i>
                     </div>
                     
                     <div class="settings-menu-item danger" onclick="window.app.auth.logout()" style="margin-top: 20px; border-top: 1px solid var(--border); border-radius: 0;">
-                        <i data-lucide="log-out"></i> Çıkış Yap
+                        <i data-lucide="log-out"></i> <span data-i18n="settings.sidebar_logout">Çıkış Yap</span>
                         <i data-lucide="chevron-right" class="menu-chevron"></i>
                     </div>
                 </div>

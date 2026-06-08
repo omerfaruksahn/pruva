@@ -5,22 +5,22 @@ window.CarrierManager = class CarrierManager {
     }
 
     async withdrawBid(adId) {
-        if (!confirm('Teklifinizi geri çekmek istediğinize emin misiniz?')) return;
+        if (!confirm(window.i18n.t('comp.carrier.confirm_withdraw_bid'))) return;
         const ad = this.app.state.ads.find(a => String(a.id) === String(adId));
         if (ad) {
             const newBids = ad.bids.filter(b => b.company !== this.app.state.currentUser);
             try {
                 await this.app.store.updateAd(adId, { bids: newBids });
             } catch (error) {
-                if (window.notificationManager) window.notificationManager.showToast('İşlem başarısız.', 'error');
+                if (window.notificationManager) window.notificationManager.showToast(window.i18n.t('comp.carrier.operation_failed'), 'error');
                 return;
             }
-            if (window.notificationManager) window.notificationManager.showToast('Teklif geri çekildi.', 'info');
+            if (window.notificationManager) window.notificationManager.showToast(window.i18n.t('comp.carrier.bid_withdrawn'), 'info');
         }
     }
 
     async withdrawFromShipment(adId) {
-        if (!confirm('DİKKAT: İşi iptal etmek profilinizden -0.2 ceza puanı düşülmesine sebep olacaktır. Devam etmek istiyor musunuz?')) return;
+        if (!confirm(window.i18n.t('comp.carrier.confirm_withdraw_shipment'))) return;
         
         const ad = this.app.state.ads.find(a => String(a.id) === String(adId));
         if (!ad) return;
@@ -38,7 +38,7 @@ window.CarrierManager = class CarrierManager {
                 origin: ad.origin,
                 destination: ad.destination,
                 scores: { cat1: 0, cat2: 0, cat3: 0 },
-                comment: 'Sistem Notu: Taşıyıcı seferden çekildiği için ceza uygulandı.'
+                comment: window.i18n.t('comp.carrier.system_note_penalty')
             });
         }
 
@@ -54,7 +54,7 @@ window.CarrierManager = class CarrierManager {
         const newTimeline = [...(ad.operationTimeline || [])];
         newTimeline.unshift({
             type: 'error',
-            text: 'Taşıyıcı seferden çekildi. İlan tekrar pazar yerine açıldı.',
+            text: window.i18n.t('comp.carrier.timeline_carrier_withdrawn'),
             date: new Date().toLocaleString('tr-TR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
         });
         updates.operationTimeline = newTimeline;
@@ -63,12 +63,12 @@ window.CarrierManager = class CarrierManager {
             await this.app.store.updateAd(adId, updates);
             this.app.router.render();
             if (window.notificationManager) {
-                window.notificationManager.showToast('İş iptal edildi ve ceza puanı yansıtıldı.', 'warning');
+                window.notificationManager.showToast(window.i18n.t('comp.carrier.job_cancelled_penalty'), 'warning');
                 window.notificationManager.add({
                     id: Date.now(),
                     type: 'error',
-                    text: `🚨 Taşıyıcı İptali: ${carrierName} seferden çekildi. İlanınız tekrar pazara açıldı.`,
-                    subtext: `İlan: ${ad.origin} → ${ad.destination}`,
+                    text: window.i18n.t('comp.carrier.notif_carrier_cancelled').replace('{carrier}', carrierName),
+                    subtext: window.i18n.t('comp.carrier.notif_ad_route').replace('{origin}', ad.origin).replace('{dest}', ad.destination),
                     date: Date.now(),
                     read: false,
                     targetUser: ad.owner,
@@ -76,22 +76,22 @@ window.CarrierManager = class CarrierManager {
                 });
             }
         } catch (error) {
-            if (window.notificationManager) window.notificationManager.showToast('İşlem başarısız.', 'error');
+            if (window.notificationManager) window.notificationManager.showToast(window.i18n.t('comp.carrier.operation_failed'), 'error');
         }
     }
 
     async archiveShipment(adId) {
-        if (!confirm('Bu ilanı arşive kaldırmak istediğinize emin misiniz?')) return;
+        if (!confirm(window.i18n.t('comp.carrier.confirm_archive'))) return;
         
         const updates = { status: 'archived' };
         try {
             await this.app.store.updateAd(adId, updates);
             if (window.notificationManager) {
-                window.notificationManager.showToast('İlan başarıyla arşivlendi.', 'success');
+                window.notificationManager.showToast(window.i18n.t('comp.carrier.ad_archived'), 'success');
             }
             this.app.router.render();
         } catch (error) {
-            if (window.notificationManager) window.notificationManager.showToast('İşlem başarısız.', 'error');
+            if (window.notificationManager) window.notificationManager.showToast(window.i18n.t('comp.carrier.operation_failed'), 'error');
         }
     }
 
@@ -106,9 +106,9 @@ window.CarrierManager = class CarrierManager {
             const hasTransit = ad.operationTimeline.some(t => t.text.includes('Yolda') || t.text.includes('Sınır') || t.text.includes('Gümrük'));
             
             if (!hasLoaded && !hasTransit) {
-                if (window.notificationManager) window.notificationManager.showToast('UYARI: Ara statüleri atladınız. Ceza puanı yansıtılacaktır!', 'alert');
+                if (window.notificationManager) window.notificationManager.showToast(window.i18n.t('comp.carrier.warn_skipped_status_penalty'), 'alert');
             } else if (!hasLoaded || !hasTransit) {
-                if (window.notificationManager) window.notificationManager.showToast('DİKKAT: Bazı ara statüleri atladınız.', 'alert');
+                if (window.notificationManager) window.notificationManager.showToast(window.i18n.t('comp.carrier.warn_skipped_status'), 'alert');
             }
         }
 
@@ -133,19 +133,19 @@ window.CarrierManager = class CarrierManager {
         if (formData && Object.keys(formData).length > 0) {
             timelineItem.details = formData;
             let detailStrings = [];
-            if (formData.plate) detailStrings.push(`Plaka: ${formData.plate}`);
-            if (formData.driverName) detailStrings.push(`Şoför: ${formData.driverName}`);
-            if (formData.driverPhone) detailStrings.push(`Tel: ${formData.driverPhone}`);
-            if (formData.containerNo) detailStrings.push(`Konteyner: ${formData.containerNo}`);
-            if (formData.carrierLine) detailStrings.push(`Armatör: ${formData.carrierLine}`);
-            if (formData.flightNo) detailStrings.push(`Uçuş No: ${formData.flightNo}`);
-            if (formData.airlineCompany) detailStrings.push(`Havayolu: ${formData.airlineCompany}`);
-            if (formData.customsName) detailStrings.push(`Gümrük/Sınır: ${formData.customsName}`);
-            if (formData.declarationNo) detailStrings.push(`Beyanname/AWB: ${formData.declarationNo}`);
-            if (formData.location) detailStrings.push(`Konum: ${formData.location}`);
-            if (formData.statusNote) detailStrings.push(`Açıklama: ${formData.statusNote}`);
-            if (formData.receiverName) detailStrings.push(`Teslim Alan: ${formData.receiverName}`);
-            if (formData.deliveryNote) detailStrings.push(`Teslim Notu: ${formData.deliveryNote}`);
+            if (formData.plate) detailStrings.push(`${window.i18n.t('comp.carrier.timeline_plate')}: ${formData.plate}`);
+            if (formData.driverName) detailStrings.push(`${window.i18n.t('comp.carrier.timeline_driver')}: ${formData.driverName}`);
+            if (formData.driverPhone) detailStrings.push(`${window.i18n.t('comp.carrier.timeline_phone')}: ${formData.driverPhone}`);
+            if (formData.containerNo) detailStrings.push(`${window.i18n.t('comp.carrier.timeline_container')}: ${formData.containerNo}`);
+            if (formData.carrierLine) detailStrings.push(`${window.i18n.t('comp.carrier.timeline_carrier_line')}: ${formData.carrierLine}`);
+            if (formData.flightNo) detailStrings.push(`${window.i18n.t('comp.carrier.timeline_flight')}: ${formData.flightNo}`);
+            if (formData.airlineCompany) detailStrings.push(`${window.i18n.t('comp.carrier.timeline_airline')}: ${formData.airlineCompany}`);
+            if (formData.customsName) detailStrings.push(`${window.i18n.t('comp.carrier.timeline_customs')}: ${formData.customsName}`);
+            if (formData.declarationNo) detailStrings.push(`${window.i18n.t('comp.carrier.timeline_declaration')}: ${formData.declarationNo}`);
+            if (formData.location) detailStrings.push(`${window.i18n.t('comp.carrier.timeline_location')}: ${formData.location}`);
+            if (formData.statusNote) detailStrings.push(`${window.i18n.t('comp.carrier.timeline_note')}: ${formData.statusNote}`);
+            if (formData.receiverName) detailStrings.push(`${window.i18n.t('comp.carrier.timeline_receiver')}: ${formData.receiverName}`);
+            if (formData.deliveryNote) detailStrings.push(`${window.i18n.t('comp.carrier.timeline_delivery_note')}: ${formData.deliveryNote}`);
             
             if (detailStrings.length > 0) {
                 timelineItem.text += ` - ${detailStrings.join(' | ')}`;
@@ -158,16 +158,16 @@ window.CarrierManager = class CarrierManager {
         try {
             await this.app.store.updateAd(adId, updates);
         } catch (error) {
-            if (window.notificationManager) window.notificationManager.showToast('Güncelleme başarısız.', 'error');
+            if (window.notificationManager) window.notificationManager.showToast(window.i18n.t('comp.carrier.operation_failed'), 'error');
             return;
         }
 
         if (window.notificationManager) {
-            window.notificationManager.showToast('Statü başarıyla güncellendi.', 'success');
+            window.notificationManager.showToast(window.i18n.t('comp.carrier.status_updated'), 'success');
             window.notificationManager.add({
                 id: Date.now(),
                 type: 'info',
-                text: `🚚 Yükünüzün durumu güncellendi: [${newStatusText}]`,
+                text: window.i18n.t('comp.carrier.notif_status_updated').replace('{status}', newStatusText),
                 date: Date.now(),
                 read: false,
                 targetUser: ad.owner,
@@ -194,7 +194,7 @@ window.CarrierManager = class CarrierManager {
         const cleanedTimeline = newTimeline.filter(t => !t.text.includes('TEST:'));
         cleanedTimeline.unshift({
             type: 'warning',
-            text: 'TEST: Liman / Gümrük Bölgesine Giriş Yapıldı (10 Gün Önceye Simüle Edildi)',
+            text: window.i18n.t('comp.carrier.sim_port_arrival'),
             date: new Date(tenDaysAgo).toLocaleString('tr-TR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
         });
         updates.operationTimeline = cleanedTimeline;
@@ -204,10 +204,10 @@ window.CarrierManager = class CarrierManager {
             this.app.store.save();
             this.app.router.render();
             if (window.notificationManager) {
-                window.notificationManager.showToast('✅ Liman girişi 10 gün öncesine başarıyla simüle edildi. Demoraj başladı!', 'success');
+                window.notificationManager.showToast(window.i18n.t('comp.carrier.sim_success'), 'success');
             }
         } catch (error) {
-            if (window.notificationManager) window.notificationManager.showToast('Simülasyon başarısız.', 'error');
+            if (window.notificationManager) window.notificationManager.showToast(window.i18n.t('comp.carrier.operation_failed'), 'error');
         }
     }
 
@@ -219,18 +219,18 @@ window.CarrierManager = class CarrierManager {
             <div id="delay-modal" class="modal-overlay" style="display: flex; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); z-index: 10000; animation: fadeIn 0.3s ease;">
                 <div class="modal-content" style="background: var(--bg-page); border-radius: 20px; width: 90%; max-width: 450px; padding: 30px; box-shadow: 0 20px 50px rgba(0,0,0,0.3); animation: slideUp 0.3s ease;">
                     <h3 style="margin-top: 0; color: var(--primary); font-size: 1.2rem; display: flex; align-items: center; gap: 8px;">
-                        <i data-lucide="alert-triangle" style="color: #e74c3c;"></i> Gecikme Bildirimi
+                        <i data-lucide="alert-triangle" style="color: #e74c3c;"></i> <span data-i18n="comp.carrier.modal_delay_title">Gecikme Bildirimi</span>
                     </h3>
-                    <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 20px;">
+                    <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 20px;" data-i18n="comp.carrier.modal_delay_desc">
                         Planlanan teslimat tarihini ertelemek üzeresiniz. Sadece <strong>1 kez</strong> erteleme hakkınız bulunmaktadır. Maksimum 30 gün uzatabilirsiniz. Daha uzun süreler için support@pruvahub.com ile iletişime geçin.
                     </p>
                     <div class="form-group" style="margin-bottom: 25px;">
-                        <label style="font-size: 0.85rem; font-weight: 600; margin-bottom: 8px; display: block;">Yeni Tahmini Teslim Tarihi</label>
+                        <label style="font-size: 0.85rem; font-weight: 600; margin-bottom: 8px; display: block;" data-i18n="comp.carrier.modal_delay_date_lbl">Yeni Tahmini Teslim Tarihi</label>
                         <input type="date" id="delay-date-input" class="form-control" style="width: 100%; padding: 12px; border: 1.5px solid var(--border-dim); border-radius: 8px;" required>
                     </div>
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                        <button type="button" class="btn-outline" style="padding: 12px; border-radius: 10px; font-weight: 600;" onclick="document.getElementById('delay-modal').remove()">Vazgeç</button>
-                        <button type="button" class="btn-primary" style="padding: 12px; border-radius: 10px; font-weight: 600; background: #e74c3c; color: white; border: none;" onclick="window.carrierManager.submitDelay('${ad.id}')">Tarihi Güncelle</button>
+                        <button type="button" class="btn-outline" style="padding: 12px; border-radius: 10px; font-weight: 600;" onclick="document.getElementById('delay-modal').remove()" data-i18n="comp.carrier.modal_cancel">Vazgeç</button>
+                        <button type="button" class="btn-primary" style="padding: 12px; border-radius: 10px; font-weight: 600; background: #e74c3c; color: white; border: none;" onclick="window.carrierManager.submitDelay('${ad.id}')" data-i18n="comp.carrier.modal_update">Tarihi Güncelle</button>
                     </div>
                 </div>
             </div>
@@ -257,7 +257,7 @@ window.CarrierManager = class CarrierManager {
 
         const dateInput = document.getElementById('delay-date-input');
         if (!dateInput || !dateInput.value) {
-            if (window.notificationManager) window.notificationManager.showToast('Lütfen geçerli bir tarih seçin.', 'error');
+            if (window.notificationManager) window.notificationManager.showToast(window.i18n.t('comp.carrier.select_valid_date'), 'error');
             return;
         }
 
@@ -271,7 +271,7 @@ window.CarrierManager = class CarrierManager {
         const newTimeline = [...(ad.operationTimeline || [])];
         newTimeline.unshift({
             type: 'warning',
-            text: `Teslimat tarihi güncellendi: ${newDate.toLocaleDateString('tr-TR')}`,
+            text: window.i18n.t('comp.carrier.delivery_date_updated').replace('{date}', newDate.toLocaleDateString('tr-TR')),
             date: new Date().toLocaleString('tr-TR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
         });
         updates.operationTimeline = newTimeline;
@@ -281,12 +281,12 @@ window.CarrierManager = class CarrierManager {
             document.getElementById('delay-modal').remove();
             
             if (window.notificationManager) {
-                window.notificationManager.showToast('Teslimat tarihi başarıyla güncellendi.', 'success');
+                window.notificationManager.showToast(window.i18n.t('comp.carrier.delivery_date_success'), 'success');
                 window.notificationManager.add({
                     id: Date.now(),
                     type: 'warning',
-                    text: `⚠️ Teslimat Gecikmesi: ${ad.acceptedBid?.company} teslimat tarihini güncelledi.`,
-                    subtext: `Yeni Tarih: ${newDate.toLocaleDateString('tr-TR')} • İlan: ${ad.origin} → ${ad.destination}`,
+                    text: window.i18n.t('comp.carrier.notif_delay').replace('{company}', ad.acceptedBid?.company),
+                    subtext: window.i18n.t('comp.carrier.notif_delay_sub').replace('{date}', newDate.toLocaleDateString('tr-TR')).replace('{origin}', ad.origin).replace('{dest}', ad.destination),
                     date: Date.now(),
                     read: false,
                     targetUser: ad.owner,
@@ -294,7 +294,7 @@ window.CarrierManager = class CarrierManager {
                 });
             }
         } catch (error) {
-            if (window.notificationManager) window.notificationManager.showToast('İşlem başarısız.', 'error');
+            if (window.notificationManager) window.notificationManager.showToast(window.i18n.t('comp.carrier.operation_failed'), 'error');
         }
     }
 
@@ -324,7 +324,7 @@ window.CarrierManager = class CarrierManager {
         
         if (window.notificationManager) {
             const planName = this.app.state.subscriptionType === 'premium' ? 'Premium' : 'Standart';
-            window.notificationManager.showToast(`Test Modu: Plan ${planName} olarak değiştirildi.`, 'info');
+            window.notificationManager.showToast(window.i18n.t('comp.carrier.test_plan_switched').replace('{plan}', planName), 'info');
         }
     }
 };

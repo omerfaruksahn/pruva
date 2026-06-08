@@ -43,7 +43,7 @@ export class RateSheetsManager {
         };
 
         try {
-            toast('Görsel işleniyor ve base64\'e dönüştürülüyor...', 'info');
+            toast(window.i18n.t('comp.rate_sheets.processing'), 'info');
             const base64Data = await this.fileToBase64(file);
             
             // Firebase Auth token al (güvenlik katmanı)
@@ -72,13 +72,13 @@ export class RateSheetsManager {
 
             if (!res.ok) {
                 const errData = await res.json();
-                throw new Error(errData.message || 'API Hatası oluştu.');
+                throw new Error(errData.message || window.i18n.t('comp.rate_sheets.api_error'));
             }
 
             const resData = await res.json();
             console.log('[RATE SHEET MANAGER] Upload success:', resData);
 
-            toast('Acente fiyat listesi Gemini Vision tarafından başarıyla analiz edildi!', 'success');
+            toast(window.i18n.t('comp.rate_sheets.analysis_success'), 'success');
             
             // Listeyi yeniden yükle
             await this.loadSheets();
@@ -87,7 +87,7 @@ export class RateSheetsManager {
 
         } catch (err) {
             console.error('[RATE SHEET MANAGER] Upload error:', err);
-            toast('Yükleme/Analiz hatası: ' + err.message, 'error');
+            toast(window.i18n.t('comp.rate_sheets.upload_error') + ' ' + err.message, 'error');
             return { success: false, error: err.message };
         }
     }
@@ -118,7 +118,7 @@ export class RateSheetsManager {
 
     // 3. Fiyat Listesi Görselini ve Satırlarını Sil
     async deleteSheet(id) {
-        if (!confirm('Bu navlun fiyat listesini ve ilişkili tüm fiyat satırlarını silmek istediğinize emin misiniz?')) return;
+        if (!confirm(window.i18n.t('comp.rate_sheets.confirm_delete'))) return;
 
         const toast = (msg, type = 'success') => {
             window.notificationManager?.showToast(msg, type);
@@ -141,13 +141,13 @@ export class RateSheetsManager {
             if (res.ok) {
                 this.app.state.rateSheets = this.app.state.rateSheets.filter(s => s.id !== id);
                 this.app.commit();
-                toast('Fiyat listesi başarıyla silindi.', 'danger');
+                toast(window.i18n.t('comp.rate_sheets.delete_success'), 'danger');
             } else {
-                throw new Error('API silme hatası.');
+                throw new Error(window.i18n.t('comp.rate_sheets.api_delete_error'));
             }
         } catch (err) {
             console.error('[RATE SHEET MANAGER] Delete sheet error:', err);
-            toast('Silme hatası: ' + err.message, 'error');
+            toast(window.i18n.t('comp.rate_sheets.delete_error') + ' ' + err.message, 'error');
         }
     }
 
@@ -168,7 +168,7 @@ export class RateSheetsManager {
                 const resData = await res.json();
                 return resData.data || [];
             }
-            throw new Error('API sorgulama hatası.');
+            throw new Error(window.i18n.t('comp.rate_sheets.api_query_error'));
         } catch (err) {
             console.error('[RATE SHEET MANAGER] Query rates error:', err);
             return [];

@@ -13,16 +13,16 @@ window.inboxView = (state) => {
             <!-- Sidebar: Sohbet Listesi -->
             <div class="inbox-sidebar">
                 <div class="inbox-sidebar-header">
-                    <h2>Mesajlarım</h2>
+                    <h2 data-i18n="inbox.my_messages">Mesajlarım</h2>
                     <div class="inbox-search-wrapper">
                         <i data-lucide="search"></i>
-                        <input type="text" id="inbox-search-bar" class="inbox-search-input" placeholder="Sohbetlerde ara..." oninput="window.inboxFilterThreads()">
+                        <input type="text" id="inbox-search-bar" class="inbox-search-input" data-i18n="[placeholder]inbox.search_placeholder" placeholder="Sohbetlerde ara..." oninput="window.inboxFilterThreads()">
                     </div>
                 </div>
                 <div class="inbox-threads-list" id="inbox-threads-list-container">
                     <div style="text-align: center; padding: 40px 20px; color: var(--text-muted);">
                         <div style="width: 28px; height: 28px; border: 3px solid var(--border); border-top-color: var(--secondary); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 12px;"></div>
-                        <p style="margin: 0; font-size: 0.85rem;">Sohbetler yükleniyor...</p>
+                        <p style="margin: 0; font-size: 0.85rem;" data-i18n="inbox.loading_chats">Sohbetler yükleniyor...</p>
                         <style>@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }</style>
                     </div>
                 </div>
@@ -34,8 +34,8 @@ window.inboxView = (state) => {
                     <div class="inbox-empty-icon">
                         <i data-lucide="message-square" style="width: 36px; height: 36px;"></i>
                     </div>
-                    <h3 class="inbox-empty-title">Mesaj Kutusu</h3>
-                    <p class="inbox-empty-desc">Sohbetleriniz burada listelenir. Konuşmak istediğiniz ilanın sahibine teklif vererek veya soru sorarak mesaj atabilirsiniz.</p>
+                    <h3 class="inbox-empty-title" data-i18n="inbox.message_box">Mesaj Kutusu</h3>
+                    <p class="inbox-empty-desc" data-i18n="inbox.empty_desc">Sohbetleriniz burada listelenir. Konuşmak istediğiniz ilanın sahibine teklif vererek veya soru sorarak mesaj atabilirsiniz.</p>
                 </div>
             </div>
         </div>
@@ -232,7 +232,7 @@ window.inboxRenderThreads = (threads) => {
     if (threads.length === 0) {
         container.innerHTML = `
             <div style="text-align: center; padding: 40px 20px; color: var(--text-secondary);">
-                <p style="margin: 0; font-size: 0.88rem; font-weight: 500;">Henüz aktif bir sohbetiniz bulunmuyor.</p>
+                <p style="margin: 0; font-size: 0.88rem; font-weight: 500;" data-i18n="inbox.no_active_chat">Henüz aktif bir sohbetiniz bulunmuyor.</p>
             </div>
         `;
         return;
@@ -349,19 +349,19 @@ window.inboxSelectThread = (chatId) => {
         <div class="inbox-input-panel" style="background: rgba(0, 0, 0, 0.02); border-top: 1px solid var(--border); padding: 20px; text-align: center;">
             <div style="display: inline-flex; align-items: center; gap: 8px; color: var(--text-muted); background: var(--bg-elevated); padding: 12px 24px; border-radius: 12px; font-size: 0.85rem; font-weight: 500; border: 1px solid var(--border); box-shadow: var(--shadow-sm);">
                 <i data-lucide="lock" style="width: 16px; height: 16px; color: ${isSystemChat ? 'var(--secondary)' : 'var(--danger)'};"></i>
-                <span>${isSystemChat ? 'Bu sohbet sistem bilgilendirmesi olup yanıt gönderimine kapalıdır.' : 'Bu ilan için başka bir teklif kabul edilmiştir. İlginiz için teşekkür ederiz.'}</span>
+                <span data-i18n="${isSystemChat ? 'inbox.locked_system' : 'inbox.locked_closed'}">${isSystemChat ? 'Bu sohbet sistem bilgilendirmesi olup yanıt gönderimine kapalıdır.' : 'Bu ilan için başka bir teklif kabul edilmiştir. İlginiz için teşekkür ederiz.'}</span>
             </div>
         </div>
     ` : `
         <!-- Input Area -->
         <div class="inbox-input-panel">
             <div class="inbox-input-wrapper" id="inbox-input-wrapper-el">
-                <button class="inbox-file-btn" onclick="document.getElementById('inbox-file-input-el').click()" title="Dosya Ekle">
+                <button class="inbox-file-btn" onclick="document.getElementById('inbox-file-input-el').click()" data-i18n="[title]inbox.add_file" title="Dosya Ekle">
                     <i data-lucide="paperclip" style="width: 20px; height: 20px;"></i>
                 </button>
                 <input type="file" id="inbox-file-input-el" style="display: none;" onchange="window.inboxHandleFileUpload(event, '${chatId}')">
                 
-                <textarea id="inbox-message-input" placeholder="Mesajınızı yazın..." class="inbox-textarea"
+                <textarea id="inbox-message-input" data-i18n="[placeholder]inbox.type_message" placeholder="Mesajınızı yazın..." class="inbox-textarea"
                           onfocus="document.getElementById('inbox-input-wrapper-el').classList.add('focus')" 
                           onblur="document.getElementById('inbox-input-wrapper-el').classList.remove('focus')" 
                           oninput="this.style.height = ''; this.style.height = Math.min(this.scrollHeight, 120) + 'px'; window.inboxHandleTyping('${chatId}')" 
@@ -372,7 +372,7 @@ window.inboxSelectThread = (chatId) => {
                 </button>
             </div>
             <div style="text-align: center; margin-top: 8px;">
-                <span style="font-size: 0.65rem; color: var(--text-muted);">Enter ile gönderin, Shift + Enter ile alt satıra geçin</span>
+                <span style="font-size: 0.65rem; color: var(--text-muted);" data-i18n="inbox.send_hint">Enter ile gönderin, Shift + Enter ile alt satıra geçin</span>
             </div>
         </div>
     `;
@@ -393,7 +393,7 @@ window.inboxSelectThread = (chatId) => {
                     <h3 class="inbox-chat-header-name">${thread.partnerName}</h3>
                     <div id="inbox-header-status-el" class="inbox-chat-header-status ${isSystemChat ? '' : (thread.presence?.[thread.partnerUid] ? '' : 'offline')}">
                         <div style="width: 6px; height: 6px; border-radius: 50%; background: ${isSystemChat ? 'var(--secondary)' : (thread.presence?.[thread.partnerUid] ? '#2ecc71' : 'var(--text-muted)')};"></div>
-                        <span>${isSystemChat ? 'Doğrulanmış Hesap' : (thread.presence?.[thread.partnerUid] ? 'Çevrimiçi' : 'Çevrimdışı')}</span>
+                        <span data-i18n="${isSystemChat ? 'inbox.verified_account' : (thread.presence?.[thread.partnerUid] ? 'inbox.online' : 'inbox.offline')}">${isSystemChat ? 'Doğrulanmış Hesap' : (thread.presence?.[thread.partnerUid] ? 'Çevrimiçi' : 'Çevrimdışı')}</span>
                     </div>
                 </div>
             </div>
@@ -401,7 +401,7 @@ window.inboxSelectThread = (chatId) => {
                 ${ad ? `
                     <a href="/marketplace" class="inbox-header-ad-link" onclick="event.preventDefault(); window.app.router.navigate('marketplace'); setTimeout(() => window.marketplaceManager.focusOnAd('${ad.id}'), 250);">
                         <i data-lucide="external-link" style="width: 14px; height: 14px;"></i>
-                        <span>İlanı Gör</span>
+                        <span data-i18n="inbox.view_ad">İlanı Gör</span>
                     </a>
                 ` : ''}
             </div>
@@ -410,7 +410,7 @@ window.inboxSelectThread = (chatId) => {
         <!-- Privacy Banner -->
         <div class="inbox-privacy-banner">
             <i data-lucide="shield-alert" style="width: 16px; height: 16px; color: #f39c12;"></i>
-            <p style="margin: 0; font-size: 0.74rem; color: #b97a0b; font-weight: 500; line-height: 1.4;">
+            <p style="margin: 0; font-size: 0.74rem; color: #b97a0b; font-weight: 500; line-height: 1.4;" data-i18n="inbox.privacy_warning">
                 Pruva güvenliği için iletişim bilgilerini paylaşmak yasaktır. Platform üzerinden anlaşma sağlandığında iletişim bilgileri otomatik iletilir.
             </p>
         </div>
@@ -419,7 +419,7 @@ window.inboxSelectThread = (chatId) => {
         <div class="inbox-messages-container" id="inbox-messages-scroll-area">
             <div style="text-align: center; margin-top: auto; margin-bottom: auto; color: var(--text-muted);">
                 <div style="width: 24px; height: 24px; border: 3px solid var(--border); border-top-color: var(--secondary); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 8px;"></div>
-                <p style="margin: 0; font-size: 0.85rem;">Mesajlar yükleniyor...</p>
+                <p style="margin: 0; font-size: 0.85rem;" data-i18n="inbox.loading_messages">Mesajlar yükleniyor...</p>
             </div>
         </div>
 
@@ -458,7 +458,7 @@ window.inboxSelectThread = (chatId) => {
             presenceEl.className = `inbox-chat-header-status ${isOnline ? '' : 'offline'}`;
             presenceEl.innerHTML = `
                 <div style="width: 6px; height: 6px; border-radius: 50%; background: ${isOnline ? '#2ecc71' : 'var(--text-muted)'};"></div>
-                <span>${isOnline ? 'Çevrimiçi' : 'Çevrimdışı'}</span>
+                <span data-i18n="${isOnline ? 'inbox.online' : 'inbox.offline'}">${isOnline ? 'Çevrimiçi' : 'Çevrimdışı'}</span>
             `;
         }
     });
@@ -479,8 +479,8 @@ window.inboxSelectThread = (chatId) => {
                     <div style="width: 54px; height: 54px; border-radius: 50%; background: var(--bg-surface); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; box-shadow: var(--shadow-sm);">
                         <i data-lucide="message-square-plus" style="width: 24px; height: 24px; color: var(--text-secondary);"></i>
                     </div>
-                    <h4 style="margin: 0 0 4px 0; color: var(--text-primary);">Sohbet Başlatın</h4>
-                    <p style="margin: 0; font-size: 0.8rem; max-width: 250px; line-height: 1.5; margin: 0 auto;">İlk mesajı göndererek görüşmeye başlayabilirsiniz.</p>
+                    <h4 style="margin: 0 0 4px 0; color: var(--text-primary);" data-i18n="inbox.start_chat">Sohbet Başlatın</h4>
+                    <p style="margin: 0; font-size: 0.8rem; max-width: 250px; line-height: 1.5; margin: 0 auto;" data-i18n="inbox.start_chat_desc">İlk mesajı göndererek görüşmeye başlayabilirsiniz.</p>
                 </div>
             `;
             if (window.lucide) window.lucide.createIcons();
@@ -517,8 +517,8 @@ window.inboxBackToThreads = () => {
                 <div class="inbox-empty-icon">
                     <i data-lucide="message-square" style="width: 36px; height: 36px;"></i>
                 </div>
-                <h3 class="inbox-empty-title">Mesaj Kutusu</h3>
-                <p class="inbox-empty-desc">Sohbetleriniz burada listelenir. Konuşmak istediğiniz ilanın sahibine teklif vererek veya soru sorarak mesaj atabilirsiniz.</p>
+                <h3 class="inbox-empty-title" data-i18n="inbox.message_box">Mesaj Kutusu</h3>
+                <p class="inbox-empty-desc" data-i18n="inbox.empty_desc">Sohbetleriniz burada listelenir. Konuşmak istediğiniz ilanın sahibine teklif vererek veya soru sorarak mesaj atabilirsiniz.</p>
             </div>
         `;
         if (window.lucide) window.lucide.createIcons();
@@ -667,7 +667,7 @@ window.inboxSetReplyTo = (messageId, senderName, text) => {
     
     replyBar.innerHTML = `
         <div class="inbox-reply-bar-content">
-            <div class="inbox-reply-bar-name">Yanıtlanıyor: ${senderName}</div>
+            <div class="inbox-reply-bar-name"><span data-i18n="inbox.replying_to">Yanıtlanıyor:</span> ${senderName}</div>
             <div class="inbox-reply-bar-text">${window.utils.escapeHTML(text)}</div>
         </div>
         <button class="inbox-reply-bar-close" onclick="window.inboxCancelReply()">
@@ -735,8 +735,8 @@ window.inboxStartEditMessage = (chatId, messageId, btnEl) => {
         bubble.innerHTML = `
             <textarea class="inbox-edit-input" id="edit-input-${messageId}">${currentText}</textarea>
             <div class="inbox-edit-actions">
-                <button class="cancel-btn" onclick="window.inboxCancelEdit('${messageId}')">İptal</button>
-                <button class="save-btn" onclick="window.inboxSaveEdit('${chatId}', '${messageId}')">Kaydet</button>
+                <button class="cancel-btn" onclick="window.inboxCancelEdit('${messageId}')" data-i18n="inbox.cancel">İptal</button>
+                <button class="save-btn" onclick="window.inboxSaveEdit('${chatId}', '${messageId}')" data-i18n="inbox.save">Kaydet</button>
             </div>
         `;
         

@@ -36,7 +36,7 @@ window.ChatManager = class ChatManager {
                 this.startChatListener(chat.id);
             } catch (error) {
                 console.error('[ChatManager] Chat oluşturulamadı:', error);
-                window.notificationManager?.showToast('Mesajlaşma başlatılamadı.', 'error');
+                window.notificationManager?.showToast(window.i18n.t('comp.chat.start_failed'), 'error');
             }
         }
     }
@@ -59,7 +59,7 @@ window.ChatManager = class ChatManager {
             input.focus();
         } catch (error) {
             console.error("Mesaj gönderilemedi:", error);
-            if (window.notificationManager) window.notificationManager.showToast('Mesaj gönderilemedi.', 'error');
+            if (window.notificationManager) window.notificationManager.showToast(window.i18n.t('comp.chat.send_failed'), 'error');
         }
     }
 
@@ -84,8 +84,8 @@ window.ChatManager = class ChatManager {
                             <div style="width: 64px; height: 64px; border-radius: 50%; background: var(--bg-elevated); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; margin-bottom: 16px; box-shadow: var(--shadow-sm);">
                                 <i data-lucide="message-square-plus" style="width: 28px; height: 28px; color: var(--text-secondary);"></i>
                             </div>
-                            <h4 style="margin: 0 0 8px 0; color: var(--text-primary); font-size: 1.1rem; font-weight: 700;">Mesaj Kutusu Boş</h4>
-                            <p style="margin: 0; font-size: 0.85rem; max-width: 220px; line-height: 1.5; color: var(--text-secondary);">Operasyon detaylarını konuşmak için ilk mesajı siz gönderin.</p>
+                            <h4 style="margin: 0 0 8px 0; color: var(--text-primary); font-size: 1.1rem; font-weight: 700;">${window.i18n.t('comp.chat.empty_title')}</h4>
+                            <p style="margin: 0; font-size: 0.85rem; max-width: 220px; line-height: 1.5; color: var(--text-secondary);">${window.i18n.t('comp.chat.empty_desc')}</p>
                         </div>`;
                 } else {
                     chatContainer.innerHTML = window.utils.chat.renderMessageList(messages, currentUid, this.app.state.currentUser);

@@ -3,13 +3,13 @@ window.reviewModal = {
         if (document.getElementById('pruva-review-modal')) return;
 
         const criteria = targetRole === 'carrier' ? [
-            { id: 'cat1', label: 'İletişim & Ulaşılabilirlik' },
-            { id: 'cat2', label: 'Zamanında Teslimat' },
-            { id: 'cat3', label: 'Evrak Düzeni & Özen' }
+            { id: 'cat1', label: window.i18n.t('comp.review.carrier_cat1') },
+            { id: 'cat2', label: window.i18n.t('comp.review.carrier_cat2') },
+            { id: 'cat3', label: window.i18n.t('comp.review.carrier_cat3') }
         ] : [
-            { id: 'cat1', label: 'İletişim & Profesyonellik' },
-            { id: 'cat2', label: 'Ödeme Hızı / Güven' },
-            { id: 'cat3', label: 'İş Süreçleri Uyumu' }
+            { id: 'cat1', label: window.i18n.t('comp.review.loader_cat1') },
+            { id: 'cat2', label: window.i18n.t('comp.review.loader_cat2') },
+            { id: 'cat3', label: window.i18n.t('comp.review.loader_cat3') }
         ];
 
         const modalHTML = `
@@ -17,8 +17,8 @@ window.reviewModal = {
                 <div style="background: white; border-radius: 20px; width: 90%; max-width: 450px; padding: 35px; box-shadow: 0 20px 50px rgba(0,0,0,0.3); animation: slideUp 0.3s ease;">
                     <div style="text-align: center; margin-bottom: 25px;">
                         <div style="font-size: 3.5rem; margin-bottom: 15px;">🌟</div>
-                        <h3 style="font-size: 1.4rem; color: var(--primary); margin: 0 0 8px 0;">Değerlendirme Yapın</h3>
-                        <p style="font-size: 0.95rem; color: #666; margin: 0;"><strong style="color:var(--secondary);">${targetName}</strong> ile olan deneyiminizi puanlayın.</p>
+                        <h3 style="font-size: 1.4rem; color: var(--primary); margin: 0 0 8px 0;" data-i18n="comp.review.title">Değerlendirme Yapın</h3>
+                        <p style="font-size: 0.95rem; color: #666; margin: 0;"><strong style="color:var(--secondary);">${targetName}</strong> <span data-i18n="comp.review.subtitle">ile olan deneyiminizi puanlayın.</span></p>
                     </div>
 
                     <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 25px;">
@@ -33,12 +33,12 @@ window.reviewModal = {
                     </div>
                     
                     <div style="margin-bottom: 25px;">
-                        <textarea id="review-comment" placeholder="Yorumunuzu buraya yazabilirsiniz (isteğe bağlı)..." style="width: 100%; padding: 15px; border: 1.5px solid #e2e8f0; border-radius: 12px; resize: none; height: 90px; font-family: inherit; font-size: 0.9rem; transition: border-color 0.2s;" onfocus="this.style.borderColor='var(--secondary)'" onblur="this.style.borderColor='#e2e8f0'"></textarea>
+                        <textarea id="review-comment" placeholder="${window.i18n.t('comp.review.comment_placeholder')}" style="width: 100%; padding: 15px; border: 1.5px solid #e2e8f0; border-radius: 12px; resize: none; height: 90px; font-family: inherit; font-size: 0.9rem; transition: border-color 0.2s;" onfocus="this.style.borderColor='var(--secondary)'" onblur="this.style.borderColor='#e2e8f0'"></textarea>
                     </div>
 
                     <div style="display: flex; gap: 12px;">
-                        <button class="btn-outline" style="flex: 1; padding: 12px; border-radius: 10px; font-weight: 600;" onclick="window.reviewModal.close()">Kapat</button>
-                        <button class="btn-primary" style="flex: 2; padding: 12px; border-radius: 10px; font-weight: 600; background: var(--secondary);" onclick="window.reviewModal.submit('${adId}', '${targetName}')">Puanlamayı Bitir</button>
+                        <button class="btn-outline" style="flex: 1; padding: 12px; border-radius: 10px; font-weight: 600;" onclick="window.reviewModal.close()" data-i18n="comp.review.close">Kapat</button>
+                        <button class="btn-primary" style="flex: 2; padding: 12px; border-radius: 10px; font-weight: 600; background: var(--secondary);" onclick="window.reviewModal.submit('${adId}', '${targetName}')" data-i18n="comp.review.submit">Puanlamayı Bitir</button>
                     </div>
                 </div>
             </div>

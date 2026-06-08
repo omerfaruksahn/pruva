@@ -17,13 +17,13 @@ window.resetPasswordView = (state) => {
 
                 <div class="auth-header">
                     <div style="font-size: 3.5rem; margin-bottom: 15px; animation: bounce 2s infinite;">⚠️</div>
-                    <h2 class="auth-title" style="color: white; font-size: 1.6rem; letter-spacing: -0.5px;">Bağlantı Geçersiz</h2>
-                    <p class="auth-subtitle" style="color: #94a3b8; font-size: 0.9rem; margin-top: 8px;">Şifre sıfırlama talebinizin süresi dolmuş veya bağlantı bozulmuş olabilir.</p>
+                    <h2 class="auth-title" style="color: white; font-size: 1.6rem; letter-spacing: -0.5px;" data-i18n="auth.reset_password.invalid_link_title">Bağlantı Geçersiz</h2>
+                    <p class="auth-subtitle" style="color: #94a3b8; font-size: 0.9rem; margin-top: 8px;" data-i18n="auth.reset_password.invalid_link_subtitle">Şifre sıfırlama talebinizin süresi dolmuş veya bağlantı bozulmuş olabilir.</p>
                 </div>
-                <p style="color: #cbd5e1; margin-bottom: 30px; font-size: 0.95rem; line-height: 1.6;">
+                <p style="color: #cbd5e1; margin-bottom: 30px; font-size: 0.95rem; line-height: 1.6;" data-i18n="auth.reset_password.invalid_link_desc">
                     Güvenliğiniz için şifre sıfırlama bağlantıları tek kullanımlıktır ve belirli bir süre sonra otomatik olarak devre dışı kalır. Lütfen giriş sayfasına dönerek tekrar yeni bir şifre sıfırlama bağlantısı talep edin.
                 </p>
-                <button class="btn-primary auth-submit-btn" onclick="window.app.router.navigate('login')" style="margin-top: 0; background: var(--primary-gradient); font-weight: 600; box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4);">Giriş Sayfasına Git</button>
+                <button class="btn-primary auth-submit-btn" onclick="window.app.router.navigate('login')" style="margin-top: 0; background: var(--primary-gradient); font-weight: 600; box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4);" data-i18n="auth.reset_password.go_to_login">Giriş Sayfasına Git</button>
             </div>
         </div>
         `;
@@ -42,15 +42,15 @@ window.resetPasswordView = (state) => {
             </div>
 
             <div class="auth-header" style="text-align: center; margin-bottom: 24px;">
-                <h2 class="auth-title" style="color: white; font-size: 1.5rem; letter-spacing: -0.5px; font-weight: 700;">Yeni Şifre Belirleyin</h2>
-                <p class="auth-subtitle" style="color: #94a3b8; font-size: 0.88rem; margin-top: 6px;">Lojistik platformunuz için güçlü ve güvenli yeni bir şifre girin</p>
+                <h2 class="auth-title" style="color: white; font-size: 1.5rem; letter-spacing: -0.5px; font-weight: 700;" data-i18n="auth.reset_password.title">Yeni Şifre Belirleyin</h2>
+                <p class="auth-subtitle" style="color: #94a3b8; font-size: 0.88rem; margin-top: 6px;" data-i18n="auth.reset_password.subtitle">Lojistik platformunuz için güçlü ve güvenli yeni bir şifre girin</p>
             </div>
 
             <form id="reset-password-form">
                 <input type="hidden" id="reset-oob-code" value="${oobCode}">
                 
                 <div class="form-group auth-form-group" style="margin-bottom: 20px;">
-                    <label style="color: #e2e8f0; font-size: 0.85rem; font-weight: 600; margin-bottom: 8px; display: block;">Yeni Şifre</label>
+                    <label style="color: #e2e8f0; font-size: 0.85rem; font-weight: 600; margin-bottom: 8px; display: block;" data-i18n="auth.reset_password.new_password">Yeni Şifre</label>
                     <div style="position: relative; display: flex; align-items: center;">
                         <i data-lucide="lock" style="position: absolute; left: 14px; width: 18px; height: 18px; color: #94a3b8;"></i>
                         <input type="password" id="reset-password" class="form-control auth-input" placeholder="Yeni şifrenizi girin" required oninput="window.updateResetPasswordStrength(this.value)" 
@@ -66,21 +66,21 @@ window.resetPasswordView = (state) => {
                     <ul class="password-requirements" style="list-style: none; padding: 0; margin: 14px 0 0; font-size: 0.8rem; display: flex; flex-direction: column; gap: 8px;">
                         <li id="req-length" style="color: #94a3b8; display: flex; align-items: center; gap: 10px; transition: all 0.3s ease;">
                             <span class="status-dot" style="width: 6px; height: 6px; border-radius: 50%; background: #475569; transition: all 0.3s ease;"></span>
-                            <span>En az 12 karakter uzunluğu</span>
+                            <span data-i18n="auth.reset_password.req_length">En az 12 karakter uzunluğu</span>
                         </li>
                         <li id="req-upper" style="color: #94a3b8; display: flex; align-items: center; gap: 10px; transition: all 0.3s ease;">
                             <span class="status-dot" style="width: 6px; height: 6px; border-radius: 50%; background: #475569; transition: all 0.3s ease;"></span>
-                            <span>En az bir büyük harf (A-Z)</span>
+                            <span data-i18n="auth.reset_password.req_upper">En az bir büyük harf (A-Z)</span>
                         </li>
                         <li id="req-number" style="color: #94a3b8; display: flex; align-items: center; gap: 10px; transition: all 0.3s ease;">
                             <span class="status-dot" style="width: 6px; height: 6px; border-radius: 50%; background: #475569; transition: all 0.3s ease;"></span>
-                            <span>En az bir rakam (0-9)</span>
+                            <span data-i18n="auth.reset_password.req_number">En az bir rakam (0-9)</span>
                         </li>
                     </ul>
                 </div>
                 
                 <div class="form-group auth-form-group" style="margin-bottom: 24px;">
-                    <label style="color: #e2e8f0; font-size: 0.85rem; font-weight: 600; margin-bottom: 8px; display: block;">Yeni Şifre (Tekrar)</label>
+                    <label style="color: #e2e8f0; font-size: 0.85rem; font-weight: 600; margin-bottom: 8px; display: block;" data-i18n="auth.reset_password.new_password_confirm">Yeni Şifre (Tekrar)</label>
                     <div style="position: relative; display: flex; align-items: center;">
                         <i data-lucide="shield-check" style="position: absolute; left: 14px; width: 18px; height: 18px; color: #94a3b8;"></i>
                         <input type="password" id="reset-password-confirm" class="form-control auth-input" placeholder="Şifrenizi tekrar girin" required
@@ -88,13 +88,13 @@ window.resetPasswordView = (state) => {
                     </div>
                 </div>
 
-                <button type="submit" class="btn-primary auth-submit-btn" style="width: 100%; padding: 14px; font-size: 1rem; font-weight: 600; margin-top: 15px; background: var(--primary-gradient); border-radius: 10px; border: none; color: white; cursor: pointer; box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4); transition: all 0.3s ease;">
+                <button type="submit" class="btn-primary auth-submit-btn" style="width: 100%; padding: 14px; font-size: 1rem; font-weight: 600; margin-top: 15px; background: var(--primary-gradient); border-radius: 10px; border: none; color: white; cursor: pointer; box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4); transition: all 0.3s ease;" data-i18n="auth.reset_password.update_btn">
                     Şifreyi Güncelle
                 </button>
             </form>
 
             <div class="auth-footer" style="text-align: center; margin-top: 25px; font-size: 0.9rem;">
-                <a onclick="window.app.router.navigate('login')" class="auth-link" style="color: #3b82f6; text-decoration: none; cursor: pointer; font-weight: 600; transition: color 0.2s ease;">
+                <a onclick="window.app.router.navigate('login')" class="auth-link" style="color: #3b82f6; text-decoration: none; cursor: pointer; font-weight: 600; transition: color 0.2s ease;" data-i18n="auth.reset_password.back_to_login">
                     Giriş Sayfasına Dön
                 </a>
             </div>

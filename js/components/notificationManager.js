@@ -44,8 +44,8 @@ window.NotificationManager = class NotificationManager {
                     this.addUnique({
                         id: `deadline-${ad.id}`,
                         type: 'alert',
-                        text: `⚠️ Kritik: "${ad.origin} - ${ad.destination}" ilanının süresi dolmak üzere!`,
-                        subtext: 'Hemen bir teklif seçip operasyonu başlatın.',
+                        text: `⚠️ ${window.i18n.t('comp.notification.critical_prefix')}: "${ad.origin} - ${ad.destination}" ${window.i18n.t('comp.notification.ad_expiring')}`,
+                        subtext: window.i18n.t('comp.notification.select_bid_now'),
                         action: 'viewBids',
                         adId: ad.id,
                         view: 'loader-dashboard',
@@ -62,8 +62,8 @@ window.NotificationManager = class NotificationManager {
                     this.addUnique({
                         id: `nobid-${ad.id}`,
                         type: 'info',
-                        text: `📭 "${ad.origin} → ${ad.destination}" ilanınıza henüz teklif gelmedi.`,
-                        subtext: 'Fiyat beklentinizi veya güzergahınızı gözden geçirebilirsiniz.',
+                        text: `📭 "${ad.origin} → ${ad.destination}" ${window.i18n.t('comp.notification.no_bids_yet')}`,
+                        subtext: window.i18n.t('comp.notification.review_price_route'),
                         view: 'loader-dashboard',
                         priority: 'low'
                     });
@@ -83,8 +83,8 @@ window.NotificationManager = class NotificationManager {
                     this.addUnique({
                         id: `stale-${ad.id}`,
                         type: 'info',
-                        text: `📦 "${ad.origin} → ${ad.destination}" sevkiyatında statü güncellemesi bekleniyor.`,
-                        subtext: `Son durum: ${lastUpdate.text}`,
+                        text: `📦 "${ad.origin} → ${ad.destination}" ${window.i18n.t('comp.notification.status_update_expected')}`,
+                        subtext: `${window.i18n.t('comp.notification.last_status')}: ${lastUpdate.text}`,
                         view: state.userRole === 'carrier' ? 'carrier-dashboard' : 'loader-dashboard',
                         priority: 'medium'
                     });
@@ -98,8 +98,8 @@ window.NotificationManager = class NotificationManager {
                 this.addUnique({
                     id: `confirm-${ad.id}`,
                     type: 'success',
-                    text: `✅ "${ad.origin} → ${ad.destination}" teslimatı onayınızı bekliyor!`,
-                    subtext: 'Teslimati onaylayarak işlemi tamamlayın.',
+                    text: `✅ "${ad.origin} → ${ad.destination}" ${window.i18n.t('comp.notification.delivery_awaiting_approval')}!`,
+                    subtext: window.i18n.t('comp.notification.approve_delivery'),
                     action: 'viewBids',
                     adId: ad.id,
                     view: 'loader-dashboard',
@@ -142,12 +142,12 @@ window.NotificationManager = class NotificationManager {
         let html = `
             <div class="notif-header">
                 <div>
-                    <strong>Bildirimler</strong>
-                    ${unreadCount > 0 ? `<span class="notif-unread-badge">${unreadCount} yeni</span>` : ''}
+                    <strong data-i18n="comp.notification.notifications">Bildirimler</strong>
+                    ${unreadCount > 0 ? `<span class="notif-unread-badge">${unreadCount} <span data-i18n="comp.notification.new">yeni</span></span>` : ''}
                 </div>
                 <div class="notif-actions">
-                    ${unreadCount > 0 ? `<span class="notif-action-btn read" onclick="event.stopPropagation(); window.notificationManager.markAllAsRead()">✓ Tümünü Oku</span>` : ''}
-                    ${myNotifs.length > 0 ? `<span class="notif-action-btn clear" onclick="event.stopPropagation(); window.notificationManager.clearAll()">🗑 Temizle</span>` : ''}
+                    ${unreadCount > 0 ? `<span class="notif-action-btn read" onclick="event.stopPropagation(); window.notificationManager.markAllAsRead()">✓ <span data-i18n="comp.notification.read_all">Tümünü Oku</span></span>` : ''}
+                    ${myNotifs.length > 0 ? `<span class="notif-action-btn clear" onclick="event.stopPropagation(); window.notificationManager.clearAll()">🗑 <span data-i18n="comp.notification.clear">Temizle</span></span>` : ''}
                 </div>
             </div>
         `;
@@ -157,8 +157,8 @@ window.NotificationManager = class NotificationManager {
                         <div class="notif-empty-icon">
                             <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" style="color: var(--text-muted); opacity: 0.5;"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
                         </div>
-                        <div class="notif-empty-title">Bildiriminiz Yok</div>
-                        <div class="notif-empty-text">Yeni aktiviteler burada görünecek.</div>
+                        <div class="notif-empty-title" data-i18n="comp.notification.no_notifications">Bildiriminiz Yok</div>
+                        <div class="notif-empty-text" data-i18n="comp.notification.new_activities_here">Yeni aktiviteler burada görünecek.</div>
                     </div>`;
             return html;
         }
@@ -169,17 +169,17 @@ window.NotificationManager = class NotificationManager {
         const olderNotifs = displayNotifs.filter(n => typeof n.date !== 'number' || (now - n.date) >= 86400000);
 
         if (todayNotifs.length > 0) {
-            html += `<div class="notif-group-title">Bugün</div>`;
+            html += `<div class="notif-group-title" data-i18n="comp.notification.today">Bugün</div>`;
             html += todayNotifs.map(n => this._renderNotifItem(n)).join('');
         }
 
         if (olderNotifs.length > 0) {
-            html += `<div class="notif-group-title">Daha Önce</div>`;
+            html += `<div class="notif-group-title" data-i18n="comp.notification.earlier">Daha Önce</div>`;
             html += olderNotifs.map(n => this._renderNotifItem(n)).join('');
         }
 
         if (myNotifs.length > 15) {
-            html += `<div class="notif-footer-link">Tüm Bildirimleri Gör (${myNotifs.length})</div>`;
+            html += `<div class="notif-footer-link"><span data-i18n="comp.notification.see_all">Tüm Bildirimleri Gör</span> (${myNotifs.length})</div>`;
         }
 
         return html;
@@ -187,15 +187,15 @@ window.NotificationManager = class NotificationManager {
 
     _renderNotifItem(n) {
         const typeConfig = {
-            match:   { icon: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>', color: 'var(--success)', label: 'Eşleşme' },
-            chat:    { icon: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>', color: 'var(--secondary)', label: 'Mesaj' },
-            alert:   { icon: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>', color: 'var(--warning)', label: 'Uyarı' },
-            success: { icon: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>', color: 'var(--success)', label: 'Başarılı' },
-            info:    { icon: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>', color: 'var(--accent)', label: 'Bilgi' }
+            match:   { icon: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>', color: 'var(--success)', label: window.i18n.t('comp.notification.type_match') },
+            chat:    { icon: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>', color: 'var(--secondary)', label: window.i18n.t('comp.notification.type_chat') },
+            alert:   { icon: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>', color: 'var(--warning)', label: window.i18n.t('comp.notification.type_alert') },
+            success: { icon: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>', color: 'var(--success)', label: window.i18n.t('comp.notification.type_success') },
+            info:    { icon: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>', color: 'var(--accent)', label: window.i18n.t('comp.notification.type_info') }
         };
 
-        const config = typeConfig[n.type] || { icon: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>', color: 'var(--secondary)', label: 'Bildirim' };
-        const timeText = typeof n.date === 'number' ? window.utils.timeAgo(n.date) : (n.date || 'Şimdi');
+        const config = typeConfig[n.type] || { icon: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>', color: 'var(--secondary)', label: window.i18n.t('comp.notification.type_notification') };
+        const timeText = typeof n.date === 'number' ? window.utils.timeAgo(n.date) : (n.date || window.i18n.t('comp.notification.now'));
 
         return `
         <div class="notif-item ${n.read ? '' : 'unread'}" 
@@ -216,8 +216,8 @@ window.NotificationManager = class NotificationManager {
                 
                 ${!n.read && n.action ? `
                     <div class="notif-item-buttons">
-                        <button class="btn-primary" style="background: ${config.color}; padding: 5px 14px; font-size: 0.7rem;">Hemen İncele</button>
-                        <button class="btn-outline" style="padding: 5px 14px; font-size: 0.7rem; color: #718096; border-color: #e2e8f0;" onclick="event.stopPropagation(); window.notificationManager.markAsRead('${n.id}')">Kapat</button>
+                        <button class="btn-primary" style="background: ${config.color}; padding: 5px 14px; font-size: 0.7rem;" data-i18n="comp.notification.review_now">Hemen İncele</button>
+                        <button class="btn-outline" style="padding: 5px 14px; font-size: 0.7rem; color: #718096; border-color: #e2e8f0;" onclick="event.stopPropagation(); window.notificationManager.markAsRead('${n.id}')" data-i18n="comp.notification.close">Kapat</button>
                     </div>
                 ` : ''}
             </div>
@@ -235,13 +235,13 @@ window.NotificationManager = class NotificationManager {
 
         // Tip bazlı renk ve ikon
         const toastConfig = {
-            match:   { icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>', color: 'var(--success)', label: 'YENİ EŞLEŞME' },
-            chat:    { icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>', color: 'var(--secondary)', label: 'MESAJ' },
-            alert:   { icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>', color: 'var(--warning)', label: 'UYARI' },
-            success: { icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>', color: 'var(--success)', label: 'BAŞARILI' },
-            info:    { icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>', color: 'var(--accent)', label: 'BİLGİ' }
+            match:   { icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>', color: 'var(--success)', label: window.i18n.t('comp.notification.label_match') },
+            chat:    { icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>', color: 'var(--secondary)', label: window.i18n.t('comp.notification.label_chat') },
+            alert:   { icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>', color: 'var(--warning)', label: window.i18n.t('comp.notification.label_alert') },
+            success: { icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>', color: 'var(--success)', label: window.i18n.t('comp.notification.label_success') },
+            info:    { icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>', color: 'var(--accent)', label: window.i18n.t('comp.notification.label_info') }
         };
-        const config = toastConfig[type] || { icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>', color: 'var(--secondary)', label: 'BİLDİRİM' };
+        const config = toastConfig[type] || { icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>', color: 'var(--secondary)', label: window.i18n.t('comp.notification.label_notification') };
 
         const toast = document.createElement('div');
         toast.className = 'toast';
@@ -350,7 +350,7 @@ window.NotificationManager = class NotificationManager {
 
     clearAll() {
         if (!this.app) return;
-        if (!confirm('Tüm bildirimleri silmek istediğinize emin misiniz?')) return;
+        if (!confirm(window.i18n.t('comp.notification.confirm_clear_all'))) return;
         this.app.state.notifications = [];
         this.app.store.save();
         this.app.router.updateNav();
@@ -379,7 +379,7 @@ window.NotificationManager = class NotificationManager {
         // Action'a göre ek işlem yap
         if (n.action === 'openChat' && n.adId) {
             const ad = this.app.state.ads.find(a => String(a.id) === String(n.adId));
-            const partnerName = n.partnerName || (ad ? ad.owner : 'İlan Sahibi');
+            const partnerName = n.partnerName || (ad ? ad.owner : window.i18n.t('comp.notification.ad_owner'));
             if (window.chatManager) {
                 setTimeout(() => {
                     window.chatManager.toggleChat(true, n.adId, partnerName);
@@ -455,7 +455,7 @@ window.NotificationManager = class NotificationManager {
                 existing.text = notif.text;
                 existing.date = notif.date;
                 existing.count = (existing.count || 1) + 1;
-                existing.text = `💰 İlanınıza ${existing.count} yeni teklif geldi!`;
+                existing.text = `💰 ${window.i18n.t('comp.notification.new_bids_prefix')} ${existing.count} ${window.i18n.t('comp.notification.new_bids_suffix')}`;
                 this.app.state.notifications.unshift(existing);
                 this.app.store.save();
                 

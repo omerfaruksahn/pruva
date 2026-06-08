@@ -162,6 +162,7 @@ window.Router = class Router {
             }
 
             if (window.lucide) window.lucide.createIcons();
+            if (window.i18n) window.i18n.updateDOM();
         };
 
         const instantViews = window.CONFIG?.INSTANT_VIEWS || ['home', 'membership', 'lojistik-hizmetleri', 'ithalat-ihracat', 'konteyner-tasimaciligi', 'navlun-hesaplama'];

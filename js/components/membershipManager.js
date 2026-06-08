@@ -11,9 +11,9 @@ export class MembershipManager {
 
     async subscribe(type, price) {
         const displayType = 'PREMIUM';
-        if (!confirm(`${displayType} planı başlatmak istiyor musunuz? (₺${price}/Ay)`)) return;
+        if (!confirm(window.i18n.t('comp.membership.confirm_start').replace('{plan}', displayType).replace('{price}', price))) return;
 
-        window.notificationManager?.showToast('Ödeme işleniyor...', 'info');
+        window.notificationManager?.showToast(window.i18n.t('comp.membership.processing'), 'info');
 
         const expiryDate = new Date();
         expiryDate.setMonth(expiryDate.getMonth() + 1);
@@ -34,10 +34,10 @@ export class MembershipManager {
             // Refactored to use the new commit wrapper
             this.app.commit();
             
-            window.notificationManager?.showToast(`${displayType} aboneliğiniz aktif edildi!`, 'success');
+            window.notificationManager?.showToast(window.i18n.t('comp.membership.activated').replace('{plan}', displayType), 'success');
         } catch (err) {
             console.error('Abonelik hatası:', err);
-            window.notificationManager?.showToast('Abonelik başlatılamadı: ' + err.message, 'error');
+            window.notificationManager?.showToast(window.i18n.t('comp.membership.activate_failed') + ': ' + err.message, 'error');
         }
     }
 
@@ -47,11 +47,11 @@ export class MembershipManager {
 
         try {
             const data = this.app.state.subscriptionType !== 'none' && this.app.state.subscriptionExpiresAt 
-                ? [{ created_at: new Date().toISOString(), description: 'PREMIUM Abonelik' }]
+                ? [{ created_at: new Date().toISOString(), description: window.i18n.t('comp.membership.premium_sub') }]
                 : [];
 
             if (data.length === 0) {
-                historyEl.innerHTML = '<div style="text-align: center; padding: 2rem;">Henüz bir ödeme kaydı bulunmuyor.</div>';
+                historyEl.innerHTML = `<div style="text-align: center; padding: 2rem;">${window.i18n.t('comp.membership.no_records')}</div>`;
                 return;
             }
 
@@ -59,10 +59,10 @@ export class MembershipManager {
                 <table class="pruva-table">
                     <thead>
                         <tr>
-                            <th>Tarih</th>
-                            <th>Plan</th>
-                            <th>Ödeme</th>
-                            <th>Durum</th>
+                            <th>${window.i18n.t('comp.membership.col_date')}</th>
+                            <th>${window.i18n.t('comp.membership.col_plan')}</th>
+                            <th>${window.i18n.t('comp.membership.col_payment')}</th>
+                            <th>${window.i18n.t('comp.membership.col_status')}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -77,14 +77,14 @@ export class MembershipManager {
                         <td>${formattedDate}</td>
                         <td>
                             <div style="font-weight: 600;">PREMIUM</div>
-                            <div style="font-size: 0.75rem; color: var(--text-muted);">Aylık Abonelik</div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted);">${window.i18n.t('comp.membership.monthly_sub')}</div>
                         </td>
                         <td>
                             <div class="price-cell" style="font-weight: 600;">
                                 ₺1250
                             </div>
                         </td>
-                        <td><span class="status-badge success">Başarılı</span></td>
+                        <td><span class="status-badge success">${window.i18n.t('comp.membership.status_success')}</span></td>
                     </tr>
                 `;
             });
@@ -94,7 +94,7 @@ export class MembershipManager {
             if (window.lucide) window.lucide.createIcons();
 
         } catch (err) {
-            historyEl.innerHTML = '<p class="error-text">Geçmiş yüklenirken bir hata oluştu.</p>';
+            historyEl.innerHTML = `<p class="error-text">${window.i18n.t('comp.membership.history_error')}</p>`;
         }
     }
 }

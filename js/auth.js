@@ -117,7 +117,7 @@ window.Auth = class Auth {
 
         // Butonu devre dışı bırak (çift tıklamayı önle)
         const submitBtn = document.querySelector('#register-form button[type="submit"]');
-        if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Kaydediliyor...'; }
+        if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = window.i18n.t('auth.btn_saving'); }
 
         try {
             if (!window.fbAuth) throw new Error('Firebase Auth initialized değil.');
@@ -204,7 +204,7 @@ Pruva ile yollarınız açık, işleriniz kolay olsun! İyi çalışmalar dileri
             if (!dbSuccess) {
                 console.warn("[AUTH] Firestore user creation failed after all attempts. Falling back to local state.");
                 if (window.notificationManager) {
-                    window.notificationManager.showToast('Veritabanı bağlantı sorunu, bilgiler geçici olarak kaydedildi.', 'warning');
+                    window.notificationManager.showToast(window.i18n.t('auth.toast_db_error'), 'warning');
                 }
             }
             
@@ -233,7 +233,7 @@ Pruva ile yollarınız açık, işleriniz kolay olsun! İyi çalışmalar dileri
             }
 
             if (window.notificationManager) {
-                window.notificationManager.showToast('Kayıt başarılı! Başvurunuz incelemeye alındı. Lütfen e-posta adresinizi doğrulaıyın.', 'success');
+                window.notificationManager.showToast(window.i18n.t('auth.toast_register_success'), 'success');
             }
             this.app.router.navigate('home');
         } catch (error) {
@@ -241,16 +241,16 @@ Pruva ile yollarınız açık, işleriniz kolay olsun! İyi çalışmalar dileri
 
             // BUG FIX: Kullanıcıya anlamlı hata mesajı göster
             const errorMessages = {
-                'auth/email-already-in-use':    'Bu e-posta adresi zaten kayıtlı. Giriş yapmayı deneyin.',
-                'auth/invalid-email':            'Geçersiz e-posta adresi formatı.',
-                'auth/weak-password':            'Şifre çok zayıf. En az 12 karakter, en az 1 büyük harf, 1 küçük harf ve 1 rakam içermelidir.',
-                'auth/network-request-failed':   'Ağ bağlantısı hatası. İnternet bağlantınızı kontrol edin.',
-                'auth/too-many-requests':        'Çok fazla deneme yapıldı. Lütfen bir süre bekleyin.',
-                'auth/operation-not-allowed':    'E-posta/şifre girişi aktif değil. Yöneticiyle iletişime geçin.',
+                'auth/email-already-in-use':     window.i18n.t('auth.err_email_in_use'),
+                'auth/invalid-email':            window.i18n.t('auth.err_invalid_email'),
+                'auth/weak-password':            window.i18n.t('auth.err_weak_password'),
+                'auth/network-request-failed':   window.i18n.t('auth.err_network'),
+                'auth/too-many-requests':        window.i18n.t('auth.err_too_many_requests'),
+                'auth/operation-not-allowed':    window.i18n.t('auth.err_operation_not_allowed'),
             };
             let cleanMsg = error.message || '';
             cleanMsg = cleanMsg.replace(/firebase:/gi, '').replace(/error/gi, '').replace(/\(auth\/[a-z-]+\)/gi, '').replace(/\./g, '').trim();
-            const userMsg = errorMessages[error.code] || `Kayıt başarısız: ${cleanMsg}`;
+            const userMsg = errorMessages[error.code] || `${window.i18n.t('auth.register_failed')}: ${cleanMsg}`;
 
             if (window.notificationManager) {
                 window.notificationManager.showToast(userMsg, 'error');
@@ -261,7 +261,7 @@ Pruva ile yollarınız açık, işleriniz kolay olsun! İyi çalışmalar dileri
             // BUG FIX: Race condition flag'ini temizle
             this._registeringUid = null;
             // Butonu yeniden aktif et
-            if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Kayıt İşlemini Tamamla'; }
+            if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = window.i18n.t('auth.btn_complete_registration'); }
         }
     }
 
@@ -306,14 +306,14 @@ Pruva ile yollarınız açık, işleriniz kolay olsun! İyi çalışmalar dileri
             this.app.state.isLoggedIn = true;
             this.app.store.save();
 
-            if (window.notificationManager) window.notificationManager.showToast('Başarıyla giriş yapıldı!', 'success');
+            if (window.notificationManager) window.notificationManager.showToast(window.i18n.t('auth.toast_login_success'), 'success');
 
             // E-posta doğrulama uyarısı (engelleyici değil)
             if (!user.emailVerified) {
                 setTimeout(() => {
                     if (window.notificationManager) {
                         window.notificationManager.showToast(
-                            'E-posta adresiniz henüz doğrulanmamış. Lütfen gelen kutunuzu kontrol edin.',
+                            window.i18n.t('auth.toast_email_not_verified'),
                             'warning'
                         );
                     }
@@ -324,17 +324,17 @@ Pruva ile yollarınız açık, işleriniz kolay olsun! İyi çalışmalar dileri
             console.error('Firebase Giriş Hatası:', error);
             // BUG FIX: alert() yerine tutarlı toast kullan
             const errorMessages = {
-                'auth/invalid-credential':       'E-posta veya şifre hatalı.',
-                'auth/user-not-found':           'Bu e-posta adresine ait hesap bulunamadı.',
-                'auth/wrong-password':           'Şifre hatalı. Lütfen tekrar deneyin.',
-                'auth/too-many-requests':        'Çok fazla başarısız deneme. Hesabınız geçici olarak kilitlendi.',
-                'auth/user-disabled':            'Hesabınız devre dışı bırakılmıştır.',
-                'auth/network-request-failed':   'Ağ bağlantısı hatası. İnternet bağlantınızı kontrol edin.',
-                'auth/invalid-email':            'Geçersiz e-posta adresi formatı.',
+                'auth/invalid-credential':       window.i18n.t('auth.err_invalid_credential'),
+                'auth/user-not-found':           window.i18n.t('auth.err_user_not_found'),
+                'auth/wrong-password':           window.i18n.t('auth.err_wrong_password'),
+                'auth/too-many-requests':        window.i18n.t('auth.err_locked'),
+                'auth/user-disabled':            window.i18n.t('auth.err_user_disabled'),
+                'auth/network-request-failed':   window.i18n.t('auth.err_network'),
+                'auth/invalid-email':            window.i18n.t('auth.err_invalid_email'),
             };
             let cleanMsg = error.message || '';
             cleanMsg = cleanMsg.replace(/firebase:/gi, '').replace(/error/gi, '').replace(/\(auth\/[a-z-]+\)/gi, '').replace(/\./g, '').trim();
-            const userMsg = errorMessages[error.code] || `Giriş başarısız: ${cleanMsg}`;
+            const userMsg = errorMessages[error.code] || `${window.i18n.t('auth.login_failed')}: ${cleanMsg}`;
             if (window.notificationManager) {
                 window.notificationManager.showToast(userMsg, 'error');
             } else {
@@ -374,11 +374,11 @@ Pruva ile yollarınız açık, işleriniz kolay olsun! İyi çalışmalar dileri
         this.updateNavbarUI();
         this.app.router.updateNav();
         
-        if (window.notificationManager) window.notificationManager.showToast('Başarıyla çıkış yapıldı.', 'info');
+        if (window.notificationManager) window.notificationManager.showToast(window.i18n.t('auth.toast_logout_success'), 'info');
     }
 
     resetState() {
-        if (confirm('Tüm yerel verileriniz temizlenecek ve sistem sıfırlanacak. Emin misiniz?')) {
+        if (confirm(window.i18n.t('auth.confirm_reset_state'))) {
             localStorage.clear();
             location.reload();
         }

@@ -54,12 +54,16 @@ import './data/logisticsData.js';
 import './firebase-config.js';
 // import './security-hardened.js'; // Konsol kullanımını zorlaştırdığı için geliştirme aşamasında kapattım
 import './state.js';
-import './utils/educationContent.js';
+import './data/campusContent.js';
 import './utils.js';
 import './security.js';
+import './i18n.js';
 import './router/index.js';
 import './seoManager.js';
 import './auth.js';
+
+// Başlangıçta i18n başlat (async ama engelleyici olmadan)
+window.i18n.init();
 
 // ─────────────────────────────────────────
 // 4. Views

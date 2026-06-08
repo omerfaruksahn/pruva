@@ -139,17 +139,17 @@ window.pricingActionsView = (state) => {
             <div class="section-header-actions">
                 <h3>
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2v4"/><path d="M12 18v4"/><path d="M4.93 4.93l2.83 2.83"/><path d="M16.24 16.24l2.83 2.83"/><path d="M2 12h4"/><path d="M18 12h4"/><path d="M4.93 19.07l2.83-2.83"/><path d="M16.24 7.76l2.83-2.83"/></svg>
-                    Önerilen Yapay Zeka Aksiyonları
+                    <span data-i18n="pricing_actions.ai_suggested">Önerilen Yapay Zeka Aksiyonları</span>
                 </h3>
-                <span class="badge" style="background-color: var(--primary); color: white; font-weight: 700; font-size: 0.72rem; padding: 4px 10px; border-radius: var(--radius-full);">${pendingCount} Bekleyen</span>
+                <span class="badge" style="background-color: var(--primary); color: white; font-weight: 700; font-size: 0.72rem; padding: 4px 10px; border-radius: var(--radius-full);">${pendingCount} <span data-i18n="pricing_actions.pending">Bekleyen</span></span>
             </div>
 
             <div class="pending-actions-list" style="margin-top: 14px;">
                 ${pendingCount === 0 ? `
                     <div class="actions-empty-state">
                         <div class="actions-empty-state-icon">🎉</div>
-                        <h4>Tebrikler, Bekleyen Aksiyon Yok!</h4>
-                        <p>Yapay zeka tüm e-postaları başarıyla işledi ve önerilecek yeni bir aksiyon bulunmuyor.</p>
+                        <h4 data-i18n="pricing_actions.no_actions_title">Tebrikler, Bekleyen Aksiyon Yok!</h4>
+                        <p data-i18n="pricing_actions.no_actions_desc">Yapay zeka tüm e-postaları başarıyla işledi ve önerilecek yeni bir aksiyon bulunmuyor.</p>
                     </div>
                 ` : pendingActions.map(action => `
                     <div class="action-item-card" data-action-id="${action.id}">
@@ -166,8 +166,8 @@ window.pricingActionsView = (state) => {
                             <div class="action-body-snippet">${action.preview}</div>
                         </div>
                         <div class="action-card-buttons">
-                            <button class="btn btn-action-red" onclick="window.pricingActionsViewInit.rejectAction(${action.id})">Reddet</button>
-                            <button class="btn btn-action-green" onclick="window.pricingActionsViewInit.openReviewModal(${action.id})">İncele ve Onayla</button>
+                            <button class="btn btn-action-red" onclick="window.pricingActionsViewInit.rejectAction(${action.id})" data-i18n="pricing_actions.reject">Reddet</button>
+                            <button class="btn btn-action-green" onclick="window.pricingActionsViewInit.openReviewModal(${action.id})" data-i18n="pricing_actions.review_approve">İncele ve Onayla</button>
                         </div>
                     </div>
                 `).join('')}
@@ -177,18 +177,18 @@ window.pricingActionsView = (state) => {
         <!-- ALT KISIM: SON RFQ'LAR TABLOSU -->
         <div class="rfqs-table-card">
             <div class="section-header-actions" style="border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 8px;">
-                <h3 style="font-size: 1rem;">Son Talepler ve Fiyatlandırma Durumu</h3>
+                <h3 style="font-size: 1rem;" data-i18n="pricing_actions.latest_requests">Son Talepler ve Fiyatlandırma Durumu</h3>
             </div>
             <div class="rfqs-table-wrapper">
                 <table class="rfqs-custom-table">
                     <thead>
                         <tr>
-                            <th>Tarih</th>
-                            <th>Gönderen Firma</th>
-                            <th>Güzergah</th>
-                            <th>Mod</th>
-                            <th>Durum</th>
-                            <th>Aksiyon</th>
+                            <th data-i18n="pricing_actions.date">Tarih</th>
+                            <th data-i18n="pricing_actions.sender">Gönderen Firma</th>
+                            <th data-i18n="pricing_actions.route">Güzergah</th>
+                            <th data-i18n="pricing_actions.mode">Mod</th>
+                            <th data-i18n="pricing_actions.status">Durum</th>
+                            <th data-i18n="pricing_actions.action">Aksiyon</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -205,9 +205,9 @@ window.pricingActionsView = (state) => {
                                 </td>
                                 <td>
                                     ${(rfq.status === 'COMPLETED' || rfq.status === 'CANCELLED' || rfq.status === 'REJECTED') ? `
-                                        <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 0.72rem; border-radius: var(--radius-sm); border: 1px solid var(--border); background: rgba(255,255,255,0.02); cursor: pointer;" onclick="window.pricingActionsViewInit.openLostModal('${rfq.id}')">Neden Kaybettik?</button>
+                                        <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 0.72rem; border-radius: var(--radius-sm); border: 1px solid var(--border); background: rgba(255,255,255,0.02); cursor: pointer;" onclick="window.pricingActionsViewInit.openLostModal('${rfq.id}')" data-i18n="pricing_actions.why_lost">Neden Kaybettik?</button>
                                     ` : `
-                                        <span style="color: var(--text-muted); font-size: 0.7rem;">Gerekli değil</span>
+                                        <span style="color: var(--text-muted); font-size: 0.7rem;" data-i18n="pricing_actions.not_needed">Gerekli değil</span>
                                     `}
                                 </td>
                             </tr>
@@ -221,7 +221,7 @@ window.pricingActionsView = (state) => {
         <div class="actions-modal-overlay" id="review-action-modal">
             <div class="actions-modal-box">
                 <div class="actions-modal-header">
-                    <h3 id="modal-action-title">Aksiyon İncele</h3>
+                    <h3 id="modal-action-title" data-i18n="pricing_actions.review_action">Aksiyon İncele</h3>
                     <button class="actions-modal-close-btn" onclick="window.pricingActionsViewInit.closeModal()">&times;</button>
                 </div>
                 <div class="actions-modal-body">
@@ -230,7 +230,7 @@ window.pricingActionsView = (state) => {
 
                     <!-- Kime Gönderilecek (Sadece SEND_RATE_REQUEST ise gösterilir) -->
                     <div id="modal-carriers-container" class="input-group">
-                        <span class="actions-modal-label">İletişime Geçilecek Taşıyıcılar / Acenteler</span>
+                        <span class="actions-modal-label" data-i18n="pricing_actions.contacts">İletişime Geçilecek Taşıyıcılar / Acenteler</span>
                         <div class="carriers-checkbox-list" id="modal-carriers-list">
                             <!-- Dinamik olarak dolacak -->
                         </div>
@@ -238,20 +238,20 @@ window.pricingActionsView = (state) => {
 
                     <!-- Konu Satırı -->
                     <div class="input-group">
-                        <label class="actions-modal-label" for="modal-mail-subject">E-posta Konu Satırı</label>
+                        <label class="actions-modal-label" for="modal-mail-subject" data-i18n="pricing_actions.email_subject">E-posta Konu Satırı</label>
                         <input type="text" class="actions-modal-input" id="modal-mail-subject">
                     </div>
 
                     <!-- Mail İçeriği -->
                     <div class="input-group">
-                        <label class="actions-modal-label" for="modal-mail-body">E-posta İçeriği</label>
+                        <label class="actions-modal-label" for="modal-mail-body" data-i18n="pricing_actions.email_content">E-posta İçeriği</label>
                         <textarea class="actions-modal-textarea" id="modal-mail-body"></textarea>
                     </div>
 
                 </div>
                 <div class="actions-modal-footer">
-                    <button class="btn btn-secondary" onclick="window.pricingActionsViewInit.closeModal()">İptal</button>
-                    <button class="btn btn-primary" style="background-color: #10b981; border-color: #10b981;" onclick="window.pricingActionsViewInit.approveAction()">Onayla ve Gönder</button>
+                    <button class="btn btn-secondary" onclick="window.pricingActionsViewInit.closeModal()" data-i18n="pricing_actions.cancel">İptal</button>
+                    <button class="btn btn-primary" style="background-color: #10b981; border-color: #10b981;" onclick="window.pricingActionsViewInit.approveAction()" data-i18n="pricing_actions.approve_send">Onayla ve Gönder</button>
                 </div>
             </div>
         </div>
@@ -260,25 +260,25 @@ window.pricingActionsView = (state) => {
         <div class="actions-modal-overlay" id="lost-deal-modal">
             <div class="actions-modal-box" style="max-width: 520px;">
                 <div class="actions-modal-header">
-                    <h3>💔 Kaybedilen Teklif Analizi</h3>
+                    <h3 data-i18n="pricing_actions.lost_deal_analysis">💔 Kaybedilen Teklif Analizi</h3>
                     <button class="actions-modal-close-btn" onclick="window.pricingActionsViewInit.closeLostModal()">&times;</button>
                 </div>
                 <div class="actions-modal-body">
                     <input type="hidden" id="modal-lost-rfq-id">
                     
                     <div class="input-group">
-                        <label class="actions-modal-label" for="modal-lost-price">Rakip Fiyatı (USD)</label>
-                        <input type="number" class="actions-modal-input" id="modal-lost-price" placeholder="Örn: 1750" step="0.01">
+                        <label class="actions-modal-label" for="modal-lost-price" data-i18n="pricing_actions.competitor_price">Rakip Fiyatı (USD)</label>
+                        <input type="number" class="actions-modal-input" id="modal-lost-price" data-i18n="[placeholder]pricing_actions.price_placeholder" placeholder="Örn: 1750" step="0.01">
                     </div>
 
                     <div class="input-group">
-                        <label class="actions-modal-label" for="modal-lost-reason">Kaybetme Nedeni</label>
-                        <textarea class="actions-modal-textarea" id="modal-lost-reason" placeholder="Neden bu teklifi kaybettik? Rakip avantajı, fiyat farkı, transit süre vb." rows="4"></textarea>
+                        <label class="actions-modal-label" for="modal-lost-reason" data-i18n="pricing_actions.loss_reason">Kaybetme Nedeni</label>
+                        <textarea class="actions-modal-textarea" id="modal-lost-reason" data-i18n="[placeholder]pricing_actions.loss_reason_placeholder" placeholder="Neden bu teklifi kaybettik? Rakip avantajı, fiyat farkı, transit süre vb." rows="4"></textarea>
                     </div>
                 </div>
                 <div class="actions-modal-footer">
-                    <button class="btn btn-secondary" onclick="window.pricingActionsViewInit.closeLostModal()">İptal</button>
-                    <button class="btn btn-primary" style="background-color: #ef4444; border-color: #ef4444;" onclick="window.pricingActionsViewInit.submitLostDeal()">Analizi Kaydet</button>
+                    <button class="btn btn-secondary" onclick="window.pricingActionsViewInit.closeLostModal()" data-i18n="pricing_actions.cancel">İptal</button>
+                    <button class="btn btn-primary" style="background-color: #ef4444; border-color: #ef4444;" onclick="window.pricingActionsViewInit.submitLostDeal()" data-i18n="pricing_actions.save_analysis">Analizi Kaydet</button>
                 </div>
             </div>
         </div>

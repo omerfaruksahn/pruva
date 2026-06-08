@@ -229,55 +229,9 @@ export const VIEW_INIT_MAP = {
     },
 
     'education': (app) => {
-        window.utils.edu.updateProgress();
-        setTimeout(() => {
-            const activeItem = document.querySelector('.nav-item-flat.active');
-            if (activeItem) {
-                activeItem.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-            }
-        }, 100);
-
-        const playerMain = document.querySelector('.player-main-flat');
-        if (playerMain) {
-            let startX = 0;
-            let startY = 0;
-            const threshold = 70;
-            const restraint = 80;
-
-            playerMain.addEventListener('touchstart', (e) => {
-                const touch = e.touches[0];
-                startX = touch.clientX;
-                startY = touch.clientY;
-            }, { passive: true });
-
-            playerMain.addEventListener('touchend', (e) => {
-                const touch = e.changedTouches[0];
-                const diffX = touch.clientX - startX;
-                const diffY = touch.clientY - startY;
-
-                if (Math.abs(diffX) >= threshold && Math.abs(diffY) <= restraint) {
-                    const currentIndex = app.state.currentEduModuleIndex || 0;
-                    const { chapters } = window.educationContent;
-                    const totalChapters = chapters?.length || 0;
-
-                    if (diffX < 0) {
-                        if (currentIndex < totalChapters - 1) {
-                            playerMain.classList.add('slide-out-left');
-                            setTimeout(() => {
-                                window.utils.setEduModule(currentIndex + 1);
-                            }, 180);
-                        }
-                    } else {
-                        if (currentIndex > 0) {
-                            playerMain.classList.add('slide-out-right');
-                            setTimeout(() => {
-                                window.utils.setEduModule(currentIndex - 1);
-                            }, 180);
-                        }
-                    }
-                }
-            }, { passive: true });
-        }
+        // Pruva Kampüs (Campus) için özel bir init gerekiyorsa buraya eklenebilir.
+        // Şimdilik boş bırakıyoruz, çünkü state ve view render yeterli.
+        window.scrollTo(0, 0);
     },
 
     'inbox': (app) => {

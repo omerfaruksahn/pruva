@@ -10,7 +10,7 @@ window.queryRateSheets = function() {
     const pol = document.getElementById('query-pol')?.value?.trim();
     const pod = document.getElementById('query-pod')?.value?.trim();
     if (!pol || !pod) {
-        alert('Lütfen POL ve POD girin.');
+        alert(window.i18n?.t ? window.i18n.t('rate_sheets.msg_pol_pod') : 'Lütfen POL ve POD girin.');
         return;
     }
     window.app.managers.rateSheets.queryRates(pol, pod).then(r => {
@@ -26,7 +26,7 @@ window.rateSheetsView = (state) => {
 
     // Tarih biçimlendirme yardımcısı
     const formatDate = (dateStr) => {
-        if (!dateStr) return 'Geçerlilik Belirtilmedi';
+        if (!dateStr) return (window.i18n?.t ? window.i18n.t('rate_sheets.no_validity') : 'Geçerlilik Belirtilmedi');
         const d = new Date(dateStr);
         return d.toLocaleDateString('tr-TR', { year: 'numeric', month: 'long', day: 'numeric' });
     };
@@ -53,13 +53,13 @@ window.rateSheetsView = (state) => {
                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
                 </div>
                 <div class="hero-meta-text">
-                    <h2>Acente Rate Sheet Yönetimi</h2>
-                    <p>Armatör veya acentelerden aldığınız spot fiyat görsellerini (PNG/JPG) sisteme sürükleyin. Pruva AI Vision fiyat satırlarını otomatik çıkarıp dijitalleştirsin.</p>
+                    <h2 data-i18n="rate_sheets.hero_title">Acente Rate Sheet Yönetimi</h2>
+                    <p data-i18n="rate_sheets.hero_desc">Armatör veya acentelerden aldığınız spot fiyat görsellerini (PNG/JPG) sisteme sürükleyin. Pruva AI Vision fiyat satırlarını otomatik çıkarıp dijitalleştirsin.</p>
                 </div>
             </div>
             <button class="hero-action-btn" onclick="document.getElementById('rate-sheet-file-input')?.click()">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                Görsel Yükle
+                <span data-i18n="rate_sheets.btn_upload">Görsel Yükle</span>
             </button>
         </div>
 
@@ -68,7 +68,7 @@ window.rateSheetsView = (state) => {
             
             <!-- SOL KOLON: Yükleme Alanı -->
             <div class="rate-card">
-                <h3 class="rate-card-title">Fiyat Tablosu Analizi</h3>
+                <h3 class="rate-card-title" data-i18n="rate_sheets.analysis_title">Fiyat Tablosu Analizi</h3>
                 
                 ${isLoading ? `
                     <!-- SCANNER / YÜKLENİYOR -->
@@ -77,8 +77,8 @@ window.rateSheetsView = (state) => {
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
                         </div>
                         <div style="text-align: center;">
-                            <h4 style="color: #0f172a; font-weight: 800; font-size: 0.95rem; margin: 0 0 6px 0;">Pruva AI Okuyor...</h4>
-                            <p style="color: #64748b; font-size: 0.78rem; margin: 0; line-height: 1.4;">Gemini Vision acente görselindeki navlun tablosunu, ek ücretleri ve geçerlilik tarihlerini dijitalleştiriyor.</p>
+                            <h4 style="color: #0f172a; font-weight: 800; font-size: 0.95rem; margin: 0 0 6px 0;" data-i18n="rate_sheets.ai_reading">Pruva AI Okuyor...</h4>
+                            <p style="color: #64748b; font-size: 0.78rem; margin: 0; line-height: 1.4;" data-i18n="rate_sheets.ai_reading_desc">Gemini Vision acente görselindeki navlun tablosunu, ek ücretleri ve geçerlilik tarihlerini dijitalleştiriyor.</p>
                         </div>
                     </div>
                 ` : `
@@ -88,12 +88,12 @@ window.rateSheetsView = (state) => {
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                         </div>
                         <div>
-                            <h3>Fiyat Görselini Sürükle ve Bırak</h3>
-                            <p>PNG veya JPG formatındaki ekran görüntülerinizi buraya sürükleyin.</p>
+                            <h3 data-i18n="rate_sheets.drag_title">Fiyat Görselini Sürükle ve Bırak</h3>
+                            <p data-i18n="rate_sheets.drag_desc">PNG veya JPG formatındaki ekran görüntülerinizi buraya sürükleyin.</p>
                         </div>
-                        <button class="btn-select">Dosya Seçin</button>
+                        <button class="btn-select" data-i18n="rate_sheets.btn_select_file">Dosya Seçin</button>
                         <input type="file" id="rate-sheet-file-input" accept="image/png, image/jpeg, image/jpg">
-                        <div class="upload-note">PNG, JPG • Max 50MB</div>
+                        <div class="upload-note" data-i18n="rate_sheets.upload_note">PNG, JPG • Max 50MB</div>
                     </div>
                 `}
             </div>
@@ -101,15 +101,15 @@ window.rateSheetsView = (state) => {
             <!-- SAĞ KOLON: Fiyat Listeleri Özet Tablosu -->
             <div class="rate-card">
                 <h3 class="rate-card-title">
-                    <span>Yüklenen Fiyat Listeleri</span>
-                    <span class="badge-count">${sheets.length} Adet</span>
+                    <span data-i18n="rate_sheets.list_title">Yüklenen Fiyat Listeleri</span>
+                    <span class="badge-count">${sheets.length} <span data-i18n="rate_sheets.list_count">Adet</span></span>
                 </h3>
                 <div class="sheets-list">
                     ${sheets.length === 0 ? `
                         <div style="text-align: center; padding: 40px; color: #64748b;">
                             <span style="font-size: 2.2rem; display: block; margin-bottom: 10px;">📁</span>
-                            <h4 style="font-size: 0.9rem; margin: 0 0 4px 0; font-weight: 700; color: #0f172a;">Henüz Fiyat Listesi Yok</h4>
-                            <p style="font-size: 0.78rem; margin: 0;">Sol taraftaki yükleme panelini kullanarak ilk acente görselinizi sisteme ekleyin.</p>
+                            <h4 style="font-size: 0.9rem; margin: 0 0 4px 0; font-weight: 700; color: #0f172a;" data-i18n="rate_sheets.empty_list_title">Henüz Fiyat Listesi Yok</h4>
+                            <p style="font-size: 0.78rem; margin: 0;" data-i18n="rate_sheets.empty_list_desc">Sol taraftaki yükleme panelini kullanarak ilk acente görselinizi sisteme ekleyin.</p>
                         </div>
                     ` : sheets.map(sheet => `
                         <div class="sheet-item">
@@ -118,12 +118,12 @@ window.rateSheetsView = (state) => {
                                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
                                 </div>
                                 <div class="sheet-meta">
-                                    <h4>${sheet.carrier_name || 'Bilinmeyen Taşıyıcı'}</h4>
-                                    <p>${sheet.filename || 'navlun_tablosu.png'}</p>
-                                    <div class="sheet-validity">Son Geçerlilik: ${formatDate(sheet.valid_until)}</div>
+                                    <h4>${sheet.carrier_name || (window.i18n?.t ? window.i18n.t('rate_sheets.unknown_carrier') : 'Bilinmeyen Taşıyıcı')}</h4>
+                                    <p>${sheet.filename || (window.i18n?.t ? window.i18n.t('rate_sheets.default_filename') : 'navlun_tablosu.png')}</p>
+                                    <div class="sheet-validity"><span data-i18n="rate_sheets.valid_until">Son Geçerlilik:</span> ${formatDate(sheet.valid_until)}</div>
                                 </div>
                             </div>
-                            <button class="btn-delete-sheet" onclick="window.rateSheetsViewInit.deleteSheet(${sheet.id})" title="Fiyat Listesini Sil">
+                            <button class="btn-delete-sheet" onclick="window.rateSheetsViewInit.deleteSheet(${sheet.id})" title="${window.i18n?.t ? window.i18n.t('rate_sheets.btn_delete_sheet') : 'Fiyat Listesini Sil'}">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                             </button>
                         </div>
@@ -135,30 +135,29 @@ window.rateSheetsView = (state) => {
 
         <!-- ALT BÖLÜM — SPOT FİYAT SORGULAMA -->
         <div class="rate-card route-query-card">
-            <h3 class="rate-card-title">Liman Rotalarına Göre Spot Fiyat Sorgulama</h3>
+            <h3 class="rate-card-title" data-i18n="rate_sheets.query_title">Liman Rotalarına Göre Spot Fiyat Sorgulama</h3>
             <div class="route-query-form">
                 <div class="query-input-group">
-                    <label for="query-pol">Yükleme Limanı (POL)</label>
-                    <input type="text" id="query-pol" placeholder="Örn: Shanghai" required value="${state.rateSheetsPol || ''}" oninput="window.app.state.rateSheetsPol = this.value">
+                    <label for="query-pol" data-i18n="rate_sheets.lbl_pol">Yükleme Limanı (POL)</label>
+                    <input type="text" id="query-pol" placeholder="${window.i18n?.t ? window.i18n.t('rate_sheets.ph_pol') : 'Örn: Shanghai'}" required value="${state.rateSheetsPol || ''}" oninput="window.app.state.rateSheetsPol = this.value">
                 </div>
                 <div class="query-input-group">
-                    <label for="query-pod">Varış Limanı (POD)</label>
-                    <input type="text" id="query-pod" placeholder="Örn: Istanbul" required value="${state.rateSheetsPod || ''}" oninput="window.app.state.rateSheetsPod = this.value">
+                    <label for="query-pod" data-i18n="rate_sheets.lbl_pod">Varış Limanı (POD)</label>
+                    <input type="text" id="query-pod" placeholder="${window.i18n?.t ? window.i18n.t('rate_sheets.ph_pod') : 'Örn: Istanbul'}" required value="${state.rateSheetsPod || ''}" oninput="window.app.state.rateSheetsPod = this.value">
                 </div>
                 <button class="query-submit-btn" onclick="window.queryRateSheets()">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                    Fiyatları Sorgula
+                    <span data-i18n="rate_sheets.btn_query">Fiyatları Sorgula</span>
                 </button>
             </div>
 
-            <!-- TABLO SONUÇLARI -->
             <div id="query-results-container">
                 ${queryResults === null ? `
-                    <div style="text-align: center; padding: 30px; color: #64748b; font-size: 0.8rem; border: 1px dashed #e2e8f0; border-radius: 6px; margin-top: 10px;">
+                    <div style="text-align: center; padding: 30px; color: #64748b; font-size: 0.8rem; border: 1px dashed #e2e8f0; border-radius: 6px; margin-top: 10px;" data-i18n="rate_sheets.query_empty_start">
                         Liman çiftlerini girip "Fiyatları Sorgula" butonuna tıklayarak en güncel spot verileri listeleyin.
                     </div>
                 ` : queryResults.length === 0 ? `
-                    <div style="text-align: center; padding: 30px; color: #ef4444; font-size: 0.8rem; border: 1px dashed rgba(239, 68, 68, 0.2); border-radius: 6px; margin-top: 10px; background-color: #fef2f2;">
+                    <div style="text-align: center; padding: 30px; color: #ef4444; font-size: 0.8rem; border: 1px dashed rgba(239, 68, 68, 0.2); border-radius: 6px; margin-top: 10px; background-color: #fef2f2;" data-i18n="rate_sheets.query_not_found">
                         Sorgulanan POL/POD rotası için geçerli bir acente spot fiyat satırı bulunamadı.
                     </div>
                 ` : `
@@ -166,21 +165,21 @@ window.rateSheetsView = (state) => {
                         <table class="results-table">
                             <thead>
                                 <tr>
-                                    <th>Taşıyıcı / Acente</th>
-                                    <th>Ekipman</th>
-                                    <th>All-In Spot Fiyat</th>
-                                    <th>Dahil Ek Ücretler</th>
-                                    <th>Transit Süre</th>
+                                    <th data-i18n="rate_sheets.th_carrier">Taşıyıcı / Acente</th>
+                                    <th data-i18n="rate_sheets.th_equip">Ekipman</th>
+                                    <th data-i18n="rate_sheets.th_price">All-In Spot Fiyat</th>
+                                    <th data-i18n="rate_sheets.th_includes">Dahil Ek Ücretler</th>
+                                    <th data-i18n="rate_sheets.th_transit">Transit Süre</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 ${queryResults.map(item => `
                                     <tr class="${item.id === cheapestId ? 'cheapest-row' : ''}">
-                                        <td style="font-weight: 700; color: #0f172a;">${item.carrier_name} ${item.id === cheapestId ? '🌟 <span style="font-size: 0.72rem; color: #059669; font-weight:700;">(En Uygun)</span>' : ''}</td>
+                                        <td style="font-weight: 700; color: #0f172a;">${item.carrier_name} ${item.id === cheapestId ? `🌟 <span style="font-size: 0.72rem; color: #059669; font-weight:700;" data-i18n="rate_sheets.best_price">(En Uygun)</span>` : ''}</td>
                                         <td>${item.container_type}</td>
                                         <td class="price-tag">${item.currency} ${item.price}</td>
-                                        <td style="font-size: 0.78rem; color: #64748b;">${item.includes && item.includes.length > 0 ? item.includes.join(', ') : 'All-In Spot'}</td>
-                                        <td>${item.transit_days ? `${item.transit_days} Gün` : 'Belirtilmedi'}</td>
+                                        <td style="font-size: 0.78rem; color: #64748b;">${item.includes && item.includes.length > 0 ? item.includes.join(', ') : (window.i18n?.t ? window.i18n.t('rate_sheets.all_in_spot') : 'All-In Spot')}</td>
+                                        <td>${item.transit_days ? `${item.transit_days} <span data-i18n="rate_sheets.days">Gün</span>` : (window.i18n?.t ? window.i18n.t('rate_sheets.no_validity') : 'Belirtilmedi')}</td>
                                     </tr>
                                 `).join('')}
                             </tbody>
@@ -244,7 +243,7 @@ window.rateSheetsViewInit = async (app) => {
     // Helper: Dosyayı yükleme işlemine gönderir
     async function processUpload(file) {
         if (!file.type.startsWith('image/')) {
-            window.notificationManager?.showToast('Lütfen sadece PNG veya JPG formatında fiyat tablosu görselleri yükleyin.', 'warning');
+            window.notificationManager?.showToast(window.i18n?.t ? window.i18n.t('rate_sheets.msg_invalid_type') : 'Lütfen sadece PNG veya JPG formatında fiyat tablosu görselleri yükleyin.', 'warning');
             return;
         }
 
@@ -275,7 +274,7 @@ window.rateSheetsViewInit = async (app) => {
         const pod = document.getElementById('query-pod')?.value.trim();
 
         if (!pol || !pod) {
-            window.notificationManager?.showToast('Lütfen liman sorgusu için POL ve POD alanlarını doldurun.', 'warning');
+            window.notificationManager?.showToast(window.i18n?.t ? window.i18n.t('rate_sheets.msg_pol_pod_req') : 'Lütfen liman sorgusu için POL ve POD alanlarını doldurun.', 'warning');
             return;
         }
 

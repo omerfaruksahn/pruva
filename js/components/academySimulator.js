@@ -135,10 +135,10 @@ window.academySimulator = {
 
     getIncotermData(code) {
         const list = {
-            EXW: { name: 'Ex Works', risk: 'Satıcı Kapısı', export: 'Alıcı', main: 'Alıcı', import: 'Alıcı', desc: 'Tüm sorumluluk alıcıdadır. Satıcı malı sadece fabrikasında teslim eder.' },
-            FOB: { name: 'Free On Board', risk: 'Gemi Güvertesi', export: 'Satıcı', main: 'Alıcı', import: 'Alıcı', desc: 'Satıcı yükü limana getirip gemiye yükleyene kadar sorumludur. Navlun alıcıya aittir.' },
-            CIF: { name: 'Cost, Insurance & Freight', risk: 'Gemi Güvertesi', export: 'Satıcı', main: 'Satıcı', import: 'Alıcı', desc: 'Satıcı ana taşıma navlunu ve alıcı adına sigortayı öder. Risk gemide alıcıya geçer.' },
-            DDP: { name: 'Delivered Duty Paid', risk: 'Alıcı Kapısı', export: 'Satıcı', main: 'Satıcı', import: 'Satıcı', desc: 'En masrafsız terimdir. Satıcı gümrük vergileri dahil malı alıcının kapısına kadar getirir.' }
+            EXW: { name: 'Ex Works', risk: window.i18n.t('comp.academy.risk_seller_door'), export: window.i18n.t('comp.academy.buyer'), main: window.i18n.t('comp.academy.buyer'), import: window.i18n.t('comp.academy.buyer'), desc: window.i18n.t('comp.academy.exw_desc') },
+            FOB: { name: 'Free On Board', risk: window.i18n.t('comp.academy.risk_ship_deck'), export: window.i18n.t('comp.academy.seller'), main: window.i18n.t('comp.academy.buyer'), import: window.i18n.t('comp.academy.buyer'), desc: window.i18n.t('comp.academy.fob_desc') },
+            CIF: { name: 'Cost, Insurance & Freight', risk: window.i18n.t('comp.academy.risk_ship_deck'), export: window.i18n.t('comp.academy.seller'), main: window.i18n.t('comp.academy.seller'), import: window.i18n.t('comp.academy.buyer'), desc: window.i18n.t('comp.academy.cif_desc') },
+            DDP: { name: 'Delivered Duty Paid', risk: window.i18n.t('comp.academy.risk_buyer_door'), export: window.i18n.t('comp.academy.seller'), main: window.i18n.t('comp.academy.seller'), import: window.i18n.t('comp.academy.seller'), desc: window.i18n.t('comp.academy.ddp_desc') }
         };
         return list[code] || list.FOB;
     },
@@ -146,17 +146,17 @@ window.academySimulator = {
     getRouteData() {
         const { pol, pod } = this.state;
         const routes = {
-            'TRIST-USNYC': { name: 'İstanbul ➔ New York', days: 18, distance: '4,900 nm', type: 'Direkt Hat', desc: 'Kuzey Atlantik rotası üzerinden hızlı transit servis.' },
-            'TRIST-NLRTM': { name: 'İstanbul ➔ Rotterdam', days: 10, distance: '2,800 nm', type: 'Aktarmalı', desc: 'Cebelitarık Boğazı geçişli standart Avrupa hattı.' },
-            'TRIST-CNSHA': { name: 'İstanbul ➔ Şanghay', days: 28, distance: '8,400 nm', type: 'Süveyş Kanalı', desc: 'Süveyş Kanalı ve Hint Okyanusu üzerinden Asya ana hattı.' },
-            'TRIZM-USNYC': { name: 'İzmir ➔ New York', days: 16, distance: '4,750 nm', type: 'Direkt Hat', desc: 'Alsancak limanından doğrudan Amerika doğu yakası servisi.' },
-            'TRIZM-NLRTM': { name: 'İzmir ➔ Rotterdam', days: 9, distance: '2,650 nm', type: 'Direkt Hat', desc: 'Ege çıkışlı hızlı kuzey Avrupa servisi.' },
-            'TRIZM-CNSHA': { name: 'İzmir ➔ Şanghay', days: 29, distance: '8,250 nm', type: 'Süveyş Kanalı', desc: 'Güney limanları uğraklı Asya konsolidasyon hattı.' },
-            'TRMER-USNYC': { name: 'Mersin ➔ New York', days: 21, distance: '5,100 nm', type: 'Aktarmalı', desc: 'Pire veya Algeciras liman aktarmalı Atlantik servisi.' },
-            'TRMER-NLRTM': { name: 'Mersin ➔ Rotterdam', days: 12, distance: '3,000 nm', type: 'Direkt Hat', desc: 'Doğu Akdeniz çıkışlı haftalık konteyner seferleri.' },
-            'TRMER-CNSHA': { name: 'Mersin ➔ Şanghay', days: 25, distance: '7,800 nm', type: 'Süveyş Kanalı', desc: 'Süveyş Kanalı\'na en yakın çıkış noktası avantajıyla hızlı Asya rotası.' }
+            'TRIST-USNYC': { name: window.i18n.t('comp.academy.ist_nyc'), days: 18, distance: '4,900 nm', type: window.i18n.t('comp.academy.direct_line'), desc: window.i18n.t('comp.academy.trist_usnyc_desc') },
+            'TRIST-NLRTM': { name: window.i18n.t('comp.academy.ist_rtm'), days: 10, distance: '2,800 nm', type: window.i18n.t('comp.academy.transshipment'), desc: window.i18n.t('comp.academy.trist_nlrtm_desc') },
+            'TRIST-CNSHA': { name: window.i18n.t('comp.academy.ist_sha'), days: 28, distance: '8,400 nm', type: window.i18n.t('comp.academy.suez_canal'), desc: window.i18n.t('comp.academy.trist_cnsha_desc') },
+            'TRIZM-USNYC': { name: window.i18n.t('comp.academy.izm_nyc'), days: 16, distance: '4,750 nm', type: window.i18n.t('comp.academy.direct_line'), desc: window.i18n.t('comp.academy.trizm_usnyc_desc') },
+            'TRIZM-NLRTM': { name: window.i18n.t('comp.academy.izm_rtm'), days: 9, distance: '2,650 nm', type: window.i18n.t('comp.academy.direct_line'), desc: window.i18n.t('comp.academy.trizm_nlrtm_desc') },
+            'TRIZM-CNSHA': { name: window.i18n.t('comp.academy.izm_sha'), days: 29, distance: '8,250 nm', type: window.i18n.t('comp.academy.suez_canal'), desc: window.i18n.t('comp.academy.trizm_cnsha_desc') },
+            'TRMER-USNYC': { name: window.i18n.t('comp.academy.mer_nyc'), days: 21, distance: '5,100 nm', type: window.i18n.t('comp.academy.transshipment'), desc: window.i18n.t('comp.academy.trmer_usnyc_desc') },
+            'TRMER-NLRTM': { name: window.i18n.t('comp.academy.mer_rtm'), days: 12, distance: '3,000 nm', type: window.i18n.t('comp.academy.direct_line'), desc: window.i18n.t('comp.academy.trmer_nlrtm_desc') },
+            'TRMER-CNSHA': { name: window.i18n.t('comp.academy.mer_sha'), days: 25, distance: '7,800 nm', type: window.i18n.t('comp.academy.suez_canal'), desc: window.i18n.t('comp.academy.trmer_cnsha_desc') }
         };
-        return routes[`${pol}-${pod}`] || { name: 'Hesaplanıyor...', days: '—', distance: '—', type: 'Bilinmiyor', desc: 'Lütfen geçerli liman rotası seçin.' };
+        return routes[`${pol}-${pod}`] || { name: window.i18n.t('comp.academy.calculating'), days: '—', distance: '—', type: window.i18n.t('comp.academy.unknown'), desc: window.i18n.t('comp.academy.select_valid_route') };
     },
 
     render() {
@@ -172,23 +172,23 @@ window.academySimulator = {
                 <div class="title-with-badge">
                     <span class="sandbox-logo-icon"><i data-lucide="terminal"></i></span>
                     <div>
-                        <h3>Lojistik Konsolu</h3>
-                        <span class="sandbox-sub">İnteraktif Simülatör v1.0</span>
+                        <h3 data-i18n="comp.academy.console_title">Lojistik Konsolu</h3>
+                        <span class="sandbox-sub" data-i18n="comp.academy.console_subtitle">İnteraktif Simülatör v1.0</span>
                     </div>
                 </div>
-                <span class="live-indicator"><span class="dot animate-pulse"></span> ONLINE</span>
+                <span class="live-indicator"><span class="dot animate-pulse"></span> <span data-i18n="comp.academy.online">ONLINE</span></span>
             </div>
 
             <!-- Tab Buttons -->
             <div class="sandbox-tabs">
                 <button class="sandbox-tab-btn ${activeTab === 'calc' ? 'active' : ''}" onclick="window.academySimulator_switchTab('calc')">
-                    <i data-lucide="calculator"></i> Hacim & Ağırlık
+                    <i data-lucide="calculator"></i> <span data-i18n="comp.academy.tab_calc">Hacim & Ağırlık</span>
                 </button>
                 <button class="sandbox-tab-btn ${activeTab === 'incoterms' ? 'active' : ''}" onclick="window.academySimulator_switchTab('incoterms')">
                     <i data-lucide="shield-alert"></i> Incoterms
                 </button>
                 <button class="sandbox-tab-btn ${activeTab === 'routes' ? 'active' : ''}" onclick="window.academySimulator_switchTab('routes')">
-                    <i data-lucide="map-pin"></i> Rota & Transit
+                    <i data-lucide="map-pin"></i> <span data-i18n="comp.academy.tab_routes">Rota & Transit</span>
                 </button>
             </div>
 
@@ -205,35 +205,35 @@ window.academySimulator = {
     renderCalcTab(calcs) {
         return `
         <div class="sandbox-tab-content fade-in-up">
-            <p class="tab-intro">Metreküp (CBM) ve havayolu/karayolu faturalandırılabilir ücrete esas ağırlık hesabı:</p>
+            <p class="tab-intro" data-i18n="comp.academy.calc_intro">Metreküp (CBM) ve havayolu/karayolu faturalandırılabilir ücrete esas ağırlık hesabı:</p>
             
             <div class="calc-inputs-grid">
                 <div class="input-item">
-                    <label>En (cm)</label>
+                    <label data-i18n="comp.academy.lbl_width">En (cm)</label>
                     <input type="number" id="sim-width" value="${this.state.width}" oninput="window.academySimulator_calculate()">
                 </div>
                 <div class="input-item">
-                    <label>Boy (cm)</label>
+                    <label data-i18n="comp.academy.lbl_length">Boy (cm)</label>
                     <input type="number" id="sim-length" value="${this.state.length}" oninput="window.academySimulator_calculate()">
                 </div>
                 <div class="input-item">
-                    <label>Yükseklik (cm)</label>
+                    <label data-i18n="comp.academy.lbl_height">Yükseklik (cm)</label>
                     <input type="number" id="sim-height" value="${this.state.height}" oninput="window.academySimulator_calculate()">
                 </div>
                 <div class="input-item">
-                    <label>Miktar (Adet)</label>
+                    <label data-i18n="comp.academy.lbl_qty">Miktar (Adet)</label>
                     <input type="number" id="sim-qty" value="${this.state.quantity}" oninput="window.academySimulator_calculate()">
                 </div>
             </div>
 
             <div class="input-item full-width" style="margin-top: 12px;">
-                <label>Gerçek Ağırlık (Toplam kg)</label>
+                <label data-i18n="comp.academy.lbl_weight">Gerçek Ağırlık (Toplam kg)</label>
                 <input type="number" id="sim-weight" value="${this.state.weight}" oninput="window.academySimulator_calculate()">
             </div>
 
             <div class="calc-results">
                 <div class="result-row primary-result">
-                    <span>Toplam Hacim (CBM):</span>
+                    <span data-i18n="comp.academy.lbl_total_cbm">Toplam Hacim (CBM):</span>
                     <strong class="text-gradient">${calcs.cbm} m³</strong>
                 </div>
 
@@ -241,19 +241,19 @@ window.academySimulator = {
                     <div class="breakdown-card ${calcs.isAirVolumetric ? 'vol-active' : ''}">
                         <div class="bc-header">
                             <i data-lucide="plane"></i>
-                            <span>Havayolu (1:6)</span>
+                            <span data-i18n="comp.academy.lbl_air">Havayolu (1:6)</span>
                         </div>
                         <div class="bc-val">${calcs.chargeableAir} kg</div>
-                        <span class="bc-lbl">${calcs.isAirVolumetric ? 'Hacimsel Ağırlık Esas Alındı' : 'Gerçek Ağırlık Esas Alındı'}</span>
+                        <span class="bc-lbl">${calcs.isAirVolumetric ? window.i18n.t('comp.academy.vol_active') : window.i18n.t('comp.academy.actual_active')}</span>
                     </div>
 
                     <div class="breakdown-card ${calcs.isRoadVolumetric ? 'vol-active' : ''}">
                         <div class="bc-header">
                             <i data-lucide="truck"></i>
-                            <span>Karayolu (1:3)</span>
+                            <span data-i18n="comp.academy.lbl_road">Karayolu (1:3)</span>
                         </div>
                         <div class="bc-val">${calcs.chargeableRoad} kg</div>
-                        <span class="bc-lbl">${calcs.isRoadVolumetric ? 'Hacimsel Ağırlık Esas Alındı' : 'Gerçek Ağırlık Esas Alındı'}</span>
+                        <span class="bc-lbl">${calcs.isRoadVolumetric ? window.i18n.t('comp.academy.vol_active') : window.i18n.t('comp.academy.actual_active')}</span>
                     </div>
                 </div>
             </div>
@@ -265,7 +265,7 @@ window.academySimulator = {
         const incotermCodes = ['EXW', 'FOB', 'CIF', 'DDP'];
         return `
         <div class="sandbox-tab-content fade-in-up">
-            <p class="tab-intro">Teslim şekline göre maliyet, risk ve sorumluluk haritası:</p>
+            <p class="tab-intro" data-i18n="comp.academy.inco_intro">Teslim şekline göre maliyet, risk ve sorumluluk haritası:</p>
             
             <div class="incoterm-selector-grid">
                 ${incotermCodes.map(code => `
@@ -278,22 +278,22 @@ window.academySimulator = {
             <div class="incoterm-details-card">
                 <div class="idc-top">
                     <h4>${inco.name} (${this.state.incoterm})</h4>
-                    <span class="idc-risk-badge"><i data-lucide="alert-triangle"></i> Risk: <strong>${inco.risk}</strong></span>
+                    <span class="idc-risk-badge"><i data-lucide="alert-triangle"></i> <span data-i18n="comp.academy.lbl_risk">Risk:</span> <strong>${inco.risk}</strong></span>
                 </div>
                 <p class="idc-desc">${inco.desc}</p>
 
                 <div class="idc-matrix">
                     <div class="matrix-row">
-                        <span>İhracat Gümrükleme:</span>
-                        <strong class="${inco.export === 'Satıcı' ? 'vendor' : 'buyer'}">${inco.export}</strong>
+                        <span data-i18n="comp.academy.lbl_export_customs">İhracat Gümrükleme:</span>
+                        <strong class="${inco.export === window.i18n.t('comp.academy.seller') ? 'vendor' : 'buyer'}">${inco.export}</strong>
                     </div>
                     <div class="matrix-row">
-                        <span>Ana Taşıma (Navlun):</span>
-                        <strong class="${inco.main === 'Satıcı' ? 'vendor' : 'buyer'}">${inco.main}</strong>
+                        <span data-i18n="comp.academy.lbl_main_transport">Ana Taşıma (Navlun):</span>
+                        <strong class="${inco.main === window.i18n.t('comp.academy.seller') ? 'vendor' : 'buyer'}">${inco.main}</strong>
                     </div>
                     <div class="matrix-row">
-                        <span>İthalat Gümrükleme:</span>
-                        <strong class="${inco.import === 'Satıcı' ? 'vendor' : 'buyer'}">${inco.import}</strong>
+                        <span data-i18n="comp.academy.lbl_import_customs">İthalat Gümrükleme:</span>
+                        <strong class="${inco.import === window.i18n.t('comp.academy.seller') ? 'vendor' : 'buyer'}">${inco.import}</strong>
                     </div>
                 </div>
             </div>
@@ -304,23 +304,23 @@ window.academySimulator = {
     renderRoutesTab(route) {
         return `
         <div class="sandbox-tab-content fade-in-up">
-            <p class="tab-intro">Türkiye çıkışlı küresel liman rotaları ve deniz transit süre analizi:</p>
+            <p class="tab-intro" data-i18n="comp.academy.routes_intro">Türkiye çıkışlı küresel liman rotaları ve deniz transit süre analizi:</p>
 
             <div class="route-selectors">
                 <div class="input-item">
-                    <label>Çıkış Limanı (POL)</label>
+                    <label data-i18n="comp.academy.lbl_pol">Çıkış Limanı (POL)</label>
                     <select onchange="window.academySimulator_setRoute('pol', this.value)">
-                        <option value="TRIST" ${this.state.pol === 'TRIST' ? 'selected' : ''}>İstanbul (Ambarlı)</option>
-                        <option value="TRIZM" ${this.state.pol === 'TRIZM' ? 'selected' : ''}>İzmir (Alsancak)</option>
-                        <option value="TRMER" ${this.state.pol === 'TRMER' ? 'selected' : ''}>Mersin Limanı</option>
+                        <option value="TRIST" ${this.state.pol === 'TRIST' ? 'selected' : ''} data-i18n="comp.academy.ist_ambarli">İstanbul (Ambarlı)</option>
+                        <option value="TRIZM" ${this.state.pol === 'TRIZM' ? 'selected' : ''} data-i18n="comp.academy.izm_alsancak">İzmir (Alsancak)</option>
+                        <option value="TRMER" ${this.state.pol === 'TRMER' ? 'selected' : ''} data-i18n="comp.academy.mer_port">Mersin Limanı</option>
                     </select>
                 </div>
                 <div class="input-item" style="margin-top: 10px;">
-                    <label>Varış Limanı (POD)</label>
+                    <label data-i18n="comp.academy.lbl_pod">Varış Limanı (POD)</label>
                     <select onchange="window.academySimulator_setRoute('pod', this.value)">
-                        <option value="USNYC" ${this.state.pod === 'USNYC' ? 'selected' : ''}>New York (US)</option>
-                        <option value="NLRTM" ${this.state.pod === 'NLRTM' ? 'selected' : ''}>Rotterdam (NL)</option>
-                        <option value="CNSHA" ${this.state.pod === 'CNSHA' ? 'selected' : ''}>Şanghay (CN)</option>
+                        <option value="USNYC" ${this.state.pod === 'USNYC' ? 'selected' : ''} data-i18n="comp.academy.nyc_us">New York (US)</option>
+                        <option value="NLRTM" ${this.state.pod === 'NLRTM' ? 'selected' : ''} data-i18n="comp.academy.rtm_nl">Rotterdam (NL)</option>
+                        <option value="CNSHA" ${this.state.pod === 'CNSHA' ? 'selected' : ''} data-i18n="comp.academy.sha_cn">Şanghay (CN)</option>
                     </select>
                 </div>
             </div>
@@ -333,11 +333,11 @@ window.academySimulator = {
 
                 <div class="rdc-metrics">
                     <div class="metric-block">
-                        <span class="mb-lbl">Transit Süre</span>
-                        <strong class="text-gradient">${route.days} Gün</strong>
+                        <span class="mb-lbl" data-i18n="comp.academy.lbl_transit_time">Transit Süre</span>
+                        <strong class="text-gradient">${route.days} <span data-i18n="comp.academy.days">Gün</span></strong>
                     </div>
                     <div class="metric-block">
-                        <span class="mb-lbl">Deniz Mesafesi</span>
+                        <span class="mb-lbl" data-i18n="comp.academy.lbl_sea_distance">Deniz Mesafesi</span>
                         <strong>${route.distance}</strong>
                     </div>
                 </div>

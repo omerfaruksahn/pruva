@@ -49,34 +49,34 @@ window.utils = {
         },
 
         timeAgo(timestamp) {
-            if (!timestamp || timestamp === 'Şimdi') return 'Şimdi';
+            if (!timestamp || timestamp === window.i18n.t('utils.time.now') || timestamp === 'Şimdi') return window.i18n.t('utils.time.now');
             const diff = Date.now() - timestamp;
             const seconds = Math.floor(diff / 1000);
             const minutes = Math.floor(seconds / 60);
             const hours = Math.floor(minutes / 60);
             const days = Math.floor(hours / 24);
 
-            if (seconds < 30) return 'Şimdi';
-            if (seconds < 60) return `${seconds} sn önce`;
-            if (minutes < 60) return `${minutes} dk önce`;
-            if (hours < 24) return `${hours} saat önce`;
-            if (days < 7) return `${days} gün önce`;
+            if (seconds < 30) return window.i18n.t('utils.time.now');
+            if (seconds < 60) return window.i18n.t('utils.time.seconds_ago').replace('${seconds}', seconds);
+            if (minutes < 60) return window.i18n.t('utils.time.minutes_ago').replace('${minutes}', minutes);
+            if (hours < 24) return window.i18n.t('utils.time.hours_ago').replace('${hours}', hours);
+            if (days < 7) return window.i18n.t('utils.time.days_ago').replace('${days}', days);
             return new Date(timestamp).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
         },
 
         timeRemaining(expiryDate) {
-            if (!expiryDate) return 'Süresiz';
+            if (!expiryDate) return window.i18n.t('utils.time.indefinite');
             const diff = expiryDate - Date.now();
-            if (diff <= 0) return 'Süresi Doldu';
+            if (diff <= 0) return window.i18n.t('utils.time.expired');
 
             const hours = Math.floor(diff / (1000 * 60 * 60));
             const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
 
             if (hours >= 24) {
                 const days = Math.floor(hours / 24);
-                return `${days}g ${hours % 24}s kaldı`;
+                return window.i18n.t('utils.time.days_hours_left').replace('${days}', days).replace('${hours}', hours % 24);
             }
-            return `${hours}s ${minutes}dk kaldı`;
+            return window.i18n.t('utils.time.hours_minutes_left').replace('${hours}', hours).replace('${minutes}', minutes);
         },
 
         cbm(w, l, h, q) {
@@ -167,9 +167,9 @@ window.utils = {
             if (!originLabel) return;
 
             const logic = {
-                port: { list: ['FOB', 'CIF', 'CFR', 'FAS'], labels: ["Yükleme Limanı", "Tahliye Limanı"] },
-                door: { list: ['EXW', 'FCA'], labels: ["Yükleme Noktası (Fabrika)", "Varış Limanı/Terminal"] },
-                full: { list: ['DAP', 'DDP', 'DPU'], labels: ["Çıkış Noktası", "Teslimat Adresi (Kapı)"] }
+                port: { list: ['FOB', 'CIF', 'CFR', 'FAS'], labels: [window.i18n.t('utils.incoterm.port_loading'), window.i18n.t('utils.incoterm.port_discharge')] },
+                door: { list: ['EXW', 'FCA'], labels: [window.i18n.t('utils.incoterm.place_loading'), window.i18n.t('utils.incoterm.port_destination')] },
+                full: { list: ['DAP', 'DDP', 'DPU'], labels: [window.i18n.t('utils.incoterm.point_origin'), window.i18n.t('utils.incoterm.delivery_door')] }
             };
 
             const category = Object.values(logic).find(l => l.list.includes(value)) || logic.full;
@@ -177,7 +177,7 @@ window.utils = {
             destLabel.innerText = category.labels[1];
         },
 
-        showImageModal(fileUrl, title = 'Belge Önizleme') {
+        showImageModal(fileUrl, title = window.i18n.t('utils.file.preview')) {
             const isPDF = fileUrl.startsWith('data:application/pdf') || fileUrl.toLowerCase().endsWith('.pdf');
             const modal = document.createElement('div');
             modal.id = 'image-preview-modal';
@@ -213,8 +213,8 @@ window.utils = {
                         <h3 style="margin: 0; font-size: 1.1rem; font-weight: 600; letter-spacing: -0.5px;">${title}</h3>
                     </div>
                     <div style="display: flex; gap: 10px; align-items: center;">
-                        <a href="${activeUrl}" target="_blank" style="background: #3498db; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: 600; text-decoration: none;">🔍 Tam Ekran</a>
-                        <a href="${activeUrl}" download="${title.replace(/\s+/g, '_')}${isPDF ? '.pdf' : '.png'}" style="background: #27ae60; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: 600; text-decoration: none;">📥 İndir</a>
+                        <a href="${activeUrl}" target="_blank" style="background: #3498db; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: 600; text-decoration: none;">${window.i18n.t('utils.file.fullscreen')}</a>
+                        <a href="${activeUrl}" download="${title.replace(/\s+/g, '_')}${isPDF ? '.pdf' : '.png'}" style="background: #27ae60; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: 600; text-decoration: none;">${window.i18n.t('utils.file.download')}</a>
                         <button id="close-modal-btn" style="background: #444; border: none; color: white; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; margin-left: 10px;">&times;</button>
                     </div>
                 </div>
@@ -308,46 +308,46 @@ window.utils = {
                                     <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-handshake"><path d="m11 17 2 2a1 1 0 0 0 1.4 0l4-4a1 1 0 0 0 0-1.4l-11.4-11.4a2.24 2.24 0 0 0-3.2 0l-1.4 1.4a2.24 2.24 0 0 0 0 3.2z"/><path d="m18 10.1 2.9-2.9a2.24 2.24 0 0 0 0-3.2l-1.4-1.4a2.24 2.24 0 0 0-3.2 0L13.9 5.5"/><path d="m21.3 12.1-4-4"/><path d="m14 16-5.5-5.5"/><path d="m19 17 2 2a1 1 0 0 1 0 1.4l-4 4a1 1 0 0 1-1.4 0l-2-2"/></svg>
                                 </div>
                                 <div style="display: flex; flex-direction: column; gap: 2px;">
-                                    <h4 style="margin: 0; font-size: 1rem; font-weight: 800; color: var(--text-primary); letter-spacing: -0.2px;">PRUVA DESTEK</h4>
+                                    <h4 style="margin: 0; font-size: 1rem; font-weight: 800; color: var(--text-primary); letter-spacing: -0.2px;">${window.i18n.t('utils.chat.system.title')}</h4>
                                     <div style="display: flex; align-items: center; gap: 6px;">
                                         <span style="font-size: 0.62rem; color: #2ecc71; font-weight: 700; background: rgba(46, 204, 113, 0.1); padding: 2px 8px; border-radius: 12px; display: inline-flex; align-items: center; gap: 4px;">
                                             <span style="width: 5px; height: 5px; border-radius: 50%; background: #2ecc71; display: inline-block;"></span>
-                                            RESMİ HESAP
+                                            ${window.i18n.t('utils.chat.system.badge')}
                                         </span>
                                     </div>
                                 </div>
                             </div>
                             
                             <div class="welcome-content" style="color: var(--text-secondary); display: flex; flex-direction: column; gap: 14px;">
-                                <p style="margin: 0; font-weight: 700; font-size: 1.05rem; color: var(--text-primary); letter-spacing: -0.3px;">👋 Pruva Lojistik Pazaryerine Hoş Geldiniz!</p>
-                                <p style="margin: 0;">Merhaba,</p>
-                                <p style="margin: 0;">Türkiye'nin en hızlı ve güvenilir dijital lojistik platformu <strong>Pruva</strong>'ya başarıyla kayıt oldunuz. Lojistik operasyonlarınızı kolaylaştırmak, en uygun navlun tekliflerine saniyeler içinde ulaşmak ve güvenilir iş ortaklarıyla anında eşleşmek için doğru yerdesiniz!</p>
+                                <p style="margin: 0; font-weight: 700; font-size: 1.05rem; color: var(--text-primary); letter-spacing: -0.3px;">${window.i18n.t('utils.chat.system.welcome_title')}</p>
+                                <p style="margin: 0;">${window.i18n.t('utils.chat.system.hello')}</p>
+                                <p style="margin: 0;">${window.i18n.t('utils.chat.system.welcome_text')}</p>
                                 
                                 <div style="background: var(--bg-page); border: 1px solid var(--border); border-radius: 12px; padding: 18px; margin: 5px 0; display: flex; flex-direction: column; gap: 12px;">
                                     <h5 style="margin: 0; color: var(--text-primary); font-weight: 700; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px;">
-                                        🚀 Pruva ile Neler Yapabilirsiniz?
+                                        ${window.i18n.t('utils.chat.system.what_can_do')}
                                     </h5>
                                     <ul style="margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 10px; font-size: 0.84rem;">
-                                        <li style="line-height: 1.5;"><strong style="color: var(--text-primary);">Yük Sahipleri İçin:</strong> Saniyeler içinde detaylı yük ilanı oluşturabilir, taşıyıcılardan gelen rekabetçi navlun tekliflerini değerlendirebilir ve yükünüzün liman serbest süre (free time) durumlarını akıllı alarmlarımızla canlı takip edebilirsiniz.</li>
-                                        <li style="line-height: 1.5;"><strong style="color: var(--text-primary);">Taşıyıcılar İçin:</strong> Pazaryerindeki yüzlerce aktif yüke anında teklif verebilir, güvenli anlaşma altyapımızla iş hacminizi katlayabilir ve yüksek performans puanı kazanarak öne çıkabilirsiniz.</li>
+                                        <li style="line-height: 1.5;"><strong style="color: var(--text-primary);">${window.i18n.t('utils.chat.system.for_shippers')}</strong> ${window.i18n.t('utils.chat.system.shippers_text')}</li>
+                                        <li style="line-height: 1.5;"><strong style="color: var(--text-primary);">${window.i18n.t('utils.chat.system.for_carriers')}</strong> ${window.i18n.t('utils.chat.system.carriers_text')}</li>
                                     </ul>
                                 </div>
 
                                 <div style="background: rgba(243, 156, 18, 0.04); border: 1px solid rgba(243, 156, 18, 0.15); border-radius: 12px; padding: 14px 16px; margin: 5px 0; display: flex; gap: 12px; align-items: flex-start;">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e67e22" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0; margin-top: 2px;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
                                     <div style="display: flex; flex-direction: column; gap: 4px;">
-                                        <h5 style="margin: 0; color: #e67e22; font-weight: 700; font-size: 0.85rem;">🛡️ Güvenli Ticaret Hatırlatması</h5>
-                                        <p style="margin: 0; font-size: 0.8rem; line-height: 1.5; color: var(--text-secondary);">Pruva güvenliğini ve işlem kalitesini korumak amacıyla sohbetler üzerinden doğrudan telefon numarası, e-posta veya banka/fatura bilgisi paylaşılması yasaktır. Platform üzerinden anlaşma sağlandığı anda, iki tarafın da iletişim ve fatura bilgileri sistem tarafından <strong>otomatik ve güvenli olarak</strong> birbirine iletilecektir.</p>
+                                        <h5 style="margin: 0; color: #e67e22; font-weight: 700; font-size: 0.85rem;">${window.i18n.t('utils.chat.system.secure_trade')}</h5>
+                                        <p style="margin: 0; font-size: 0.8rem; line-height: 1.5; color: var(--text-secondary);">${window.i18n.t('utils.chat.system.secure_trade_text')}</p>
                                     </div>
                                 </div>
 
                                 <p style="font-size: 0.78rem; line-height: 1.5; font-style: italic; opacity: 0.85; margin: 5px 0 0 0; border-top: 1px solid var(--border); padding-top: 14px;">
-                                    💡 <strong>Not:</strong> Bu mesaj otomatik bir sistem bilgilendirmesidir ve yanıtlanamamaktadır. Destek almak istediğiniz her an sol taraftaki menüden <strong>Yardım & Destek</strong> alanına gidebilir veya support@pruvahub.com adresinden ekibimize ulaşabilirsiniz.
+                                    ${window.i18n.t('utils.chat.system.note')}
                                 </p>
 
                                 <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
                                     <span style="font-size: 0.72rem; color: var(--text-muted);">${time}</span>
-                                    <p style="margin: 0; font-weight: 700; color: var(--text-primary);">Pruva Destek Ekibi</p>
+                                    <p style="margin: 0; font-weight: 700; color: var(--text-primary);">${window.i18n.t('utils.chat.system.team')}</p>
                                 </div>
                             </div>
                         </div>
@@ -381,9 +381,9 @@ window.utils = {
                     dateStr = dateObj.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
                 }
                 if (dateObj.toDateString() === today.toDateString()) {
-                    dateStr = 'Bugün';
+                    dateStr = window.i18n.t('utils.chat.today');
                 } else if (dateObj.toDateString() === yesterday.toDateString()) {
-                    dateStr = 'Dün';
+                    dateStr = window.i18n.t('utils.chat.yesterday');
                 }
 
                 if (dateStr !== lastDateStr) {
@@ -421,7 +421,7 @@ window.utils = {
                             <div class="inbox-message-bubble msg-deleted">
                                 <div class="msg-deleted-placeholder">
                                     <i data-lucide="ban" style="width: 14px; height: 14px;"></i>
-                                    <span>Bu mesaj silindi</span>
+                                    <span>${window.i18n.t('utils.chat.deleted_msg')}</span>
                                 </div>
                                 <div class="msg-time-row">
                                     ${time}
@@ -436,8 +436,8 @@ window.utils = {
                 let replyHtml = '';
                 if (msg.replyTo && msgMap[msg.replyTo]) {
                     const repliedMsg = msgMap[msg.replyTo];
-                    const repliedName = repliedMsg.senderId === currentUid ? 'Siz' : (repliedMsg.senderName || 'Kullanıcı');
-                    const repliedText = repliedMsg.deleted ? 'Bu mesaj silindi' : (repliedMsg.text || 'Dosya');
+                    const repliedName = repliedMsg.senderId === currentUid ? window.i18n.t('utils.chat.you') : (repliedMsg.senderName || window.i18n.t('utils.chat.user'));
+                    const repliedText = repliedMsg.deleted ? window.i18n.t('utils.chat.deleted_msg') : (repliedMsg.text || window.i18n.t('utils.chat.file'));
                     const truncatedReply = repliedText.length > 80 ? repliedText.substring(0, 80) + '...' : repliedText;
                     replyHtml = `
                         <div class="msg-reply-preview" onclick="window.inboxScrollToMessage && window.inboxScrollToMessage('${msg.replyTo}')">
@@ -452,8 +452,8 @@ window.utils = {
                 if (msg.type === 'file') {
                     if (msg.fileType && msg.fileType.startsWith('image/')) {
                         content = `
-                            <div class="msg-image-wrapper" onclick="window.utils.showImageModal('${msg.fileUrl}', '${window.utils.escapeHTML(msg.fileName || 'Resim')}')">
-                                <img src="${msg.fileUrl}" alt="Resim" class="msg-image" loading="lazy" />
+                            <div class="msg-image-wrapper" onclick="window.utils.showImageModal('${msg.fileUrl}', '${window.utils.escapeHTML(msg.fileName || window.i18n.t('utils.chat.image'))}')">
+                                <img src="${msg.fileUrl}" alt="${window.i18n.t('utils.chat.image')}" class="msg-image" loading="lazy" />
                                 <span class="msg-image-name">${window.utils.escapeHTML(msg.fileName)}</span>
                             </div>
                         `;
@@ -463,7 +463,7 @@ window.utils = {
                                 <i data-lucide="file-text" style="width: 20px; height: 20px;"></i>
                                 <div class="msg-file-info">
                                     <span class="msg-file-name">${window.utils.escapeHTML(msg.fileName)}</span>
-                                    <span class="msg-file-type">${msg.fileType || 'Dosya'}</span>
+                                    <span class="msg-file-type">${msg.fileType || window.i18n.t('utils.chat.file')}</span>
                                 </div>
                                 <i data-lucide="download" style="width: 16px; height: 16px; opacity: 0.6;"></i>
                             </a>
@@ -490,7 +490,7 @@ window.utils = {
                         chips += `
                             <button class="msg-reaction-chip ${data.isMine ? 'is-mine' : ''}" 
                                     onclick="window.inboxToggleReaction('${chatId}', '${msg.id}', '${emoji}')"
-                                    title="${data.count} kişi tepki verdi">
+                                    title="${data.count} ${window.i18n.t('utils.chat.reacted')}">
                                 <span>${emoji}</span>
                                 ${data.count > 1 ? `<span class="reaction-count">${data.count}</span>` : ''}
                             </button>
@@ -506,13 +506,13 @@ window.utils = {
                     // Double checkmark SVG
                     if (isRead) {
                         readReceiptHtml = `
-                            <span class="msg-read-receipt is-read" title="Okundu">
+                            <span class="msg-read-receipt is-read" title="${window.i18n.t('utils.chat.read')}">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 6 7 17 2 12"></polyline><polyline points="23 6 12 17" style="opacity:1"></polyline></svg>
                             </span>
                         `;
                     } else {
                         readReceiptHtml = `
-                            <span class="msg-read-receipt" title="Gönderildi">
+                            <span class="msg-read-receipt" title="${window.i18n.t('utils.chat.sent')}">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
                             </span>
                         `;
@@ -520,7 +520,7 @@ window.utils = {
                 }
 
                 // ── Edited Badge ──
-                const editedBadge = msg.edited ? `<span class="msg-edited-badge">düzenlendi</span>` : '';
+                const editedBadge = msg.edited ? `<span class="msg-edited-badge">${window.i18n.t('utils.chat.edited')}</span>` : '';
 
                 // ── Hover Action Bar ──
                 const safeMsgId = msg.id;
@@ -528,24 +528,24 @@ window.utils = {
                 
                 const actionHtml = `
                     <div class="inbox-message-actions" data-msg-id="${safeMsgId}">
-                        <button class="inbox-action-btn" onclick="window.inboxSetReplyTo('${safeMsgId}', '${window.utils.escapeHTML(msg.senderName || '')}', '${safeText.substring(0, 50)}')" title="Yanıtla">
+                        <button class="inbox-action-btn" onclick="window.inboxSetReplyTo('${safeMsgId}', '${window.utils.escapeHTML(msg.senderName || '')}', '${safeText.substring(0, 50)}')" title="${window.i18n.t('utils.chat.reply')}">
                             <i data-lucide="reply" style="width: 14px; height: 14px;"></i>
                         </button>
-                        <button class="inbox-action-btn" onclick="window.inboxShowReactionPicker(event, '${chatId}', '${safeMsgId}')" title="Tepki Ver">
+                        <button class="inbox-action-btn" onclick="window.inboxShowReactionPicker(event, '${chatId}', '${safeMsgId}')" title="${window.i18n.t('utils.chat.react')}">
                             <i data-lucide="smile-plus" style="width: 14px; height: 14px;"></i>
                         </button>
                         ${msg.type === 'text' ? `
-                        <button class="inbox-action-btn" onclick="navigator.clipboard.writeText(\`${safeText}\`); window.notificationManager?.showToast('Mesaj kopyalandı', 'success');" title="Kopyala">
+                        <button class="inbox-action-btn" onclick="navigator.clipboard.writeText(\`${safeText}\`); window.notificationManager?.showToast(window.i18n.t('utils.chat.msg_copied'), 'success');" title="${window.i18n.t('utils.chat.copy')}">
                             <i data-lucide="copy" style="width: 14px; height: 14px;"></i>
                         </button>
                         ` : ''}
                         ${isMe && msg.type === 'text' ? `
-                        <button class="inbox-action-btn" onclick="window.inboxStartEditMessage('${chatId}', '${safeMsgId}', this)" title="Düzenle">
+                        <button class="inbox-action-btn" onclick="window.inboxStartEditMessage('${chatId}', '${safeMsgId}', this)" title="${window.i18n.t('utils.chat.edit')}">
                             <i data-lucide="pencil" style="width: 14px; height: 14px;"></i>
                         </button>
                         ` : ''}
                         ${isMe ? `
-                        <button class="inbox-action-btn danger" onclick="window.inboxDeleteMessage('${chatId}', '${safeMsgId}')" title="Sil">
+                        <button class="inbox-action-btn danger" onclick="window.inboxDeleteMessage('${chatId}', '${safeMsgId}')" title="${window.i18n.t('utils.chat.delete')}">
                             <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
                         </button>
                         ` : ''}
@@ -580,87 +580,52 @@ window.utils = {
 
 
     // ─────────────────────────────────────────
-    // Education — Eğitim Modülü
+    // Campus — Eğitim Merkezi Pazaryeri
     // ─────────────────────────────────────────
 
-    edu: {
-        toggleTab(btn, contentId) {
-            const parent = btn.parentElement;
-            const tabs = parent.querySelectorAll('.comp-tab');
-            const container = parent.parentElement;
-            const panes = container.querySelectorAll('.tab-pane');
-
-            tabs.forEach(t => t.classList.remove('active'));
-            btn.classList.add('active');
-
-            panes.forEach(p => p.classList.remove('active'));
-            const activePane = document.getElementById(contentId);
-            if (activePane) activePane.classList.add('active');
+    campus: {
+        setCampusView(mode) {
+            if (!window.app?.state) return;
+            window.app.state.campusViewMode = mode;
+            if (window.app.store) window.app.store.save();
+            window.app.router.render();
+            window.scrollTo(0, 0);
         },
 
-        markModuleRead(id) {
+        setCampusCategory(catId) {
+            if (!window.app?.state) return;
+            window.app.state.campusCategory = catId;
+            if (window.app.store) window.app.store.save();
+            window.app.router.render();
+        },
+
+        viewCampusProduct(productId) {
+            if (!window.app?.state) return;
+            window.app.state.campusSelectedProduct = productId;
+            this.setCampusView('product_detail');
+        },
+
+        addToLibrary(productId) {
             if (!window.app?.state) return;
             const state = window.app.state;
-            if (!state.eduReadModules) state.eduReadModules = [];
+            if (!state.campusLibrary) state.campusLibrary = [];
             
-            if (!state.eduReadModules.includes(id)) {
-                state.eduReadModules.push(id);
-                this.updateProgress();
-                
+            if (!state.campusLibrary.includes(productId)) {
+                state.campusLibrary.push(productId);
                 if (window.notificationManager) {
-                    window.notificationManager.showToast('Modül tamamlandı!', 'success');
+                    window.notificationManager.showToast('Kütüphanenize eklendi!', 'success');
                 }
                 if (window.app.store) window.app.store.save();
                 window.app.router.render();
             }
-        },
-
-        updateProgress() {
-            if (!window.app?.state) return;
-            const total = window.educationContent.chapters.length;
-            const read = (window.app.state.eduReadModules || []).length;
-            const percent = Math.round((read / total) * 100);
-            
-            const textEl = document.getElementById('edu-progress-text');
-            const fillEl = document.getElementById('edu-progress-fill');
-            
-            if (textEl) textEl.textContent = `%${percent}`;
-            if (fillEl) fillEl.style.width = `${percent}%`;
-        },
-
-        setModule(index) {
-            if (!window.app?.state) return;
-            if (index < 0 || index >= window.educationContent.chapters.length) return;
-            
-            window.app.state.currentEduModuleIndex = index;
-            if (window.app.store) window.app.store.save();
-            window.app.router.render();
-            window.scrollTo(0, 0);
-        },
-
-        setViewMode(mode) {
-            if (!window.app?.state) return;
-            window.app.state.eduViewMode = mode;
-            if (window.app.store) window.app.store.save();
-            window.app.router.render();
-            window.scrollTo(0, 0);
-        },
-
-        setCategory(catId) {
-            if (!window.app?.state) return;
-            window.app.state.eduCategory = catId;
-            if (window.app.store) window.app.store.save();
-            window.app.router.render();
-        },
+        }
     },
 
-    // Backward compatibility aliases (plain proxies)
-    toggleEduTab(...args)     { return this.edu.toggleTab(...args); },
-    markEduModuleRead(...args){ return this.edu.markModuleRead(...args); },
-    updateEduProgress(...args){ return this.edu.updateProgress(...args); },
-    setEduModule(...args)     { return this.edu.setModule(...args); },
-    setEduViewMode(...args)   { return this.edu.setViewMode(...args); },
-    setEduCategory(...args)   { return this.edu.setCategory(...args); },
+    // Backward compatibility & global access aliases
+    setCampusView(...args)   { return this.campus.setCampusView(...args); },
+    setCampusCategory(...args) { return this.campus.setCampusCategory(...args); },
+    viewCampusProduct(...args) { return this.campus.viewCampusProduct(...args); },
+    addToLibrary(...args)    { return this.campus.addToLibrary(...args); },
 
 
     // ─────────────────────────────────────────
@@ -689,7 +654,7 @@ window.utils = {
 
             app.state.ads.push({
                 id: Date.now() + i,
-                title: `${pick(goods)} Sevkiyatı`,
+                title: `${pick(goods)} ${window.i18n.t('utils.demo.shipment')}`,
                 origin,
                 destination,
                 transport: pick(transports),
@@ -701,7 +666,7 @@ window.utils = {
                 weight: Math.floor(Math.random() * 5000) + 100 + " kg",
                 totalCBM: (Math.random() * 20).toFixed(2),
                 bids: [],
-                owner: "Demo Kullanıcısı",
+                owner: window.i18n.t('utils.demo.user'),
                 isStackable: Math.random() > 0.5,
                 createdAt,
                 durationHours: duration,
@@ -750,7 +715,7 @@ window.utils = {
         }
     },
 
-    toggleButtonLoading(button, isLoading, originalText, loadingText = 'Yükleniyor...') {
+    toggleButtonLoading(button, isLoading, originalText, loadingText = window.i18n.t('utils.button.loading')) {
         if (!button) return;
         button.disabled = isLoading;
         button.innerHTML = isLoading 
@@ -775,7 +740,7 @@ window.utils = {
         const onclick = options.onclick || `window.marketplaceManager.toggleAd('${ad.id}')`;
         const rightStatusHTML = options.rightStatusHTML || `
             <div class="dash-ad-status-box">
-                <div class="dash-ad-label">Kalan Süre</div>
+                <div class="dash-ad-label">${window.i18n.t('utils.ad.time_left')}</div>
                 <div class="dash-ad-value" style="color: ${ad.expiryDate && ad.expiryDate < Date.now() ? '#ff4d4f' : '#e67e22'}; font-weight: 700;">
                     ${timeRemaining}
                 </div>
@@ -796,7 +761,7 @@ window.utils = {
                                 ${ad.origin} ➔ ${ad.destination}
                             </h4>
                             <div class="dash-ad-meta">
-                                ${cargoType} • ${incoterm} • <span style="color: var(--secondary); font-weight: 600;">${bidCount} Teklif</span>
+                                ${cargoType} • ${incoterm} • <span style="color: var(--secondary); font-weight: 600;">${bidCount} ${window.i18n.t('utils.ad.bids')}</span>
                             </div>
                         </div>
                     </div>

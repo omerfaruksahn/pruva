@@ -52,9 +52,9 @@
             <span style="color: var(--text-primary); font-weight: 800; letter-spacing: -0.5px;">PRUVA</span>
         </a>
         <div class="nav-links">
-            <a href="/">Home</a>
-            <a href="/marketplace">Marketplace</a>
-            <a href="/dashboard">Dashboard</a>
+            <a href="/" data-i18n="nav.home">Home</a>
+            <a href="/marketplace" data-i18n="nav.marketplace">Marketplace</a>
+            <a href="/dashboard" data-i18n="nav.dashboard">Dashboard</a>
         </div>
         <div class="nav-right">
             <!-- Dinamik olarak auth.js tarafından doldurulur -->
@@ -67,35 +67,35 @@
     <!-- Mobile Nav Drawer -->
     <div class="mobile-nav-drawer" id="mobile-nav-drawer">
         <a href="/">
-            <i data-lucide="home"></i> Anasayfa
+            <i data-lucide="home"></i> <span data-i18n="nav.home">Anasayfa</span>
         </a>
         <a href="/marketplace">
-            <i data-lucide="shopping-bag"></i> Pazaryeri
+            <i data-lucide="shopping-bag"></i> <span data-i18n="nav.marketplace">Pazaryeri</span>
         </a>
         <a href="/dashboard">
-            <i data-lucide="layout-dashboard"></i> Dashboard
+            <i data-lucide="layout-dashboard"></i> <span data-i18n="nav.dashboard">Dashboard</span>
         </a>
         <a href="/education">
-            <i data-lucide="graduation-cap"></i> Eğitim
+            <i data-lucide="graduation-cap"></i> <span data-i18n="nav.education">Eğitim</span>
         </a>
         <a href="/settings">
-            <i data-lucide="settings"></i> Ayarlar
+            <i data-lucide="settings"></i> <span data-i18n="nav.settings">Ayarlar</span>
         </a>
         <div class="mobile-nav-divider"></div>
         <a href="/membership">
-            <i data-lucide="star"></i> Üyelik
+            <i data-lucide="star"></i> <span data-i18n="nav.membership">Üyelik</span>
         </a>
         <a id="mobile-logout-link" onclick="window.app.auth.logout();" style="color: #ff4d4f; display: none;">
-            <i data-lucide="log-out"></i> Çıkış Yap
+            <i data-lucide="log-out"></i> <span data-i18n="nav.logout">Çıkış Yap</span>
         </a>
         <a id="mobile-login-link" href="/login" style="display: none;">
-            <i data-lucide="log-in"></i> Giriş Yap
+            <i data-lucide="log-in"></i> <span data-i18n="nav.login">Giriş Yap</span>
         </a>
         <a id="mobile-register-link" href="/register" style="display: none; color: var(--primary);">
-            <i data-lucide="user-plus"></i> Kayıt Ol
+            <i data-lucide="user-plus"></i> <span data-i18n="nav.register">Kayıt Ol</span>
         </a>
 
-        <a class="mobile-post-btn" id="mobile-nav-post-btn" href="/post-ad" style="display: block; text-decoration: none; text-align: center; line-height: 40px;">
+        <a class="mobile-post-btn" id="mobile-nav-post-btn" href="/post-ad" style="display: block; text-decoration: none; text-align: center; line-height: 40px;" data-i18n="nav.post_ad">
             Yeni İlan Ver
         </a>
     </div>
@@ -113,23 +113,23 @@
             <div class="footer-grid">
                 <div class="footer-col">
                     <div class="footer-logo">PRUVA</div>
-                    <p class="footer-desc">Türkiye'nin en hızlı dijital lojistik pazaryeri. Yükünüzü güvenle, hızla, en iyi fiyatla taşıyoruz.</p>
+                    <p class="footer-desc" data-i18n="footer.desc">Türkiye'nin en hızlı dijital lojistik pazaryeri. Yükünüzü güvenle, hızla, en iyi fiyatla taşıyoruz.</p>
                 </div>
                 <div class="footer-col">
-                    <h4>Platform</h4>
-                    <a href="/marketplace">Marketplace</a>
-                    <a href="/post-ad">Post Load</a>
-                    <a href="/dashboard">Dashboard</a>
+                    <h4 data-i18n="footer.platform">Platform</h4>
+                    <a href="/marketplace" data-i18n="nav.marketplace">Marketplace</a>
+                    <a href="/post-ad" data-i18n="nav.post_ad">Post Load</a>
+                    <a href="/dashboard" data-i18n="nav.dashboard">Dashboard</a>
                 </div>
                 <div class="footer-col">
-                    <h4>Lojistik & Araçlar</h4>
-                    <a href="/lojistik-hizmetleri">Lojistik Hizmetleri</a>
-                    <a href="/navlun-hesaplama">Navlun Hesaplama</a>
-                    <a href="/konteyner-tasimaciligi">Konteyner Taşımacılığı</a>
-                    <a href="/ithalat-ihracat">İthalat & İhracat</a>
+                    <h4 data-i18n="footer.logistics">Lojistik & Araçlar</h4>
+                    <a href="/lojistik-hizmetleri" data-i18n="footer.services">Lojistik Hizmetleri</a>
+                    <a href="/navlun-hesaplama" data-i18n="footer.calc">Navlun Hesaplama</a>
+                    <a href="/konteyner-tasimaciligi" data-i18n="footer.container">Konteyner Taşımacılığı</a>
+                    <a href="/ithalat-ihracat" data-i18n="footer.import_export">İthalat & İhracat</a>
                 </div>
                 <div class="footer-col">
-                    <h4>İletişim</h4>
+                    <h4 data-i18n="footer.contact">İletişim</h4>
                     <p style="font-size: 0.85rem; color: #8899aa;">support@pruvahub.com</p>
                     <p style="font-size: 0.85rem; color: #8899aa;">+90 (212) 000 00 00</p>
                     <div class="footer-social">
@@ -140,7 +140,7 @@
                 </div>
             </div>
             <div class="footer-bottom">
-                <span>© 2026 Pruva Lojistik. Tüm hakları saklıdır.</span>
+                <span data-i18n="footer.rights">© 2026 Pruva Lojistik. Tüm hakları saklıdır.</span>
                 <span>v2.0 — Made with ❤️ in İstanbul</span>
             </div>
         </div>

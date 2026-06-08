@@ -15,88 +15,88 @@ window.PruvaAiManager = class PruvaAiManager {
         this.DEFAULT_TEMPLATES = {
             'fcl-request': {
                 name: 'FCL Rate Request',
-                subject: 'Rate Request – {{POL}} / {{POD}} – {{KONTEYNER_TİPİ}} x{{ADET}} – {{YÜKLEME_TARİHİ}}',
-                body: 'Sayın {{TAŞIYICI_ADI}},\n\nAşağıdaki yük için spot navlun fiyatı talep ediyoruz:\n\nPOL: {{POL}}\nPOD: {{POD}}\nKonteyner: {{KONTEYNER_TİPİ}} x {{ADET}}\nYükleme Tarihi: {{YÜKLEME_TARİHİ}}\nIncoterm: {{INCOTERM}}\nYük Cinsi: {{YÜK_CİNSİ}}\n\nAll-in fiyat bekliyoruz. Fiyatınızı geçerlilik süresiyle birlikte iletirseniz seviniriz.\n\nTeşekkürler,\n{{İMZA}}'
+                subject: 'Rate Request – {{POL}} / {{POD}} – {{CONTAINER_TYPE}} x{{QTY}} – {{LOAD_DATE}}',
+                body: 'Sayın {{CARRIER_NAME}},\n\nAşağıdaki yük için spot navlun fiyatı talep ediyoruz:\n\nPOL: {{POL}}\nPOD: {{POD}}\nKonteyner: {{CONTAINER_TYPE}} x {{QTY}}\nYükleme Tarihi: {{LOAD_DATE}}\nIncoterm: {{INCOTERM}}\nYük Cinsi: {{CARGO_TYPE}}\n\nAll-in fiyat bekliyoruz. Fiyatınızı geçerlilik süresiyle birlikte iletirseniz seviniriz.\n\nTeşekkürler,\n{{SIGNATURE}}'
             },
             'fcl-offer': {
                 name: 'FCL Müşteri Teklifi',
-                subject: 'Navlun Teklifi – {{POL}} / {{POD}} – {{KONTEYNER_TİPİ}} x{{ADET}}',
-                body: 'Sayın {{MÜŞTERİ_ADI}},\n\nTalebiniz doğrultusunda aşağıdaki navlun teklifini sunmaktayız:\n\nGüzergah: {{POL}} → {{POD}}\nKonteyner: {{KONTEYNER_TİPİ}} x {{ADET}}\nYükleme Tarihi: {{YÜKLEME_TARİHİ}}\nIncoterm: {{INCOTERM}}\nNavlun (All-in): USD {{NAVLUN_FİYATI}} / konteyner\nFiyat Geçerliliği: {{GEÇERLİLİK_SÜRESİ}}\n\nSorularınız için her zaman ulaşabilirsiniz.\n\nSaygılarimizla,\n{{İMZA}}'
+                subject: 'Navlun Teklifi – {{POL}} / {{POD}} – {{CONTAINER_TYPE}} x{{QTY}}',
+                body: 'Sayın {{CUSTOMER_NAME}},\n\nTalebiniz doğrultusunda aşağıdaki navlun teklifini sunmaktayız:\n\nGüzergah: {{POL}} → {{POD}}\nKonteyner: {{CONTAINER_TYPE}} x {{QTY}}\nYükleme Tarihi: {{LOAD_DATE}}\nIncoterm: {{INCOTERM}}\nNavlun (All-in): USD {{FREIGHT_PRICE}} / konteyner\nFiyat Geçerliliği: {{VALIDITY}}\n\nSorularınız için her zaman ulaşabilirsiniz.\n\nSaygılarimizla,\n{{SIGNATURE}}'
             },
             'fcl-negotiation': {
                 name: 'FCL Pazarlık',
                 subject: 'Re: Rate Request – {{POL}} / {{POD}} – Revize Talep',
-                body: 'Sayın {{TAŞIYICI_ADI}},\n\nVerdiğiniz fiyat için teşekkür ederiz. Ancak müşterimizin bütçesi doğrultusunda USD {{BEKLENEN_FİYAT}} seviyesinde revize talep ediyoruz.\n\nMevcut fiyatınız: USD {{NAVLUN_FİYATI}}\nBeklenen fiyat: USD {{BEKLENEN_FİYAT}}\nFark: USD {{FARK}}\n\nBu güzergahta düzenli yük potansiyelimiz bulunmaktadır. Revizenizi bekliyoruz.\n\nTeşekkürler,\n{{İMZA}}'
+                body: 'Sayın {{CARRIER_NAME}},\n\nVerdiğiniz fiyat için teşekkür ederiz. Ancak müşterimizin bütçesi doğrultusunda USD {{TARGET_PRICE}} seviyesinde revize talep ediyoruz.\n\nMevcut fiyatınız: USD {{FREIGHT_PRICE}}\nBeklenen fiyat: USD {{TARGET_PRICE}}\nFark: USD {{DIFF}}\n\nBu güzergahta düzenli yük potansiyelimiz bulunmaktadır. Revizenizi bekliyoruz.\n\nTeşekkürler,\n{{SIGNATURE}}'
             },
             'fcl-followup': {
                 name: 'FCL Takip',
-                subject: 'Takip – Rate Request – {{POL}} / {{POD}} – {{YÜKLEME_TARİHİ}}',
-                body: 'Sayın {{TAŞIYICI_ADI}},\n\n{{TARİH}} tarihinde ilettiğimiz rate request\'e henüz dönüş alamadık. Yükleme tarihi yaklaşmaktadır, fiyatınızı paylaşabilir misiniz?\n\nTeşekkürler,\n{{İMZA}}'
+                subject: 'Takip – Rate Request – {{POL}} / {{POD}} – {{LOAD_DATE}}',
+                body: 'Sayın {{CARRIER_NAME}},\n\n{{DATE}} tarihinde ilettiğimiz rate request\'e henüz dönüş alamadık. Yükleme tarihi yaklaşmaktadır, fiyatınızı paylaşabilir misiniz?\n\nTeşekkürler,\n{{SIGNATURE}}'
             },
             'lcl-request': {
                 name: 'LCL Rate Request',
-                subject: 'LCL Rate Request – {{POL}} / {{POD}} – {{CBM}} CBM / {{KG}} KG – {{YÜKLEME_TARİHİ}}',
-                body: 'Sayın {{TAŞIYICI_ADI}},\n\nAşağıdaki parsiyel yük için navlun fiyatı talep ediyoruz:\n\nPOL / CFS: {{POL}} / {{CFS_POL}}\nPOD / CFS: {{POD}} / {{CFS_POD}}\nHacim: {{CBM}} CBM\nAğırlık: {{KG}} KG\nPaket Adedi: {{PAKET_ADEDI}}\nW/M: {{W_M}}\nYükleme Tarihi: {{YÜKLEME_TARİHİ}}\nIncoterm: {{INCOTERM}}\nYük Cinsi: {{YÜK_CİNSİ}}\n\nFiyatınızı geçerlilik süresiyle iletirseniz seviniriz.\n\nTeşekkürler,\n{{İMZA}}'
+                subject: 'LCL Rate Request – {{POL}} / {{POD}} – {{CBM}} CBM / {{KG}} KG – {{LOAD_DATE}}',
+                body: 'Sayın {{CARRIER_NAME}},\n\nAşağıdaki parsiyel yük için navlun fiyatı talep ediyoruz:\n\nPOL / CFS: {{POL}} / {{CFS_POL}}\nPOD / CFS: {{POD}} / {{CFS_POD}}\nHacim: {{CBM}} CBM\nAğırlık: {{KG}} KG\nPaket Adedi: {{PKG_QTY}}\nW/M: {{W_M}}\nYükleme Tarihi: {{LOAD_DATE}}\nIncoterm: {{INCOTERM}}\nYük Cinsi: {{CARGO_TYPE}}\n\nFiyatınızı geçerlilik süresiyle iletirseniz seviniriz.\n\nTeşekkürler,\n{{SIGNATURE}}'
             },
             'lcl-offer': {
                 name: 'LCL Müşteri Teklifi',
                 subject: 'LCL Navlun Teklifi – {{POL}} / {{POD}} – {{CBM}} CBM',
-                body: 'Sayın {{MÜŞTERİ_ADI}},\n\nParsiyel yük talebiniz için aşağıdaki teklifi sunmaktayız:\n\nGüzergah: {{POL}} → {{POD}}\nHacim: {{CBM}} CBM / {{KG}} KG\nYükleme Tarihi: {{YÜKLEME_TARİHİ}}\nIncoterm: {{INCOTERM}}\nNavlun: USD {{NAVLUN_FİYATI}} / W/M\nFiyat Geçerliliği: {{GEÇERLİLİK_SÜRESİ}}\n\nSaygılarımızla,\n{{İMZA}}'
+                body: 'Sayın {{CUSTOMER_NAME}},\n\nParsiyel yük talebiniz için aşağıdaki teklifi sunmaktayız:\n\nGüzergah: {{POL}} → {{POD}}\nHacim: {{CBM}} CBM / {{KG}} KG\nYükleme Tarihi: {{LOAD_DATE}}\nIncoterm: {{INCOTERM}}\nNavlun: USD {{FREIGHT_PRICE}} / W/M\nFiyat Geçerliliği: {{VALIDITY}}\n\nSaygılarımızla,\n{{SIGNATURE}}'
             },
             'lcl-negotiation': {
                 name: 'LCL Pazarlık',
                 subject: 'Re: LCL Rate Request – {{POL}} / {{POD}} – Revize Talep',
-                body: 'Sayın {{TAŞIYICI_ADI}},\n\nFiyatınız için teşekkürler. USD {{BEKLENEN_FİYAT}}/W/M seviyesinde revize mümkün müdür?\n\nMevcut: USD {{NAVLUN_FİYATI}} / W/M\nBeklenen: USD {{BEKLENEN_FİYAT}} / W/M\n\nTeşekkürler,\n{{İMZA}}'
+                body: 'Sayın {{CARRIER_NAME}},\n\nFiyatınız için teşekkürler. USD {{TARGET_PRICE}}/W/M seviyesinde revize mümkün müdür?\n\nMevcut: USD {{FREIGHT_PRICE}} / W/M\nBeklenen: USD {{TARGET_PRICE}} / W/M\n\nTeşekkürler,\n{{SIGNATURE}}'
             },
             'lcl-followup': {
                 name: 'LCL Takip',
-                subject: 'Takip – LCL Rate Request – {{POL}} / {{POD}} – {{YÜKLEME_TARİHİ}}',
-                body: 'Sayın {{TAŞIYICI_ADI}},\n\n{{TARİH}} tarihinde ilettiğimiz LCL rate request\'e dönüş alamadık. Fiyatınızı paylaşabilir misiniz?\n\nTeşekkürler,\n{{İMZA}}'
+                subject: 'Takip – LCL Rate Request – {{POL}} / {{POD}} – {{LOAD_DATE}}',
+                body: 'Sayın {{CARRIER_NAME}},\n\n{{DATE}} tarihinde ilettiğimiz LCL rate request\'e dönüş alamadık. Fiyatınızı paylaşabilir misiniz?\n\nTeşekkürler,\n{{SIGNATURE}}'
             },
             'air-request': {
                 name: 'Hava Rate Request',
-                subject: 'Air Freight Rate Request – {{POL}} / {{POD}} – {{CHARGEABLE_WEIGHT}} KG – {{YÜKLEME_TARİHİ}}',
-                body: 'Sayın {{TAŞIYICI_ADI}},\n\nAşağıdaki hava yükü için fiyat talep ediyoruz:\n\nGüzergah: {{UCUŞ_GÜZERGAHI}}\nGerçek Ağırlık: {{KG}} KG\nHacimsel Ağırlık: {{HACIMSEL_AGIRLIK}} KG\nChargeable Weight: {{CHARGEABLE_WEIGHT}} KG\nBoyutlar: {{BOYUT}} cm\nPaket Adedi: {{PAKET_ADEDI}}\nYükleme Tarihi: {{YÜKLEME_TARİHİ}}\nIncoterm: {{INCOTERM}}\nYük Cinsi: {{YÜK_CİNSİ}}\n\nAll-in fiyat bekliyoruz.\n\nTeşekkürler,\n{{İMZA}}'
+                subject: 'Air Freight Rate Request – {{POL}} / {{POD}} – {{CHARGEABLE_WEIGHT}} KG – {{LOAD_DATE}}',
+                body: 'Sayın {{CARRIER_NAME}},\n\nAşağıdaki hava yükü için fiyat talep ediyoruz:\n\nGüzergah: {{FLIGHT_ROUTE}}\nGerçek Ağırlık: {{KG}} KG\nHacimsel Ağırlık: {{VOL_WEIGHT}} KG\nChargeable Weight: {{CHARGEABLE_WEIGHT}} KG\nBoyutlar: {{DIMENSIONS}} cm\nPaket Adedi: {{PKG_QTY}}\nYükleme Tarihi: {{LOAD_DATE}}\nIncoterm: {{INCOTERM}}\nYük Cinsi: {{CARGO_TYPE}}\n\nAll-in fiyat bekliyoruz.\n\nTeşekkürler,\n{{SIGNATURE}}'
             },
             'air-offer': {
                 name: 'Hava Müşteri Teklifi',
                 subject: 'Hava Yolu Navlun Teklifi – {{POL}} / {{POD}} – {{CHARGEABLE_WEIGHT}} KG',
-                body: 'Sayın {{MÜŞTERİ_ADI}},\n\nHava yolu talebiniz için teklifimiz:\n\nGüzergah: {{UCUŞ_GÜZERGAHI}}\nChargeable Weight: {{CHARGEABLE_WEIGHT}} KG\nYükleme Tarihi: {{YÜKLEME_TARİHİ}}\nIncoterm: {{INCOTERM}}\nNavlun: USD {{NAVLUN_FİYATI}} / KG\nFiyat Geçerliliği: {{GEÇERLİLİK_SÜRESİ}}\n\nSaygılarımızla,\n{{İMZA}}'
+                body: 'Sayın {{CUSTOMER_NAME}},\n\nHava yolu talebiniz için teklifimiz:\n\nGüzergah: {{FLIGHT_ROUTE}}\nChargeable Weight: {{CHARGEABLE_WEIGHT}} KG\nYükleme Tarihi: {{LOAD_DATE}}\nIncoterm: {{INCOTERM}}\nNavlun: USD {{FREIGHT_PRICE}} / KG\nFiyat Geçerliliği: {{VALIDITY}}\n\nSaygılarımızla,\n{{SIGNATURE}}'
             },
             'air-negotiation': {
                 name: 'Hava Pazarlık',
                 subject: 'Re: Air Freight Rate Request – {{POL}} / {{POD}} – Revize Talep',
-                body: 'Sayın {{TAŞIYICI_ADI}},\n\nFiyatınız için teşekkürler. USD {{BEKLENEN_FİYAT}}/KG seviyesinde revize mümkün müdür?\n\nMevcut: USD {{NAVLUN_FİYATI}} / KG\nBeklenen: USD {{BEKLENEN_FİYAT}} / KG\n\nTeşekkürler,\n{{İMZA}}'
+                body: 'Sayın {{CARRIER_NAME}},\n\nFiyatınız için teşekkürler. USD {{TARGET_PRICE}}/KG seviyesinde revize mümkün müdür?\n\nMevcut: USD {{FREIGHT_PRICE}} / KG\nBeklenen: USD {{TARGET_PRICE}} / KG\n\nTeşekkürler,\n{{SIGNATURE}}'
             },
             'air-followup': {
                 name: 'Hava Takip',
-                subject: 'Takip – Air Freight Rate Request – {{POL}} / {{POD}} – {{YÜKLEME_TARİHİ}}',
-                body: 'Sayın {{TAŞIYICI_ADI}},\n\n{{TARİH}} tarihinde ilettiğimiz hava yolu rate request\'e dönüş alamadık. Fiyatınızı paylaşabilir misiniz?\n\nTeşekkürler,\n{{İMZA}}'
+                subject: 'Takip – Air Freight Rate Request – {{POL}} / {{POD}} – {{LOAD_DATE}}',
+                body: 'Sayın {{CARRIER_NAME}},\n\n{{DATE}} tarihinde ilettiğimiz hava yolu rate request\'e dönüş alamadık. Fiyatınızı paylaşabilir misiniz?\n\nTeşekkürler,\n{{SIGNATURE}}'
             },
             'road-request': {
                 name: 'Kara Rate Request',
-                subject: 'Kara Taşıma Fiyat Talebi – {{POL}} / {{POD}} – {{ARAÇ_TİPİ}} – {{YÜKLEME_TARİHİ}}',
-                body: 'Sayın {{TAŞIYICI_ADI}},\n\nAşağıdaki kara taşıması için fiyat talep ediyoruz:\n\nGüzergah: {{GÜZERGAH}}\nAraç Tipi: {{ARAÇ_TİPİ}}\nAraç Adedi: {{ARAÇ_ADEDI}}\nAğırlık: {{KG}} KG\nYükleme Metresi: {{LDM}} LDM\nGümrük Noktası: {{GÜMRÜK_NOKTASI}}\nYükleme Tarihi: {{YÜKLEME_TARİHİ}}\nIncoterm: {{INCOTERM}}\nYük Cinsi: {{YÜK_CİNSİ}}\n\nTeşekkürler,\n{{İMZA}}'
+                subject: 'Kara Taşıma Fiyat Talebi – {{POL}} / {{POD}} – {{TRUCK_TYPE}} – {{LOAD_DATE}}',
+                body: 'Sayın {{CARRIER_NAME}},\n\nAşağıdaki kara taşıması için fiyat talep ediyoruz:\n\nGüzergah: {{ROUTE}}\nAraç Tipi: {{TRUCK_TYPE}}\nAraç Adedi: {{TRUCK_QTY}}\nAğırlık: {{KG}} KG\nYükleme Metresi: {{LDM}} LDM\nGümrük Noktası: {{CUSTOMS}}\nYükleme Tarihi: {{LOAD_DATE}}\nIncoterm: {{INCOTERM}}\nYük Cinsi: {{CARGO_TYPE}}\n\nTeşekkürler,\n{{SIGNATURE}}'
             },
             'road-offer': {
                 name: 'Kara Müşteri Teklifi',
-                subject: 'Kara Taşıma Teklifi – {{POL}} / {{POD}} – {{ARAÇ_TİPİ}}',
-                body: 'Sayın {{MÜŞTERİ_ADI}},\n\nKara taşıma talebiniz için teklifimiz:\n\nGüzergah: {{GÜZERGAH}}\nAraç Tipi: {{ARAÇ_TİPİ}}\nYükleme Tarihi: {{YÜKLEME_TARİHİ}}\nNavlun: USD {{NAVLUN_FİYATI}} / araç\nFiyat Geçerliliği: {{GEÇERLİLİK_SÜRESİ}}\n\nSaygılarımızla,\n{{İMZA}}'
+                subject: 'Kara Taşıma Teklifi – {{POL}} / {{POD}} – {{TRUCK_TYPE}}',
+                body: 'Sayın {{CUSTOMER_NAME}},\n\nKara taşıma talebiniz için teklifimiz:\n\nGüzergah: {{ROUTE}}\nAraç Tipi: {{TRUCK_TYPE}}\nYükleme Tarihi: {{LOAD_DATE}}\nNavlun: USD {{FREIGHT_PRICE}} / araç\nFiyat Geçerliliği: {{VALIDITY}}\n\nSaygılarımızla,\n{{SIGNATURE}}'
             },
             'road-negotiation': {
                 name: 'Kara Pazarlık',
                 subject: 'Re: Kara Taşıma Fiyat Talebi – {{POL}} / {{POD}} – Revize Talep',
-                body: 'Sayın {{TAŞIYICI_ADI}},\n\nFiyatınız için teşekkürler. USD {{BEKLENEN_FİYAT}}/araç seviyesinde revize mümkün müdür?\n\nMevcut: USD {{NAVLUN_FİYATI}} / araç\nBeklenen: USD {{BEKLENEN_FİYAT}} / araç\n\nTeşekkürler,\n{{İMZA}}'
+                body: 'Sayın {{CARRIER_NAME}},\n\nFiyatınız için teşekkürler. USD {{TARGET_PRICE}}/araç seviyesinde revize mümkün müdür?\n\nMevcut: USD {{FREIGHT_PRICE}} / araç\nBeklenen: USD {{TARGET_PRICE}} / araç\n\nTeşekkürler,\n{{SIGNATURE}}'
             },
             'road-followup': {
                 name: 'Kara Takip',
-                subject: 'Takip – Kara Taşıma Fiyat Talebi – {{POL}} / {{POD}} – {{YÜKLEME_TARİHİ}}',
-                body: 'Sayın {{TAŞIYICI_ADI}},\n\n{{TARİH}} tarihinde ilettiğimiz kara taşıma fiyat talebine dönüş alamadık. Fiyatınızı paylaşabilir misiniz?\n\nTeşekkürler,\n{{İMZA}}'
+                subject: 'Takip – Kara Taşıma Fiyat Talebi – {{POL}} / {{POD}} – {{LOAD_DATE}}',
+                body: 'Sayın {{CARRIER_NAME}},\n\n{{DATE}} tarihinde ilettiğimiz kara taşıma fiyat talebine dönüş alamadık. Fiyatınızı paylaşabilir misiniz?\n\nTeşekkürler,\n{{SIGNATURE}}'
             },
             'common-missing': {
                 name: 'Eksik Bilgi Sorgulama',
                 subject: 'Navlun Talebi – Ek Bilgi Gerekli',
-                body: 'Sayın {{MÜŞTERİ_ADI}},\n\nNavlun talebinizi aldık, teşekkür ederiz.\n\nFiyatlandırma yapabilmemiz için aşağıdaki bilgilere ihtiyaç duyuyoruz:\n{{EKSİK_BİLGİLER}}\n\nMevcut bilgileriniz:\n{{MEVCUT_BİLGİLER}}\n\nBu bilgileri ilettiğinizde en kısa sürede fiyat teklifimizi sunacağız.\n\nSaygılarımızla,\n{{İMZA}}'
+                body: 'Sayın {{CUSTOMER_NAME}},\n\nNavlun talebinizi aldık, teşekkür ederiz.\n\nFiyatlandırma yapabilmemiz için aşağıdaki bilgilere ihtiyaç duyuyoruz:\n{{MISSING_INFO}}\n\nMevcut bilgileriniz:\n{{AVAILABLE_INFO}}\n\nBu bilgileri ilettiğinizde en kısa sürede fiyat teklifimizi sunacağız.\n\nSaygılarımızla,\n{{SIGNATURE}}'
             }
         };
 
@@ -131,6 +131,20 @@ window.PruvaAiManager = class PruvaAiManager {
         this.templates = {};
         this.carriers = [];
         this.activeStarsForm = 5;
+
+        // Dil değiştiğinde şablonları anında yeni dile göre sıfırla
+        window.addEventListener('languageChanged', () => {
+            if (this.DEFAULT_TEMPLATES) {
+                this.templates = JSON.parse(JSON.stringify(this.DEFAULT_TEMPLATES));
+                if (typeof this.renderTemplates === 'function') {
+                    this.renderTemplates();
+                }
+                if (this.activeTemplateKey && typeof this.selectTemplate === 'function') {
+                    this.selectTemplate(this.activeTemplateKey);
+                }
+            }
+        });
+
         this.rules = {
             autoInquiry: true,
             maxRounds: 3,
@@ -623,7 +637,7 @@ window.PruvaAiManager = class PruvaAiManager {
                 chipsContainer.appendChild(chip);
             });
         } else {
-            const commonMandatory = ['MÜŞTERİ_ADI', 'EKSİK_BİLGİLER', 'MEVCUT_BİLGİLER', 'İMZA'];
+            const commonMandatory = ['CUSTOMER_NAME', 'MISSING_INFO', 'AVAILABLE_INFO', 'SIGNATURE'];
             commonMandatory.forEach(key => {
                 const isPresent = foundVariables.includes(key);
                 const chip = document.createElement('div');
@@ -641,7 +655,7 @@ window.PruvaAiManager = class PruvaAiManager {
 
         foundVariables.forEach(key => {
             if (!isMissingInfoTemplate && activeMandatories.includes(key)) return;
-            if (isMissingInfoTemplate && ['MÜŞTERİ_ADI', 'EKSİK_BİLGİLER', 'MEVCUT_BİLGİLER', 'İMZA'].includes(key)) return;
+            if (isMissingInfoTemplate && ['CUSTOMER_NAME', 'MISSING_INFO', 'AVAILABLE_INFO', 'SIGNATURE'].includes(key)) return;
 
             const chip = document.createElement('div');
             chip.className = 'chip optional valid';
@@ -2512,32 +2526,32 @@ const VARIABLES_CONFIG = {
     common: {
         title: 'Ortak Değişkenler',
         items: [
-            { key: 'TAŞIYICI_ADI', label: 'Taşıyıcı Firma Adı' },
-            { key: 'MÜŞTERİ_ADI', label: 'Müşteri Firma Adı' },
-            { key: 'MÜŞTERİ_MAİL', label: 'Müşteri E-Posta' },
-            { key: 'ŞİRKET_ADI', label: 'Kendi Şirket Adı' },
-            { key: 'İMZA', label: 'İmza Satırı' },
-            { key: 'TARİH', label: 'Bugünün Tarihi' },
-            { key: 'BÖLGE', label: 'Güzergah Özeti' },
+            { key: 'CARRIER_NAME', label: 'Taşıyıcı Firma Adı' },
+            { key: 'CUSTOMER_NAME', label: 'Müşteri Firma Adı' },
+            { key: 'CUSTOMER_EMAIL', label: 'Müşteri E-Posta' },
+            { key: 'COMPANY_NAME', label: 'Kendi Şirket Adı' },
+            { key: 'SIGNATURE', label: 'İmza Satırı' },
+            { key: 'DATE', label: 'Bugünün Tarihi' },
+            { key: 'REGION', label: 'Güzergah Özeti' },
             { key: 'POL', label: 'Yükleme Limanı (POL)' },
             { key: 'POD', label: 'Varış Limanı (POD)' },
             { key: 'INCOTERM', label: 'Incoterm (FOB, EXW vb.)' },
-            { key: 'YÜK_CİNSİ', label: 'Yükün Cinsi' },
-            { key: 'YÜKLEME_TARİHİ', label: 'Yükleme Tarihi' },
-            { key: 'GEÇERLİLİK_SÜRESİ', label: 'Teklif Geçerlilik Süresi' },
-            { key: 'NAVLUN_FİYATI', label: 'Navlun Fiyatı' },
-            { key: 'BEKLENEN_FİYAT', label: 'Müşteri Hedef Fiyatı' },
-            { key: 'FARK', label: 'Fiyat Farkı' },
-            { key: 'EKSİK_BİLGİLER', label: 'AI Dinamik Eksik Bilgiler' },
-            { key: 'MEVCUT_BİLGİLER', label: 'Mevcut Bilgiler Özeti' }
+            { key: 'CARGO_TYPE', label: 'Yükün Cinsi' },
+            { key: 'LOAD_DATE', label: 'Yükleme Tarihi' },
+            { key: 'VALIDITY', label: 'Teklif Geçerlilik Süresi' },
+            { key: 'FREIGHT_PRICE', label: 'Navlun Fiyatı' },
+            { key: 'TARGET_PRICE', label: 'Müşteri Hedef Fiyatı' },
+            { key: 'DIFF', label: 'Fiyat Farkı' },
+            { key: 'MISSING_INFO', label: 'AI Dinamik Eksik Bilgiler' },
+            { key: 'AVAILABLE_INFO', label: 'Mevcut Bilgiler Özeti' }
         ]
     },
     fcl: {
         title: 'FCL Özel Değişkenleri',
         items: [
-            { key: 'KONTEYNER_TİPİ', label: 'Konteyner Tipi (40HC, 20GP...)' },
-            { key: 'ADET', label: 'Konteyner Adedi' },
-            { key: 'ARMATÖR', label: 'Tercih Edilen Armatör' }
+            { key: 'CONTAINER_TYPE', label: 'Konteyner Tipi (40HC, 20GP...)' },
+            { key: 'QTY', label: 'Konteyner Adedi' },
+            { key: 'SHIPOWNER', label: 'Tercih Edilen Armatör' }
         ]
     },
     lcl: {
@@ -2545,7 +2559,7 @@ const VARIABLES_CONFIG = {
         items: [
             { key: 'CBM', label: 'Hacim (Metreküp)' },
             { key: 'KG', label: 'Ağırlık (Kilogram)' },
-            { key: 'PAKET_ADEDI', label: 'Koli / Palet Adedi' },
+            { key: 'PKG_QTY', label: 'Koli / Palet Adedi' },
             { key: 'W_M', label: 'W/M Katsayısı' },
             { key: 'CFS_POL', label: 'Çıkış CFS Deposu' },
             { key: 'CFS_POD', label: 'Varış CFS Deposu' }
@@ -2555,68 +2569,68 @@ const VARIABLES_CONFIG = {
         title: 'Hava Yolu Özel Değişkenleri',
         items: [
             { key: 'KG', label: 'Ağırlık (Brüt)' },
-            { key: 'HACIMSEL_AGIRLIK', label: 'Hacimsel Ağırlık' },
+            { key: 'VOL_WEIGHT', label: 'Hacimsel Ağırlık' },
             { key: 'CHARGEABLE_WEIGHT', label: 'Faturalandırılabilir Ağırlık' },
-            { key: 'BOYUT', label: 'Koli Boyutları (EnxBoyxYük)' },
-            { key: 'PAKET_ADEDI', label: 'Koli Adedi' },
-            { key: 'UCUŞ_GÜZERGAHI', label: 'Uçuş Parkuru (örn: IST-JFK)' }
+            { key: 'DIMENSIONS', label: 'Koli Boyutları (EnxBoyxYük)' },
+            { key: 'PKG_QTY', label: 'Koli Adedi' },
+            { key: 'FLIGHT_ROUTE', label: 'Uçuş Parkuru (örn: IST-JFK)' }
         ]
     },
     road: {
         title: 'Kara Yolu Özel Değişkenleri',
         items: [
-            { key: 'ARAÇ_TİPİ', label: 'Araç Tipi (Tır, Mega...)' },
+            { key: 'TRUCK_TYPE', label: 'Araç Tipi (Tır, Mega...)' },
             { key: 'LDM', label: 'Yükleme Metresi (LDM)' },
             { key: 'KG', label: 'Ağırlık (KG)' },
-            { key: 'GÜMRÜK_NOKTASI', label: 'Gümrük Geçiş Kapısı' },
-            { key: 'GÜZERGAH', label: 'Kalkış/Varış Şehirleri' },
-            { key: 'ARAÇ_ADEDI', label: 'Gerekli Araç Sayısı' }
+            { key: 'CUSTOMS', label: 'Gümrük Geçiş Kapısı' },
+            { key: 'ROUTE', label: 'Kalkış/Varış Şehirleri' },
+            { key: 'TRUCK_QTY', label: 'Gerekli Araç Sayısı' }
         ]
     }
 };
 
 const MANDATORY_CONFIG = {
-    fcl: ['POL', 'POD', 'KONTEYNER_TİPİ', 'ADET', 'YÜKLEME_TARİHİ', 'INCOTERM', 'YÜK_CİNSİ'],
-    lcl: ['POL', 'POD', 'CBM', 'KG', 'PAKET_ADEDI', 'YÜKLEME_TARİHİ', 'INCOTERM', 'YÜK_CİNSİ'],
-    air: ['POL', 'POD', 'KG', 'HACIMSEL_AGIRLIK', 'BOYUT', 'PAKET_ADEDI', 'YÜKLEME_TARİHİ', 'INCOTERM', 'YÜK_CİNSİ'],
-    road: ['POL', 'POD', 'ARAÇ_TİPİ', 'KG', 'YÜKLEME_TARİHİ', 'INCOTERM', 'YÜK_CİNSİ']
+    fcl: ['POL', 'POD', 'CONTAINER_TYPE', 'QTY', 'LOAD_DATE', 'INCOTERM', 'CARGO_TYPE'],
+    lcl: ['POL', 'POD', 'CBM', 'KG', 'PKG_QTY', 'LOAD_DATE', 'INCOTERM', 'CARGO_TYPE'],
+    air: ['POL', 'POD', 'KG', 'VOL_WEIGHT', 'DIMENSIONS', 'PKG_QTY', 'LOAD_DATE', 'INCOTERM', 'CARGO_TYPE'],
+    road: ['POL', 'POD', 'TRUCK_TYPE', 'KG', 'LOAD_DATE', 'INCOTERM', 'CARGO_TYPE']
 };
 
 const MOCK_PREVIEW_VALUES = {
     'POL': 'Şangay',
     'POD': 'Ambarlı',
-    'TAŞIYICI_ADI': 'MSC',
-    'MÜŞTERİ_ADI': 'Arçelik',
-    'MÜŞTERİ_MAİL': 'info@arcelik.com',
-    'KONTEYNER_TİPİ': '40HC',
-    'ADET': '2',
-    'YÜKLEME_TARİHİ': '15 Temmuz 2026',
+    'CARRIER_NAME': 'MSC',
+    'CUSTOMER_NAME': 'Arçelik',
+    'CUSTOMER_EMAIL': 'info@arcelik.com',
+    'CONTAINER_TYPE': '40HC',
+    'QTY': '2',
+    'LOAD_DATE': '15 Temmuz 2026',
     'INCOTERM': 'FOB',
-    'YÜK_CİNSİ': 'Genel Kargo',
-    'NAVLUN_FİYATI': '1850',
-    'GEÇERLİLİK_SÜRESİ': '30 Haziran 2026',
-    'BEKLENEN_FİYAT': '1600',
-    'FARK': '250',
-    'ŞİRKET_ADI': 'Pruva Lojistik',
-    'İMZA': 'Ahmet Yılmaz / Pricing',
+    'CARGO_TYPE': 'Genel Kargo',
+    'FREIGHT_PRICE': '1850',
+    'VALIDITY': '30 Haziran 2026',
+    'TARGET_PRICE': '1600',
+    'DIFF': '250',
+    'COMPANY_NAME': 'Pruva Lojistik',
+    'SIGNATURE': 'Ahmet Yılmaz / Pricing',
     'CBM': '12',
     'KG': '4500',
-    'PAKET_ADEDI': '8',
+    'PKG_QTY': '8',
     'W_M': '12',
     'CFS_POL': 'Şangay CFS Deposu',
     'CFS_POD': 'Ambarlı CFS Deposu',
-    'HACIMSEL_AGIRLIK': '1500',
+    'VOL_WEIGHT': '1500',
     'CHARGEABLE_WEIGHT': '4500',
-    'BOYUT': '120 x 80 x 160',
-    'UCUŞ_GÜZERGAHI': 'PVG → IST',
-    'ARAÇ_TİPİ': 'TIR (Tır-Mega)',
+    'DIMENSIONS': '120 x 80 x 160',
+    'FLIGHT_ROUTE': 'PVG → IST',
+    'TRUCK_TYPE': 'TIR (Tır-Mega)',
     'LDM': '4.2',
-    'GÜMRÜK_NOKTASI': 'Kapıkule Gümrük',
-    'GÜZERGAH': 'İstanbul → Münih',
-    'ARAÇ_ADEDI': '1',
-    'TARİH': '27 Mayıs 2026',
-    'BÖLGE': 'Uzak Doğu - Türkiye Güzergahı',
-    'EKSİK_BİLGİLER': '• Konteyner Tipi (Örn: 40HC)\n• Yükleme Tarihi (Planlanan)',
-    'MEVCUT_BİLGİLER': 'Çıkış: Şangay, Varış: Ambarlı, Incoterm: FOB, Yük Cinsi: Genel Kargo',
-    'ARMATÖR': 'MSC Lojistik'
+    'CUSTOMS': 'Kapıkule Gümrük',
+    'ROUTE': 'İstanbul → Münih',
+    'TRUCK_QTY': '1',
+    'DATE': '27 Mayıs 2026',
+    'REGION': 'Uzak Doğu - Türkiye Güzergahı',
+    'MISSING_INFO': '• Konteyner Tipi (Örn: 40HC)\n• Yükleme Tarihi (Planlanan)',
+    'AVAILABLE_INFO': 'Çıkış: Şangay, Varış: Ambarlı, Incoterm: FOB, Yük Cinsi: Genel Kargo',
+    'SHIPOWNER': 'MSC Lojistik'
 };

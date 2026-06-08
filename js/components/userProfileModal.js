@@ -21,36 +21,36 @@ window.userProfileModal = {
         // Role-based config
         const roleConfig = isCarrier ? {
             icon: 'truck',
-            label: 'Taşıyıcı',
-            cat1Label: 'İletişim & Ulaşılabilirlik',
-            cat2Label: 'Zamanında Teslimat',
-            cat3Label: 'Evrak Düzeni & Özen',
+            label: window.i18n.t('user_profile.role_carrier'),
+            cat1Label: window.i18n.t('user_profile.cat_comm'),
+            cat2Label: window.i18n.t('user_profile.cat_delivery'),
+            cat3Label: window.i18n.t('user_profile.cat_doc'),
             cat1Color: '#3498db',
             cat2Color: '#27ae60',
             cat3Color: '#9b59b6',
             trustLevels: [
-                { min: 50, minRating: 4.8, label: 'Elit Taşıyıcı', color: '#9b59b6', icon: 'award' },
-                { min: 10, minRating: 4.5, label: 'Güvenilir Taşıyıcı', color: '#27ae60', icon: 'shield-check' },
-                { min: 1, minRating: 0, label: 'Aktif Taşıyıcı', color: '#3498db', icon: 'truck' }
+                { min: 50, minRating: 4.8, label: window.i18n.t('user_profile.elite_carrier'), color: '#9b59b6', icon: 'award' },
+                { min: 10, minRating: 4.5, label: window.i18n.t('user_profile.reliable_carrier'), color: '#27ae60', icon: 'shield-check' },
+                { min: 1, minRating: 0, label: window.i18n.t('user_profile.active_carrier'), color: '#3498db', icon: 'truck' }
             ]
         } : {
             icon: 'package',
-            label: 'Yük Veren',
-            cat1Label: 'İletişim & Profesyonellik',
-            cat2Label: 'Ödeme Hızı & Güven',
-            cat3Label: 'İş Süreçleri Uyumu',
+            label: window.i18n.t('user_profile.role_loader'),
+            cat1Label: window.i18n.t('user_profile.cat_prof'),
+            cat2Label: window.i18n.t('user_profile.cat_pay'),
+            cat3Label: window.i18n.t('user_profile.cat_proc'),
             cat1Color: '#3498db',
             cat2Color: '#e67e22',
             cat3Color: '#27ae60',
             trustLevels: [
-                { min: 50, minRating: 4.8, label: 'Elit Yük Veren', color: '#9b59b6', icon: 'award' },
-                { min: 10, minRating: 4.5, label: 'Güvenilir Yük Veren', color: '#27ae60', icon: 'shield-check' },
-                { min: 1, minRating: 0, label: 'Aktif Yük Veren', color: '#e67e22', icon: 'package' }
+                { min: 50, minRating: 4.8, label: window.i18n.t('user_profile.elite_loader'), color: '#9b59b6', icon: 'award' },
+                { min: 10, minRating: 4.5, label: window.i18n.t('user_profile.reliable_loader'), color: '#27ae60', icon: 'shield-check' },
+                { min: 1, minRating: 0, label: window.i18n.t('user_profile.active_loader'), color: '#e67e22', icon: 'package' }
             ]
         };
 
         // Trust level hesaplama
-        let trustLevel = { label: 'Yeni Üye', color: '#888', icon: 'shield' };
+        let trustLevel = { label: window.i18n.t('user_profile.new_member'), color: '#888', icon: 'shield' };
         for (const tl of roleConfig.trustLevels) {
             if (perf.completedJobs >= tl.min && perf.overallRating >= tl.minRating) {
                 trustLevel = { label: tl.label, color: tl.color, icon: tl.icon };
@@ -82,7 +82,7 @@ window.userProfileModal = {
                                 <i data-lucide="${roleConfig.icon}" style="width: 32px; height: 32px;"></i>
                             </div>
                             <div>
-                                <h2 style="margin: 0 0 5px 0; font-size: 1.5rem; color: var(--primary); font-weight: 800; ${!isCarrier ? 'filter: blur(6px); user-select: none;' : ''}" title="${!isCarrier ? 'Firma adı teklif kabul edilene kadar gizlidir' : ''}">${companyName}</h2>
+                                <h2 style="margin: 0 0 5px 0; font-size: 1.5rem; color: var(--primary); font-weight: 800; ${!isCarrier ? 'filter: blur(6px); user-select: none;' : ''}" title="${!isCarrier ? window.i18n.t('user_profile.hidden_name') : ''}">${companyName}</h2>
                                 <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
                                     <span style="font-size: 0.75rem; color: ${isCarrier ? 'var(--secondary)' : '#e67e22'}; background: ${isCarrier ? '#f0f7ff' : '#fff7ed'}; padding: 3px 10px; border-radius: 20px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">
                                         ${roleConfig.label}
@@ -92,7 +92,7 @@ window.userProfileModal = {
                                     </span>
                                     ${verifiedRefs.length > 0 ? `
                                         <span style="font-size: 0.8rem; color: #27ae60; display: flex; align-items: center; gap: 4px; font-weight: 600;">
-                                            <i data-lucide="check-circle" style="width: 14px; height: 14px;"></i> ${verifiedRefs.length} Referans
+                                            <i data-lucide="check-circle" style="width: 14px; height: 14px;"></i> ${window.i18n.t('user_profile.references').replace('{count}', verifiedRefs.length)}
                                         </span>
                                     ` : ''}
                                 </div>
@@ -105,23 +105,23 @@ window.userProfileModal = {
                         <!-- Main Stats -->
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                             <div style="background: var(--bg-surface); padding: 20px; border-radius: 16px; border: 1px solid var(--border-dim); text-align: center;">
-                                <div style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; margin-bottom: 10px;">Genel Puan</div>
+                                <div style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; margin-bottom: 10px;">${window.i18n.t('user_profile.overall_rating')}</div>
                                 <div style="font-size: 3rem; font-weight: 800; color: var(--primary); line-height: 1; margin-bottom: 10px;">${perf.overallRating > 0 ? perf.overallRating : '-'}</div>
                                 <div style="display: flex; justify-content: center; gap: 2px;">
-                                    ${perf.overallRating > 0 ? renderStars(perf.overallRating) : '<span style="color: var(--text-muted); font-size: 0.8rem;">Henüz puan yok</span>'}
+                                    ${perf.overallRating > 0 ? renderStars(perf.overallRating) : `<span style="color: var(--text-muted); font-size: 0.8rem;">${window.i18n.t('user_profile.no_rating')}</span>`}
                                 </div>
                             </div>
                             <div style="background: var(--bg-surface); padding: 20px; border-radius: 16px; border: 1px solid var(--border-dim); text-align: center;">
-                                <div style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; margin-bottom: 10px;">Tamamlanan İş</div>
+                                <div style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; margin-bottom: 10px;">${window.i18n.t('user_profile.completed_jobs')}</div>
                                 <div style="font-size: 3rem; font-weight: 800; color: var(--primary); line-height: 1; margin-bottom: 10px;">${perf.completedJobs}</div>
-                                <div style="font-size: 0.85rem; color: var(--text-secondary);">Pruva üzerinden</div>
+                                <div style="font-size: 0.85rem; color: var(--text-secondary);">${window.i18n.t('user_profile.via_pruva')}</div>
                             </div>
                         </div>
 
                         <!-- Category Breakdown -->
                         ${perf.completedJobs > 0 ? `
                         <div>
-                            <h3 style="margin: 0 0 15px 0; font-size: 1.1rem; color: var(--primary);">Kategori Performansı</h3>
+                            <h3 style="margin: 0 0 15px 0; font-size: 1.1rem; color: var(--primary);">${window.i18n.t('user_profile.cat_perf')}</h3>
                             <div style="display: flex; flex-direction: column; gap: 15px;">
                                 <div>
                                     <div style="display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 600; margin-bottom: 5px; color: var(--text-secondary);">
@@ -156,11 +156,11 @@ window.userProfileModal = {
 
                         <!-- Recent Reviews -->
                         <div>
-                            <h3 style="margin: 0 0 15px 0; font-size: 1.1rem; color: var(--primary);">Son Yorumlar</h3>
+                            <h3 style="margin: 0 0 15px 0; font-size: 1.1rem; color: var(--primary);">${window.i18n.t('user_profile.recent_reviews')}</h3>
                             <div style="display: flex; flex-direction: column; gap: 15px;">
                                 ${(perf.lastReviews && perf.lastReviews.length > 0) ? perf.lastReviews.map(review => {
                                     const avg = ((review.scores.cat1 + review.scores.cat2 + review.scores.cat3) / 3).toFixed(1);
-                                    const reviewerLabel = review.reviewerRole === 'loader' ? 'Yük Veren' : review.reviewerRole === 'carrier' ? 'Taşıyıcı' : 'Firma';
+                                    const reviewerLabel = review.reviewerRole === 'loader' ? window.i18n.t('user_profile.role_loader') : review.reviewerRole === 'carrier' ? window.i18n.t('user_profile.role_carrier') : window.i18n.t('user_profile.company');
                                     return `
                                     <div style="background: var(--bg-surface); padding: 15px; border-radius: 12px; border: 1px solid var(--border-dim);">
                                         <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
@@ -178,7 +178,7 @@ window.userProfileModal = {
                                     `;
                                 }).join('') : `
                                     <div style="text-align: center; padding: 30px; background: var(--bg-surface); border-radius: 12px; border: 1px dashed var(--border-dim); color: var(--text-muted); font-size: 0.9rem;">
-                                        Henüz yorum yapılmamış.
+                                        ${window.i18n.t('user_profile.no_reviews')}
                                     </div>
                                 `}
                             </div>

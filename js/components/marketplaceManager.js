@@ -59,14 +59,14 @@ window.MarketplaceManager = class MarketplaceManager {
             const carrierData = this.app.store.getCurrentUser() || this.app.state.users.find(u => u.name === this.app.state.currentUser);
             if (carrierData && carrierData.bannedUntil && carrierData.bannedUntil > Date.now()) {
                 if (window.notificationManager) {
-                    window.notificationManager.showToast('Zaman aşımına uğramış ve güncellenmemiş sevkiyatınızdan dolayı şu an teklif veremezsiniz.', 'error');
+                    window.notificationManager.showToast(window.i18n.t('market.err_banned_bid'), 'error');
                 }
                 return;
             }
 
             if (this.app.state.subscriptionType !== 'premium') {
                 if (window.notificationManager) {
-                    window.notificationManager.showToast('Teklif verebilmek için Premium Üye olmanız gerekmektedir.', 'warning');
+                    window.notificationManager.showToast(window.i18n.t('market.err_premium_required'), 'warning');
                 }
                 this.app.router.navigate('membership');
             } else {
@@ -126,7 +126,7 @@ window.MarketplaceManager = class MarketplaceManager {
                     isGhost = true;
                 } else if (score < 50) {
                     if (window.notificationManager) {
-                        window.notificationManager.showToast('SİSTEM UYARISI: Kalite Puanınız kritik seviyenin altındadır.', 'alert');
+                        window.notificationManager.showToast(window.i18n.t('market.warn_low_quality'), 'alert');
                     }
                 }
             }
@@ -154,7 +154,7 @@ window.MarketplaceManager = class MarketplaceManager {
                 });
             } catch (error) {
                 if (window.notificationManager) {
-                    window.notificationManager.showToast('Teklif kaydedilirken hata oluştu.', 'error');
+                    window.notificationManager.showToast(window.i18n.t('market.err_bid_save'), 'error');
                 }
                 return;
             }
@@ -167,7 +167,7 @@ window.MarketplaceManager = class MarketplaceManager {
                 window.notificationManager.add({
                     id: Date.now(),
                     type: 'match',
-                    text: `✅ ${ad.origin} → ${ad.destination} ilanına teklifiniz başarıyla iletildi.`,
+                    text: `✅ ${ad.origin} → ${ad.destination} ${window.i18n.t('market.notif_bid_success')}`,
                     targetUser: currentUser
                 });
                 
@@ -176,7 +176,7 @@ window.MarketplaceManager = class MarketplaceManager {
                     window.notificationManager.add({
                         id: Date.now() + 1,
                         type: 'match',
-                        text: `💰 İlanınıza yeni bir teklif geldi: ${price}${currency}`,
+                        text: `💰 ${window.i18n.t('market.notif_new_bid')}: ${price}${currency}`,
                         targetUser: ad.owner,
                         view: 'loader-dashboard',
                         action: 'viewBids',
@@ -283,7 +283,7 @@ window.MarketplaceManager = class MarketplaceManager {
                     window.notificationManager.add({
                         id: Date.now(),
                         type: 'info',
-                        text: '🔗 İlan linki panoya kopyalandı!',
+                        text: window.i18n.t('market.notif_link_copied'),
                         targetUser: this.app.state.currentUser
                     });
                 }
@@ -303,7 +303,7 @@ window.MarketplaceManager = class MarketplaceManager {
         // Carrier Quality Gate check
         if (rating < 4.0 && completedJobs < 3) {
             if (window.notificationManager) {
-                window.notificationManager.showToast('Şikayet bildirebilmek için platform puanınızın en az 4.0 olması veya en az 3 sevkiyat tamamlamış olmanız gerekmektedir.', 'warning');
+                window.notificationManager.showToast(window.i18n.t('market.err_report_low_score'), 'warning');
             }
             return;
         }
@@ -315,7 +315,7 @@ window.MarketplaceManager = class MarketplaceManager {
         ad.reports = ad.reports || [];
         if (ad.reports.some(r => r.by === this.app.state.currentUser)) {
             if (window.notificationManager) {
-                window.notificationManager.showToast('Bu ilanı daha önce şikayet ettiniz.', 'warning');
+                window.notificationManager.showToast(window.i18n.t('market.err_already_reported'), 'warning');
             }
             return;
         }
@@ -326,37 +326,37 @@ window.MarketplaceManager = class MarketplaceManager {
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                         <div>
                             <h2 style="margin: 0; font-size: 1.3rem; color: #e74c3c; display: flex; align-items: center; gap: 8px;">
-                                <i data-lucide="alert-triangle" style="width: 22px; height: 22px; color: #e74c3c;"></i> İlanı Şikayet Et
+                                <i data-lucide="alert-triangle" style="width: 22px; height: 22px; color: #e74c3c;"></i> <span data-i18n="comp.marketplace.report_ad">İlanı Şikayet Et</span>
                             </h2>
-                            <p style="margin: 5px 0 0; font-size: 0.85rem; color: var(--text-secondary);">Güvenli lojistik için şikayet nedeninizi seçin</p>
+                            <p style="margin: 5px 0 0; font-size: 0.85rem; color: var(--text-secondary);" data-i18n="comp.marketplace.report_desc">Güvenli lojistik için şikayet nedeninizi seçin</p>
                         </div>
                         <button onclick="document.getElementById('report-ad-modal').remove()" style="background: none; border: none; font-size: 1.5rem; color: var(--text-muted); cursor: pointer;">&times;</button>
                     </div>
                     
                     <div class="form-group" style="margin-bottom: 15px;">
-                        <label style="font-weight: 600; font-size: 0.85rem; display: block; margin-bottom: 8px;">Şikayet Nedeni *</label>
+                        <label style="font-weight: 600; font-size: 0.85rem; display: block; margin-bottom: 8px;" data-i18n="comp.marketplace.report_reason">Şikayet Nedeni *</label>
                         <select id="report-reason" class="form-control" style="width: 100%; padding: 12px; border: 1.5px solid var(--border-dim); border-radius: 8px;" onchange="document.getElementById('report-desc-container').style.display = this.value === 'other' ? 'block' : 'none'">
-                            <option value="spam">Sahte İlan / Spam</option>
-                            <option value="misleading">Yanıltıcı Bilgi (Farklı Yük/Tarih)</option>
-                            <option value="price">Telefonda/Mesajda Fiyat Değiştirme</option>
-                            <option value="abuse">Küfür / Uygunsuz İletişim</option>
-                            <option value="other">Diğer (Açıklama Zorunlu)</option>
+                            <option value="spam" data-i18n="comp.marketplace.reason_spam">Sahte İlan / Spam</option>
+                            <option value="misleading" data-i18n="comp.marketplace.reason_misleading">Yanıltıcı Bilgi (Farklı Yük/Tarih)</option>
+                            <option value="price" data-i18n="comp.marketplace.reason_price">Telefonda/Mesajda Fiyat Değiştirme</option>
+                            <option value="abuse" data-i18n="comp.marketplace.reason_abuse">Küfür / Uygunsuz İletişim</option>
+                            <option value="other" data-i18n="comp.marketplace.reason_other">Diğer (Açıklama Zorunlu)</option>
                         </select>
                     </div>
                     
                     <div class="form-group" id="report-desc-container" style="margin-bottom: 15px; display: none;">
-                        <label style="font-weight: 600; font-size: 0.85rem; display: block; margin-bottom: 8px;">Açıklama *</label>
-                        <textarea id="report-description" class="form-control" rows="3" placeholder="Lütfen şikayetinizi detaylandırın..." style="width: 100%; padding: 12px; border: 1.5px solid var(--border-dim); border-radius: 8px;"></textarea>
+                        <label style="font-weight: 600; font-size: 0.85rem; display: block; margin-bottom: 8px;" data-i18n="comp.marketplace.description">Açıklama *</label>
+                        <textarea id="report-description" class="form-control" rows="3" placeholder="Lütfen şikayetinizi detaylandırın..." data-i18n="[placeholder]comp.marketplace.desc_placeholder" style="width: 100%; padding: 12px; border: 1.5px solid var(--border-dim); border-radius: 8px;"></textarea>
                     </div>
                     
                     <div style="background: #fffbe6; border: 1px solid #ffe58f; border-radius: 8px; padding: 12px; margin-bottom: 20px; font-size: 0.8rem; color: #d46b08; display: flex; align-items: flex-start; gap: 8px;">
                         <i data-lucide="alert-circle" style="width: 16px; height: 16px; flex-shrink: 0; margin-top: 2px; color: #d46b08;"></i>
-                        <span><strong>⚠️ Yalancı Çoban Kuralı:</strong> Asılsız/kötü niyetli raporlama yaptığı tespit edilen taşıyıcılara <strong>-0.2 puan</strong> ceza uygulanır.</span>
+                        <span data-i18n="comp.marketplace.warning_rule"><strong>⚠️ Yalancı Çoban Kuralı:</strong> Asılsız/kötü niyetli raporlama yaptığı tespit edilen taşıyıcılara <strong>-0.2 puan</strong> ceza uygulanır.</span>
                     </div>
                     
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                        <button class="btn-outline" style="padding: 12px; border-radius: 10px; font-weight: 600;" onclick="document.getElementById('report-ad-modal').remove()">Vazgeç</button>
-                        <button class="btn-primary" style="padding: 12px; border-radius: 10px; font-weight: 600; background: #e74c3c; border: none; color: white;" onclick="window.marketplaceManager.submitAdReport('${adId}')">Şikayeti İlet</button>
+                        <button class="btn-outline" style="padding: 12px; border-radius: 10px; font-weight: 600;" onclick="document.getElementById('report-ad-modal').remove()" data-i18n="comp.marketplace.cancel">Vazgeç</button>
+                        <button class="btn-primary" style="padding: 12px; border-radius: 10px; font-weight: 600; background: #e74c3c; border: none; color: white;" onclick="window.marketplaceManager.submitAdReport('${adId}')" data-i18n="comp.marketplace.submit_report">Şikayeti İlet</button>
                     </div>
                 </div>
             </div>
@@ -377,7 +377,7 @@ window.MarketplaceManager = class MarketplaceManager {
 
         if (reason === 'other' && !description) {
             if (window.notificationManager) {
-                window.notificationManager.showToast('Lütfen şikayet nedeninizi açıklayın.', 'warning');
+                window.notificationManager.showToast(window.i18n.t('market.err_report_reason_missing'), 'warning');
             }
             return;
         }
@@ -402,13 +402,13 @@ window.MarketplaceManager = class MarketplaceManager {
                 // Verified loaders do not get hidden automatically, just raise admin review warning
                 await this.app.store.updateAd(adId, { reports: ad.reports });
                 if (window.notificationManager) {
-                    window.notificationManager.showToast('Şikayetiniz başarıyla iletildi. İlan incelemeye alındı.', 'success');
+                    window.notificationManager.showToast(window.i18n.t('market.report_success'), 'success');
                     // Notification to admin
                     window.notificationManager.add({
                         id: Date.now(),
                         type: 'warning',
-                        text: `⚠️ Şikayet Bildirimi (Onaylı Yükveren): ${ad.owner} firmasının ilanına şikayet!`,
-                        subtext: `İlan No: ${window.utils.formatAdNumber(adId)} | Şikayet Eden: ${currentUser} | Neden: ${reason}`,
+                        text: `⚠️ ${window.i18n.t('market.report_notice')}: ${ad.owner} ${window.i18n.t('market.report_notice_suffix')}`,
+                        subtext: `${window.i18n.t('market.ad_no')}: ${window.utils.formatAdNumber(adId)} | ${window.i18n.t('market.reporter')}: ${currentUser} | ${window.i18n.t('market.reason')}: ${reason}`,
                         date: Date.now(),
                         read: false,
                         targetRole: 'admin',
@@ -421,13 +421,13 @@ window.MarketplaceManager = class MarketplaceManager {
                     // Auto-hide ad
                     await this.app.store.updateAd(adId, { reports: ad.reports, status: 'spam_hidden' });
                     if (window.notificationManager) {
-                        window.notificationManager.showToast('Şikayetiniz iletildi. İlan 3 şikayete ulaştığı için yayından kaldırıldı.', 'info');
+                        window.notificationManager.showToast(window.i18n.t('market.report_removed'), 'info');
                         // Notification to admin
                         window.notificationManager.add({
                             id: Date.now(),
                             type: 'error',
-                            text: `🚨 İlan Yayından Kaldırıldı (Spam): İlan #${window.utils.formatAdNumber(adId)} otomatik olarak gizlendi.`,
-                            subtext: `Gerekçe: 3 farklı taşıyıcı tarafından şikayet edildi. Son şikayetçi: ${currentUser}`,
+                            text: `🚨 ${window.i18n.t('market.ad_removed')}: ${window.i18n.t('market.ad_no')} #${window.utils.formatAdNumber(adId)} ${window.i18n.t('market.ad_hidden')}`,
+                            subtext: `${window.i18n.t('market.reason_3_reports')}. ${window.i18n.t('market.last_reporter')}: ${currentUser}`,
                             date: Date.now(),
                             read: false,
                             targetRole: 'admin',
@@ -437,7 +437,7 @@ window.MarketplaceManager = class MarketplaceManager {
                 } else {
                     await this.app.store.updateAd(adId, { reports: ad.reports });
                     if (window.notificationManager) {
-                        window.notificationManager.showToast('Şikayetiniz başarıyla iletildi. İlan incelemeye alındı.', 'success');
+                        window.notificationManager.showToast(window.i18n.t('market.report_success'), 'success');
                     }
                 }
             }
@@ -446,7 +446,7 @@ window.MarketplaceManager = class MarketplaceManager {
             this.app.router.render();
         } catch (error) {
             if (window.notificationManager) {
-                window.notificationManager.showToast('Şikayet iletilemedi: ' + error.message, 'error');
+                window.notificationManager.showToast(window.i18n.t('market.report_failed') + ': ' + error.message, 'error');
             }
         }
     }
