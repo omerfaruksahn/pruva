@@ -650,6 +650,17 @@ window.inboxSendMessage = async (chatId) => {
 // Mesaj Aksiyon Handler'ları (React, Reply, Edit, Delete)
 // ─────────────────────────────────────────────
 
+// Yanıtlanan orijinal mesaja kaydır ve kısa süreli vurgula (ölü buton düzeltildi)
+window.inboxScrollToMessage = (messageId) => {
+    if (!messageId) return;
+    const el = document.getElementById(`msg-${messageId}`);
+    if (!el) return;
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    // Kısa bir vurgulama efekti
+    el.classList.add('msg-highlight');
+    setTimeout(() => el.classList.remove('msg-highlight'), 1600);
+};
+
 window.inboxSetReplyTo = (messageId, senderName, text) => {
     window.inboxCurrentReplyTo = { messageId, text, name: senderName };
     

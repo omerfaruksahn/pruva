@@ -228,7 +228,11 @@ window.PruvaAiManager = class PruvaAiManager {
     async loadState() {
         this.templates = JSON.parse(JSON.stringify(this.DEFAULT_TEMPLATES));
         this.carriers = JSON.parse(JSON.stringify(this.DEFAULT_CARRIERS));
-        
+
+        // Daha önce yerel olarak kaydedilmiş veriler varsa, default'ların üzerine yükle
+        // (API gelene kadar kullanıcının son durumu görünür; API başarısız olsa bile veri kaybolmaz)
+        this.loadFromLocalStorage();
+
         const autoInqEl = document.getElementById('rule-auto-inquiry');
         const maxRoundsEl = document.getElementById('rule-max-rounds');
         if (autoInqEl) autoInqEl.checked = this.rules.autoInquiry;
@@ -341,11 +345,49 @@ window.PruvaAiManager = class PruvaAiManager {
         }
     }
 
-    saveTemplates() {}
+    // Kullanıcıya özel localStorage anahtarı (farklı hesaplar karışmasın)
+    _storageKey(suffix) {
+        const uid = this.app.state.user?.id || window.fbAuth?.currentUser?.uid || 'guest';
+        return `pruva_ai_${suffix}_${uid}`;
+    }
 
-    saveCarriers() {}
+    saveTemplates() {
+        try {
+            localStorage.setItem(this._storageKey('templates'), JSON.stringify(this.templates));
+        } catch (e) {
+            console.warn('[PRUVA AI] Şablonlar yerel olarak kaydedilemedi:', e.message);
+        }
+    }
 
-    saveRules() {}
+    saveCarriers() {
+        try {
+            localStorage.setItem(this._storageKey('carriers'), JSON.stringify(this.carriers));
+        } catch (e) {
+            console.warn('[PRUVA AI] Taşıyıcılar yerel olarak kaydedilemedi:', e.message);
+        }
+    }
+
+    saveRules() {
+        try {
+            localStorage.setItem(this._storageKey('rules'), JSON.stringify(this.rules));
+        } catch (e) {
+            console.warn('[PRUVA AI] Kurallar yerel olarak kaydedilemedi:', e.message);
+        }
+    }
+
+    // localStorage'da kayıtlı veriler varsa yükle (API'den önce fallback olarak)
+    loadFromLocalStorage() {
+        try {
+            const t = localStorage.getItem(this._storageKey('templates'));
+            if (t) this.templates = JSON.parse(t);
+            const c = localStorage.getItem(this._storageKey('carriers'));
+            if (c) this.carriers = JSON.parse(c);
+            const r = localStorage.getItem(this._storageKey('rules'));
+            if (r) this.rules = JSON.parse(r);
+        } catch (e) {
+            console.warn('[PRUVA AI] Yerel veriler okunamadı:', e.message);
+        }
+    }
 
     getMetrics() {
         return this.metrics;

@@ -6,7 +6,7 @@ const hpp = require('hpp');
 const xss = require('xss-clean');
 const path = require('path');
 const errorHandler = require('./errorHandler');
-const { generalLimiter, aiLimiter, uploadLimiter } = require('./rateLimiter');
+const { generalLimiter, aiLimiter, uploadLimiter, ttsLimiter } = require('./rateLimiter');
 require('dotenv').config({ path: path.join(__dirname, '.env') });
 
 const app = express();
@@ -76,7 +76,7 @@ app.use('/api/pricing', require('./routes/pricingActions'));
 app.use('/api/ai', aiLimiter, require('./routes/aiChat'));
 app.use('/api/rate-sheets', uploadLimiter, express.json({ limit: '50mb' }), express.urlencoded({ limit: '50mb', extended: true }), require('./routes/rateSheets'));
 app.use('/api/user-actions', require('./routes/userActions'));
-app.use('/api/tts', require('./routes/tts'));
+app.use('/api/tts', ttsLimiter, require('./routes/tts'));
 app.use('/api/webhooks', require('./routes/webhooks'));
 // Root route - serve index.html
 app.get('/', (req, res) => {

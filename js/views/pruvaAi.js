@@ -305,7 +305,30 @@ window.pruvaAiView = (state) => {
                             } else if (msg.type === 'ai_suggestion' || msg.type === 'AI_SUGGESTION') {
                                 const suggestedMail = typeof msg.suggestedMail === 'string' ? JSON.parse(msg.suggestedMail) : (msg.suggestedMail || {});
                                 const hasMail = suggestedMail.body || msg.suggestedMessage;
-                                
+
+                                // ── Alıcı güvenlik kontrolü: kayıtlı kişilerde var mı? ──
+                                // (Prompt injection ile AI'a yabancı adres yazdırılırsa kullanıcı UYARILSIN)
+                                const proposedTo = (suggestedMail.to || activeConv.email || '').toLowerCase().trim();
+                                let isKnownRecipient = true; // alıcı yoksa uyarı gösterme (approve zaten durduruyor)
+                                if (proposedTo) {
+                                    const knownEmails = new Set();
+                                    // Kayıtlı taşıyıcı e-postaları
+                                    (window.pruvaAiManager?.carriers || []).forEach(c => {
+                                        if (c.email) knownEmails.add(c.email.toLowerCase().trim());
+                                    });
+                                    // Mevcut konuşmaların muhatap e-postaları
+                                    (state.pricingConversations || []).forEach(c => {
+                                        if (c.email) knownEmails.add(c.email.toLowerCase().trim());
+                                    });
+                                    isKnownRecipient = knownEmails.has(proposedTo);
+                                }
+                                const recipientWarning = (!isKnownRecipient && proposedTo) ? `
+                                    <div style="margin-top: 6px; padding: 8px 10px; background: rgba(220, 38, 38, 0.12); border: 1px solid rgba(220, 38, 38, 0.45); border-radius: var(--radius-sm); font-size: 0.72rem; color: #fca5a5; display: flex; align-items: flex-start; gap: 6px;">
+                                        <span>⚠️</span>
+                                        <span><strong>Dikkat:</strong> Bu adres (${escapeHTML(proposedTo)}) kayıtlı taşıyıcılarınızda veya mevcut konuşmalarınızda <strong>bulunmuyor</strong>. Onaylamadan önce alıcıyı kontrol edin.</span>
+                                    </div>
+                                ` : '';
+
                                 return `
                                     <div class="chat-bubble-row center">
                                         <div class="ai-suggestion-card" id="suggestion-card-${activeConv.id}-${index}" style="width: 100%; max-width: 500px;">
@@ -321,6 +344,7 @@ window.pruvaAiView = (state) => {
                                                         <strong style="color: var(--text-primary); min-width: 45px;" data-i18n="pruva_ai.to">Alıcı:</strong> 
                                                         <span>${escapeHTML(suggestedMail.to || activeConv.email || 'Alıcı Belirtilmedi')}</span>
                                                     </div>
+                                                    ${recipientWarning}
                                                     <div style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 8px; display: flex; gap: 4px;">
                                                         <strong style="color: var(--text-primary); min-width: 45px;" data-i18n="pruva_ai.subject">Konu:</strong> 
                                                         <span>${escapeHTML(suggestedMail.subject || 'Konu Yok')}</span>

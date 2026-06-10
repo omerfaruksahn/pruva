@@ -488,9 +488,10 @@ router.get('/carrier_performance', auth, async (req, res) => {
 router.get('/rate-history', auth, async (req, res) => {
     try {
         const { pol, pod, mode } = req.query;
-        let query = 'SELECT id, pol, pod, transport_mode, container_type, carrier_name, price, currency, valid_until, created_at FROM pricing_rate_history WHERE user_id = $' + (paramIdx++); queryParams.push(req.user.id);
         const queryParams = [];
         let paramIdx = 1;
+        let query = 'SELECT id, pol, pod, transport_mode, container_type, carrier_name, price, currency, valid_until, created_at FROM pricing_rate_history WHERE user_id = $' + (paramIdx++);
+        queryParams.push(req.user.id);
         
         if (pol) {
             query += ` AND LOWER(pol) = LOWER($${paramIdx++})`;

@@ -1,4 +1,6 @@
 const { GoogleGenerativeAI } = require('@google/generative-ai');
+const db = require('../db');
+const { tryStaticReply, pickModel } = require('./aiRouter');
 require('dotenv').config();
 
 const genAI = process.env.GEMINI_API_KEY ? new GoogleGenerativeAI(process.env.GEMINI_API_KEY) : null;
@@ -50,6 +52,18 @@ async function analyzeCommand(userMessage, context = {}, fileParts = []) {
     if (!genAI) {
       throw new Error('GEMINI_API_KEY bulunamadı. Yapay zeka kullanılamıyor.');
     }
+
+    // ── KATMAN 0: Basit kalıp mı? Öyleyse AI'a hiç gitme (BEDAVA) ──
+    const staticReply = tryStaticReply(userMessage);
+    if (staticReply.handled) {
+      console.log('[AI ROUTER] Katman 0 (static) — AI çağrısı yapılmadı, ücretsiz yanıt.');
+      return staticReply.response;
+    }
+
+    // ── KATMAN 1/2: Hangi modele gideceğine karar ver ──
+    const hasFiles = Array.isArray(fileParts) && fileParts.length > 0;
+    const routed = pickModel(userMessage, context, hasFiles);
+    console.log(`[AI ROUTER] Katman seçildi: ${routed.tier} → model: ${routed.model}`);
     
     const tools = [{
       functionDeclarations: [
@@ -80,30 +94,46 @@ async function analyzeCommand(userMessage, context = {}, fileParts = []) {
     }];
 
     const model = genAI.getGenerativeModel({ 
-      model: process.env.AI_MODEL || 'gemini-2.5-flash',
+      model: routed.model,
       tools: tools
     });
     
     const contextStr = context.company 
       ? `\nAKTİF KONUŞMA: ${context.company} (${context.status || 'UNKNOWN'})\nMUHATAP E-POSTA ADRESİ: ${context.email || 'Bilinmiyor'}`
       : `\nMUHATAP E-POSTA ADRESİ: ${context.email || 'Bilinmiyor'}`;
-    
-    let historyStr = '';
-    if (context.history && context.history.length > 0) {
-      historyStr = '\nSOHBET GEÇMİŞİ:\n' + context.history.map(h => `${h.role === 'user' ? 'Kullanıcı' : 'Pruva AI'}: ${h.text}`).join('\n') + '\n';
-    }
-    
+
     const carriersStr = context.carriers?.length 
       ? `\nMEVCUT TAŞIYICILAR: ${context.carriers.map(c => c.name).join(', ')}`
       : '';
-    
-    const prompt = `${SYSTEM_PROMPT}\n${contextStr}${historyStr}\n${carriersStr}\n\nKULLANICI MESAJI: "${userMessage}"\n\nJSON yanıtını ver:`;
-    
-    let contents = [{ role: "user", parts: [{ text: prompt }, ...fileParts] }];
 
-    // İlk çağrı
+    // ── Geçmişi STRING'e gömmek yerine gerçek diyalog turları olarak ver ──
+    // Böylece Gemini multi-turn bağlamı doğru anlar ve geçmişteki metinler
+    // "talimat" gibi değil "konuşma" gibi işlenir (prompt injection direnci artar).
+    const historyTurns = [];
+    if (context.history && context.history.length > 0) {
+      for (const h of context.history) {
+        historyTurns.push({
+          role: h.role === 'user' ? 'user' : 'model',
+          parts: [{ text: h.text || '' }]
+        });
+      }
+      // Gemini contents dizisi 'user' turu ile başlamalı — baştaki model turlarını at
+      while (historyTurns.length > 0 && historyTurns[0].role !== 'user') {
+        historyTurns.shift();
+      }
+    }
+
+    const finalUserText = `${contextStr}${carriersStr}\n\nKULLANICI MESAJI: "${userMessage}"\n\nJSON yanıtını ver:`;
+
+    let contents = [
+      ...historyTurns,
+      { role: "user", parts: [{ text: finalUserText }, ...fileParts] }
+    ];
+
+    // İlk çağrı (SYSTEM_PROMPT artık systemInstruction olarak gidiyor — her turda tekrar gönderilmiyor)
     let result = await model.generateContent({
-      contents: contents
+      contents: contents,
+      systemInstruction: { role: "system", parts: [{ text: SYSTEM_PROMPT }] }
     });
     
     // Eğer AI bir function call (araç kullanımı) döndürdüyse
@@ -128,8 +158,76 @@ async function analyzeCommand(userMessage, context = {}, fileParts = []) {
           }
         }
       } else if (call.name === "search_past_rates") {
-        // İleride detaylı veritabanı araması eklenecek, şimdilik mock
-        functionResult = { message: `Geçmişte ${call.args.pod} için 1200 USD fiyatı bulunmuştur.` };
+        // GERÇEK veritabanı sorgusu — sahte sabit fiyat KALDIRILDI.
+        const pol = (call.args.pol || '').trim();
+        const pod = (call.args.pod || '').trim();
+        if (!context.userId) {
+          functionResult = { error: "Kullanıcı kimliği bulunamadı, fiyat geçmişi sorgulanamadı." };
+        } else if (!pod) {
+          functionResult = { error: "Varış limanı (POD) belirtilmeden fiyat araması yapılamaz." };
+        } else {
+          try {
+            const found = [];
+
+            // 1) Yüklenen rate sheet'lerden aktif/geçerli fiyatlar
+            const rsQuery = `
+              SELECT rsi.pol, rsi.pod, rsi.container_type, rsi.price, rsi.currency,
+                     rsi.valid_until, rs.carrier_name
+              FROM rate_sheet_items rsi
+              JOIN rate_sheets rs ON rs.id = rsi.sheet_id
+              WHERE rsi.user_id = $1
+                AND rsi.pod ILIKE $2
+                ${pol ? 'AND rsi.pol ILIKE $3' : ''}
+                AND (rsi.valid_until IS NULL OR rsi.valid_until >= CURRENT_DATE)
+              ORDER BY rsi.price ASC
+              LIMIT 5
+            `;
+            const rsParams = pol
+              ? [String(context.userId), `%${pod}%`, `%${pol}%`]
+              : [String(context.userId), `%${pod}%`];
+            const rsRes = await db.query(rsQuery, rsParams);
+            rsRes.rows.forEach(r => found.push({
+              source: 'rate_sheet',
+              pol: r.pol, pod: r.pod, container_type: r.container_type,
+              price: r.price, currency: r.currency || 'USD',
+              carrier_name: r.carrier_name, valid_until: r.valid_until
+            }));
+
+            // 2) Geçmiş navlun kayıtları (pricing_rate_history)
+            const histQuery = `
+              SELECT pol, pod, container_type, carrier_name, price, currency, valid_until, created_at
+              FROM pricing_rate_history
+              WHERE user_id = $1
+                AND pod ILIKE $2
+                ${pol ? 'AND pol ILIKE $3' : ''}
+              ORDER BY created_at DESC
+              LIMIT 5
+            `;
+            const histParams = pol
+              ? [context.userId, `%${pod}%`, `%${pol}%`]
+              : [context.userId, `%${pod}%`];
+            const histRes = await db.query(histQuery, histParams);
+            histRes.rows.forEach(r => found.push({
+              source: 'history',
+              pol: r.pol, pod: r.pod, container_type: r.container_type,
+              price: r.price, currency: r.currency || 'USD',
+              carrier_name: r.carrier_name, valid_until: r.valid_until,
+              date: r.created_at
+            }));
+
+            if (found.length === 0) {
+              functionResult = {
+                found: false,
+                message: `${pol ? pol + ' → ' : ''}${pod} rotası için sistemde kayıtlı geçerli bir fiyat bulunamadı.`
+              };
+            } else {
+              functionResult = { found: true, count: found.length, rates: found };
+            }
+          } catch (e) {
+            console.error('[AI AGENT] search_past_rates DB hatası:', e.message);
+            functionResult = { error: "Fiyat veritabanı sorgulanırken hata oluştu: " + e.message };
+          }
+        }
       }
       
       // Fonksiyon sonucunu AI'a geri gönder (Second Turn)
@@ -146,7 +244,8 @@ async function analyzeCommand(userMessage, context = {}, fileParts = []) {
       
       console.log(`[AI AGENT] Function Response AI'a iletiliyor...`);
       result = await model.generateContent({
-        contents: contents
+        contents: contents,
+        systemInstruction: { role: "system", parts: [{ text: SYSTEM_PROMPT }] }
       });
     }
     
@@ -176,7 +275,8 @@ async function analyzeCommand(userMessage, context = {}, fileParts = []) {
 async function analyzeEmail(emailBody, emailSubject = '') {
   try {
     if (!genAI) return null;
-    const model = genAI.getGenerativeModel({ model: process.env.AI_MODEL || 'gemini-2.5-flash' });
+    // Mail sınıflandırma basit bir iştir → en ucuz model yeterli (maliyet optimizasyonu)
+    const model = genAI.getGenerativeModel({ model: process.env.AI_MODEL_CHEAP || 'gemini-2.5-flash-lite' });
     const prompt = `Sen lojistik maillerini analiz edip yapılandırılmış veri çıkaran bir Pricing AI asistanısın.\n\nAşağıdaki emaili analiz et ve şu JSON formatında yanıt ver:\n{\n  "category": "RFQ|RATE_RESPONSE|NEGOTIATION|FOLLOWUP|OTHER",\n  "transport_mode": "DENIZ_FCL|DENIZ_LCL|HAVA|KARA|null",\n  "extracted_data": {\n    "pol": "yükleme limanı/şehri",\n    "pod": "varış limanı/şehri",\n    "container_type": "20DC|40HC|etc veya null",\n    "quantity": "adet veya null",\n    "incoterm": "FOB|EXW|CIF|etc veya null",\n    "loading_date": "tarih veya null",\n    "cargo_type": "yük cinsi veya null",\n    "weight_kg": "ağırlık veya null",\n    "price": "fiyat veya null",\n    "currency": "USD|EUR|TRY veya null",\n    "carrier_name": "taşıyıcı adı veya null",\n    "transit_time": "transit süre veya null"\n  },\n  "missing_fields": ["eksik alanlar listesi"],\n  "action": "SEND_RATE_REQUEST|SEND_OFFER|SEND_MISSING_INFO|null",\n  "summary": "Kısa Türkçe özet"\n}\n\nKONU: ${emailSubject}\nİÇERİK: ${emailBody}\n\nSadece JSON döndür:`;
     
     const result = await model.generateContent({
@@ -214,7 +314,7 @@ async function analyzeRateSheetImage(base64Data, mimeType, filename = '') {
     }
 
     const model = genAI.getGenerativeModel({ 
-      model: process.env.AI_MODEL || 'gemini-2.5-flash' 
+      model: process.env.AI_MODEL_SMART || 'gemini-2.5-flash' 
     });
 
     const imagePart = {

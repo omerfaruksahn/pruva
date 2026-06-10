@@ -394,15 +394,49 @@ async function scanEmails(userId, searchQuery = null, initialDeepScan = false) {
 
                 // Taşıyıcı performans skoru kaydet (Faz 5)
                 if (carrierId) {
-                    const responseHours = parseFloat((Math.random() * 3 + 1.5).toFixed(1)); // 1.5 - 4.5 saat arası rastgele
-                    const wasCheapest = analysis.extracted_data.price <= 1850;
-                    const wasSelected = wasCheapest; // en ucuzsa seçildi işaretle
-                    
+                    // ── GERÇEK yanıt süresi: RFQ oluşturulma → mailin gelme zamanı ──
+                    // (Eski kod Math.random() ile sahte değer üretiyordu — kaldırıldı)
+                    let responseHours = null;
+                    try {
+                        const rfqTimeRes = await db.query(
+                            'SELECT created_at FROM pricing_rfqs WHERE id = $1', [rfqId]
+                        );
+                        const rfqCreatedAt = rfqTimeRes.rows[0]?.created_at;
+                        const mailTime = mail.received_at || new Date();
+                        if (rfqCreatedAt) {
+                            const diffMs = new Date(mailTime) - new Date(rfqCreatedAt);
+                            if (diffMs > 0) {
+                                responseHours = parseFloat((diffMs / (1000 * 60 * 60)).toFixed(1));
+                            }
+                        }
+                    } catch (e) {
+                        console.warn('[MAIL SCANNER] Yanıt süresi hesaplanamadı:', e.message);
+                    }
+
+                    // ── GERÇEK "en ucuz" kontrolü: aynı RFQ'daki diğer fiyatlarla karşılaştır ──
+                    // (Eski kod hardcoded "<= 1850" eşiği kullanıyordu — kaldırıldı)
+                    let wasCheapest = false;
+                    try {
+                        const minRes = await db.query(
+                            'SELECT MIN(extracted_price) AS min_price FROM pricing_rates WHERE rfq_id = $1 AND extracted_price IS NOT NULL',
+                            [rfqId]
+                        );
+                        const minPrice = parseFloat(minRes.rows[0]?.min_price);
+                        if (!isNaN(minPrice) && analysis.extracted_data.price != null) {
+                            wasCheapest = parseFloat(analysis.extracted_data.price) <= minPrice;
+                        }
+                    } catch (e) {
+                        console.warn('[MAIL SCANNER] En ucuz kontrolü yapılamadı:', e.message);
+                    }
+
+                    // "Seçildi" bilgisi tarama anında BİLİNEMEZ — kullanıcı teklif seçince güncellenir
+                    const wasSelected = false;
+
                     await db.query(
                         'INSERT INTO pricing_carrier_performance (carrier_id, response_hours, was_cheapest, was_selected, rfq_id) VALUES ($1, $2, $3, $4, $5)',
                         [carrierId, responseHours, wasCheapest, wasSelected, rfqId]
                     );
-                    console.log(`[MAIL SCANNER] Taşıyıcı performans kaydı eklendi: CarrierID=${carrierId}, Yanıt Süresi=${responseHours} saat`);
+                    console.log(`[MAIL SCANNER] Taşıyıcı performans kaydı eklendi: CarrierID=${carrierId}, Yanıt Süresi=${responseHours ?? 'hesaplanamadı'} saat`);
                 }
             }
 

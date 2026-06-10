@@ -429,7 +429,9 @@ router.get('/conversations', auth, async (req, res) => {
     
     for (const action of actions.rows) {
       const actionEmail = (action.sender_email || '').toLowerCase().trim();
-      const key = actionEmail;
+      // Copilot konuşması convMap'te 'copilot' anahtarıyla tutuluyor — e-postayla DEĞİL.
+      // (Eski kod 'copilot@pruva.ai' ile arıyordu → copilot geçmişi her yenilemede kayboluyordu)
+      const key = actionEmail === 'copilot@pruva.ai' ? 'copilot' : actionEmail;
       
       const conv = convMap[key];
       if (conv) {
@@ -535,6 +537,33 @@ router.get('/conversations', auth, async (req, res) => {
   }
 });
 
+// ── Konuşma ID'sini muhatap e-postasına çözümle ──
+// Frontend'e giden conv.id üç biçimde olabilir:
+//   'copilot'      → copilot kanalı
+//   'rfq-<sayı>'   → müşteri kaydı olmayan konuşma (RFQ id'si)
+//   <sayı>         → pricing_customers.id (müşteri kaydı olan konuşma)
+// Konuşmalar e-postaya göre gruplandığı için sil/arşivle işlemleri
+// o e-postanın TÜM RFQ'larına uygulanmalı. (Eski kod parseInt(convId) ile
+// müşteri ID'sini RFQ ID'si sanıp YANLIŞ kaydı silebiliyordu!)
+async function resolveConversationEmail(client, convId, userId) {
+  if (String(convId).startsWith('rfq-')) {
+    const rfqId = parseInt(String(convId).slice(4));
+    if (isNaN(rfqId)) return null;
+    const r = await client.query(
+      'SELECT sender_email FROM pricing_rfqs WHERE id = $1 AND user_id = $2',
+      [rfqId, userId]
+    );
+    return r.rows[0]?.sender_email || null;
+  }
+  const customerId = parseInt(convId);
+  if (isNaN(customerId)) return null;
+  const c = await client.query(
+    'SELECT email FROM pricing_customers WHERE id = $1 AND user_id = $2',
+    [customerId, userId]
+  );
+  return c.rows[0]?.email || null;
+}
+
 // @route   DELETE api/ai/conversations/:id
 // @desc    Konuşma geçmişini kalıcı olarak siler (tüm ilişkili tablolar dahil)
 router.delete('/conversations/:id', auth, async (req, res) => {
@@ -552,28 +581,29 @@ router.delete('/conversations/:id', auth, async (req, res) => {
         [userId]
       );
     } else {
-      // Normal konuşma (rfq_id bazlı): Tüm ilişkili verileri cascade sil
-      const rfqId = parseInt(convId);
-      if (isNaN(rfqId)) {
-        await client.query('ROLLBACK');
-        return res.status(400).json({ error: 'Geçersiz konuşma ID.' });
-      }
-
-      // Sahiplik doğrulaması
-      const ownerCheck = await client.query(
-        'SELECT id FROM pricing_rfqs WHERE id = $1 AND user_id = $2',
-        [rfqId, userId]
-      );
-      if (ownerCheck.rows.length === 0) {
+      // Konuşma = aynı e-postadan gelen TÜM RFQ'lar → e-postayı çözümle
+      const email = await resolveConversationEmail(client, convId, userId);
+      if (!email) {
         await client.query('ROLLBACK');
         return res.status(404).json({ error: 'Konuşma bulunamadı.' });
       }
 
-      // Cascade silme (foreign key sırasına göre)
-      await client.query('DELETE FROM pricing_carrier_performance WHERE rfq_id = $1', [rfqId]);
-      await client.query('DELETE FROM pricing_rates WHERE rfq_id = $1', [rfqId]);
-      await client.query('DELETE FROM pricing_actions WHERE rfq_id = $1 AND user_id = $2', [rfqId, userId]);
-      await client.query('DELETE FROM pricing_rfqs WHERE id = $1 AND user_id = $2', [rfqId, userId]);
+      // Bu e-postanın tüm RFQ id'lerini al (sahiplik garantili)
+      const rfqsRes = await client.query(
+        'SELECT id FROM pricing_rfqs WHERE LOWER(sender_email) = LOWER($1) AND user_id = $2',
+        [email, userId]
+      );
+      const rfqIds = rfqsRes.rows.map(r => r.id);
+      if (rfqIds.length === 0) {
+        await client.query('ROLLBACK');
+        return res.status(404).json({ error: 'Konuşma bulunamadı.' });
+      }
+
+      // Cascade silme (foreign key sırasına göre) — tüm RFQ'lar için
+      await client.query('DELETE FROM pricing_carrier_performance WHERE rfq_id = ANY($1)', [rfqIds]);
+      await client.query('DELETE FROM pricing_rates WHERE rfq_id = ANY($1)', [rfqIds]);
+      await client.query('DELETE FROM pricing_actions WHERE rfq_id = ANY($1) AND user_id = $2', [rfqIds, userId]);
+      await client.query('DELETE FROM pricing_rfqs WHERE id = ANY($1) AND user_id = $2', [rfqIds, userId]);
     }
 
     await client.query('COMMIT');
@@ -588,21 +618,30 @@ router.delete('/conversations/:id', auth, async (req, res) => {
 });
 
 // @route   PUT api/ai/conversations/:id/archive
-// @desc    Konuşmayı (RFQ ve bağlı olduğu conversation_id) arşivler
+// @desc    Konuşmayı (muhatabın tüm RFQ'larını) arşivler
 router.put('/conversations/:id/archive', auth, async (req, res) => {
   const client = await db.getClient();
   try {
     const userId = req.user.id;
-    const convId = req.params.id; // Bu conversation_id veya rfq.id olabilir
+    const convId = req.params.id;
 
     await client.query('BEGIN');
 
     if (convId !== 'copilot') {
-      // Hem id hem de conversation_id bazında arşivleyelim
-      await client.query(
-        "UPDATE pricing_rfqs SET is_archived = true WHERE (conversation_id = $1 OR id::text = $1) AND user_id = $2",
-        [convId, userId]
+      const email = await resolveConversationEmail(client, convId, userId);
+      if (!email) {
+        await client.query('ROLLBACK');
+        return res.status(404).json({ error: 'Konuşma bulunamadı.' });
+      }
+      const upd = await client.query(
+        'UPDATE pricing_rfqs SET is_archived = true WHERE LOWER(sender_email) = LOWER($1) AND user_id = $2',
+        [email, userId]
       );
+      if (upd.rowCount === 0) {
+        // Eski kod burada da "Arşivlendi!" diyordu — sessiz sahte başarı düzeltildi
+        await client.query('ROLLBACK');
+        return res.status(404).json({ error: 'Arşivlenecek konuşma bulunamadı.' });
+      }
     }
 
     await client.query('COMMIT');
@@ -627,10 +666,19 @@ router.put('/conversations/:id/unarchive', auth, async (req, res) => {
     await client.query('BEGIN');
 
     if (convId !== 'copilot') {
-      await client.query(
-        "UPDATE pricing_rfqs SET is_archived = false WHERE (conversation_id = $1 OR id::text = $1) AND user_id = $2",
-        [convId, userId]
+      const email = await resolveConversationEmail(client, convId, userId);
+      if (!email) {
+        await client.query('ROLLBACK');
+        return res.status(404).json({ error: 'Konuşma bulunamadı.' });
+      }
+      const upd = await client.query(
+        'UPDATE pricing_rfqs SET is_archived = false WHERE LOWER(sender_email) = LOWER($1) AND user_id = $2',
+        [email, userId]
       );
+      if (upd.rowCount === 0) {
+        await client.query('ROLLBACK');
+        return res.status(404).json({ error: 'Arşivden çıkarılacak konuşma bulunamadı.' });
+      }
     }
 
     await client.query('COMMIT');

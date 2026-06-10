@@ -48,4 +48,16 @@ const uploadLimiter = rateLimit({
     legacyHeaders: false,
 });
 
-module.exports = { generalLimiter, authLimiter, aiLimiter, uploadLimiter };
+// TTS (Sesli Yanıt) Limiti — ses sentezi pahalı bir işlem, sıkı limit (maliyet/DoS koruması)
+const ttsLimiter = rateLimit({
+    windowMs: 60 * 1000, // 1 dakika
+    max: process.env.NODE_ENV === 'production' ? 10 : 999999,
+    message: {
+        success: false,
+        message: 'Sesli yanıt limitine ulaştınız. Lütfen bir dakika bekleyin.'
+    },
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+
+module.exports = { generalLimiter, authLimiter, aiLimiter, uploadLimiter, ttsLimiter };
