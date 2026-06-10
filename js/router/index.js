@@ -133,6 +133,10 @@ window.Router = class Router {
         if (currentView === 'education' && this.app.state.eduViewMode === 'player') {
             document.body.classList.add('view-education-player');
         }
+        
+        if (window.ThemeManager) {
+            window.ThemeManager.apply();
+        }
 
         const viewFn = this.app.views[currentView] || this.app.views.home;
         const isSameView = this._lastRenderedView === currentView;
