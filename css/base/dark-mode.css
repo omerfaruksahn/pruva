@@ -560,3 +560,369 @@ body.dark-mode table td,
 body.dark-mode table th {
     color: var(--text-primary);
 }
+
+/* ─────────────────────────────────────────
+   PRUVA AI CHAT — DARK MODE OVERRIDES
+   ───────────────────────────────────────── */
+
+/* Chat Layout & Sidebar */
+body.dark-mode .pruva-chat-layout {
+    border-color: var(--border);
+}
+
+body.dark-mode .chat-left-sidebar {
+    background-color: var(--bg-surface) !important;
+    border-right-color: var(--border);
+}
+
+body.dark-mode .chat-list-item:hover {
+    background-color: var(--bg-elevated) !important;
+}
+
+body.dark-mode .chat-list-item.active {
+    background-color: rgba(37, 99, 235, 0.1) !important;
+}
+
+/* Chat Right Panel */
+body.dark-mode .chat-right-panel {
+    background-color: var(--bg-surface) !important;
+}
+
+body.dark-mode .chat-active-header {
+    background-color: var(--bg-surface);
+    border-bottom-color: var(--border);
+}
+
+body.dark-mode .chat-timeline-area {
+    background-color: var(--bg-surface);
+}
+
+body.dark-mode .chat-welcome-box {
+    background: transparent !important;
+}
+
+/* Chat Bubbles */
+body.dark-mode .chat-bubble-row.incoming .chat-bubble {
+    background-color: var(--bg-elevated) !important;
+    border-color: var(--border) !important;
+    color: var(--text-primary);
+}
+
+body.dark-mode .chat-bubble-row.outgoing .chat-bubble {
+    background-color: #1e40af !important;
+    color: white;
+}
+
+body.dark-mode .pruva-saas-layout .chat-bubble-row.incoming .chat-bubble {
+    background-color: var(--bg-elevated) !important;
+    border-color: var(--border) !important;
+}
+
+body.dark-mode .chat-bubble-meta {
+    color: var(--text-muted);
+}
+
+/* AI Action Card (amber action steps) */
+body.dark-mode .ai-action-card {
+    background: rgba(245, 158, 11, 0.06);
+    border-color: rgba(245, 158, 11, 0.2);
+    color: #fbbf24;
+}
+
+/* AI Suggestion Card */
+body.dark-mode .ai-suggestion-card {
+    background-color: var(--bg-surface) !important;
+    border-color: rgba(217, 119, 6, 0.35) !important;
+}
+
+body.dark-mode .ai-suggestion-title {
+    color: #fbbf24 !important;
+}
+
+body.dark-mode .pruva-saas-layout .ai-suggestion-title {
+    background: rgba(37, 99, 235, 0.08) !important;
+    color: #93c5fd !important;
+    border-bottom-color: var(--border) !important;
+}
+
+body.dark-mode .ai-suggestion-text {
+    color: var(--text-primary);
+}
+
+body.dark-mode .ai-suggestion-actions {
+    background: var(--bg-elevated) !important;
+    border-top-color: var(--border) !important;
+}
+
+body.dark-mode .mail-preview-box {
+    background: var(--bg-elevated) !important;
+    border-color: var(--border) !important;
+}
+
+body.dark-mode .mail-body-preview {
+    background: rgba(255, 255, 255, 0.04) !important;
+    color: var(--text-primary) !important;
+    border-color: var(--border) !important;
+}
+
+/* Chat Input */
+body.dark-mode .chat-input-wrapper,
+body.dark-mode .saas-input-wrapper {
+    background: var(--bg-elevated) !important;
+    border-color: var(--border) !important;
+}
+
+body.dark-mode .chat-input-field {
+    background-color: var(--bg-elevated) !important;
+    color: var(--text-primary) !important;
+    border-color: var(--border) !important;
+}
+
+body.dark-mode .saas-input-field {
+    color: var(--text-primary) !important;
+}
+
+body.dark-mode .chat-attach-btn {
+    color: var(--text-secondary);
+}
+
+body.dark-mode .chat-attach-btn:hover {
+    background: var(--bg-surface);
+    color: var(--text-primary);
+}
+
+/* Details Drawer */
+body.dark-mode .chat-details-drawer {
+    background: var(--bg-surface);
+    border-left-color: var(--border);
+    box-shadow: -8px 0 32px rgba(0, 0, 0, 0.5);
+}
+
+body.dark-mode .drawer-header {
+    background: var(--bg-elevated);
+    border-bottom-color: var(--border);
+}
+
+body.dark-mode .drawer-company-card {
+    background: var(--bg-elevated);
+    border-color: var(--border);
+}
+
+body.dark-mode .drawer-stat-item {
+    background: var(--bg-elevated);
+    border-color: var(--border);
+}
+
+body.dark-mode .drawer-timeline-item {
+    background: var(--bg-elevated);
+    border-color: var(--border);
+}
+
+body.dark-mode .drawer-notes-area {
+    background: var(--bg-elevated);
+    border-color: var(--border);
+    color: var(--text-primary);
+}
+
+/* Welcome Robot */
+body.dark-mode .welcome-robot-wrapper {
+    background: var(--bg-elevated);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2), inset 0 0 0 1px var(--border);
+}
+
+/* Chat Search & Filters */
+body.dark-mode .chat-search-input {
+    background-color: var(--bg-elevated) !important;
+    border-color: var(--border) !important;
+    color: var(--text-primary) !important;
+}
+
+body.dark-mode .chat-filter-select {
+    background-color: var(--bg-elevated) !important;
+    border-color: var(--border) !important;
+    color: var(--text-primary) !important;
+}
+
+body.dark-mode .chat-left-footer {
+    background: var(--bg-surface);
+    border-top-color: var(--border);
+}
+
+/* SaaS Sidebar Overrides */
+body.dark-mode .pruva-saas-layout .chat-left-sidebar {
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2) !important;
+}
+
+body.dark-mode .pruva-saas-layout .chat-right-panel {
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2) !important;
+}
+
+body.dark-mode .pruva-saas-layout .saas-input-wrapper {
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3) !important;
+}
+
+body.dark-mode .pruva-saas-layout .saas-input-wrapper:focus-within {
+    box-shadow: 0 12px 50px rgba(37, 99, 235, 0.15) !important;
+    border-color: rgba(37, 99, 235, 0.4) !important;
+}
+
+/* Pending Attachment Chips */
+body.dark-mode .pending-attachment-chip {
+    background: rgba(37, 99, 235, 0.12) !important;
+    border-color: rgba(37, 99, 235, 0.25) !important;
+    color: #93c5fd !important;
+}
+
+/* ─────────────────────────────────────────
+   INBOX — DARK MODE OVERRIDES
+   ───────────────────────────────────────── */
+
+body.dark-mode .inbox-container {
+    background: var(--bg-surface);
+    border-color: var(--border);
+    box-shadow: 0 16px 32px rgba(0, 0, 0, 0.4);
+}
+
+body.dark-mode .inbox-sidebar {
+    background: var(--bg-surface);
+    border-right-color: var(--border);
+}
+
+body.dark-mode .inbox-sidebar-header {
+    background: var(--bg-elevated);
+    border-bottom-color: var(--border);
+}
+
+body.dark-mode .inbox-thread-item {
+    border-bottom-color: var(--border);
+}
+
+body.dark-mode .inbox-thread-item:hover {
+    background: var(--bg-elevated);
+}
+
+body.dark-mode .inbox-thread-item.active {
+    background: rgba(59, 130, 246, 0.08);
+}
+
+body.dark-mode .inbox-chat-header {
+    background: var(--bg-surface);
+    border-bottom-color: var(--border);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+body.dark-mode .inbox-messages-container {
+    background-color: var(--bg-page);
+    background-image: radial-gradient(var(--border) 1px, transparent 1px);
+}
+
+body.dark-mode .inbox-message-wrapper.is-them .inbox-message-bubble {
+    background: var(--bg-surface);
+    border-color: var(--border);
+    color: var(--text-primary);
+}
+
+body.dark-mode .inbox-input-panel {
+    background: var(--bg-surface);
+    border-top-color: var(--border);
+}
+
+body.dark-mode .inbox-input-wrapper {
+    background: var(--bg-elevated);
+    border-color: var(--border);
+}
+
+body.dark-mode .inbox-textarea {
+    color: var(--text-primary);
+}
+
+body.dark-mode .inbox-reply-bar {
+    background: var(--bg-elevated);
+    border-bottom-color: var(--border);
+}
+
+body.dark-mode .inbox-context-menu {
+    background: var(--bg-surface);
+    border-color: var(--border);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+}
+
+body.dark-mode .inbox-context-menu-item:hover {
+    background: var(--bg-elevated);
+}
+
+body.dark-mode .inbox-header-menu {
+    background: var(--bg-surface);
+    border-color: var(--border);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+}
+
+body.dark-mode .inbox-emoji-picker {
+    background: var(--bg-surface);
+    border-color: var(--border);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+}
+
+body.dark-mode .emoji-picker-search {
+    background: var(--bg-elevated);
+    border-color: var(--border);
+    color: var(--text-primary);
+}
+
+body.dark-mode .emoji-picker-item:hover {
+    background: var(--bg-elevated);
+}
+
+body.dark-mode .inbox-typing-dots {
+    background: var(--bg-surface);
+    border-color: var(--border);
+}
+
+body.dark-mode .inbox-empty-state {
+    background-color: var(--bg-page);
+    background-image: radial-gradient(var(--border) 1px, transparent 1px);
+}
+
+body.dark-mode .inbox-empty-icon {
+    background: var(--bg-surface);
+    border-color: var(--border);
+}
+
+body.dark-mode .inbox-privacy-banner {
+    background: rgba(245, 158, 11, 0.04);
+    border-bottom-color: rgba(245, 158, 11, 0.08);
+}
+
+/* Inbox Message Highlight (scroll-to) Animation */
+.msg-highlight {
+    animation: msgHighlightPulse 1.6s ease-out;
+}
+
+@keyframes msgHighlightPulse {
+    0%   { box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.4); }
+    50%  { box-shadow: 0 0 0 8px rgba(59, 130, 246, 0.15); }
+    100% { box-shadow: 0 0 0 0 transparent; }
+}
+
+/* ─────────────────────────────────────────
+   PRICING ACTIONS & SETTINGS — DARK MODE
+   ───────────────────────────────────────── */
+
+body.dark-mode .pricing-actions-container,
+body.dark-mode .pricing-settings-container {
+    background-color: var(--bg-page);
+}
+
+/* ─────────────────────────────────────────
+   RATE SHEETS — DARK MODE
+   ───────────────────────────────────────── */
+
+body.dark-mode .rate-sheet-card {
+    background: var(--bg-surface);
+    border-color: var(--border);
+}
+
+body.dark-mode .rate-sheet-card:hover {
+    border-color: var(--secondary);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
