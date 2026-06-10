@@ -16,6 +16,12 @@ window.ThemeManager = {
     },
 
     toggle() {
+        const now = Date.now();
+        if (this._lastToggle && (now - this._lastToggle) < 400) {
+            return;
+        }
+        this._lastToggle = now;
+
         this.isDark = !this.isDark;
         localStorage.setItem('pruva_dark_mode', this.isDark);
         this.apply();
@@ -24,10 +30,10 @@ window.ThemeManager = {
             window.notificationManager.showToast(this.isDark ? window.i18n.t('comp.theme.night_mode') : window.i18n.t('comp.theme.day_mode'), 'info');
         }
         
-        // UI'daki tüm ikonları güncelle
-        const icons = document.querySelectorAll('.theme-toggle-icon');
-        icons.forEach(icon => {
-            icon.setAttribute('data-lucide', this.isDark ? 'sun' : 'moon');
+        // UI'daki tüm ikonları güncelle (SVG yerine temiz <i> koyup Lucide ile oluşturuyoruz)
+        const wrappers = document.querySelectorAll('.theme-toggle-wrapper');
+        wrappers.forEach(wrapper => {
+            wrapper.innerHTML = `<i data-lucide="${this.isDark ? 'sun' : 'moon'}" class="theme-toggle-icon" style="width: 18px; height: 18px;"></i>`;
         });
         
         // Lucide ikonlarını yeniden oluştur
