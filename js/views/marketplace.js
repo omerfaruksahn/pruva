@@ -115,8 +115,8 @@ window.marketplaceView = (state) => {
                 <div class="filter-chip ${state.filters.transport === 'land' ? 'active' : ''}" onclick="window.marketplaceManager.toggleFilter('transport', 'land')"><i data-lucide="truck" style="width: 14px; height: 14px; margin-right: 6px;"></i> <span data-i18n="marketplace.transport_land">Kara</span></div>
                 <div class="filter-chip ${state.filters.transport === 'air' ? 'active' : ''}" onclick="window.marketplaceManager.toggleFilter('transport', 'air')"><i data-lucide="plane" style="width: 14px; height: 14px; margin-right: 6px;"></i> <span data-i18n="marketplace.transport_air">Hava</span></div>
                 <div style="width: 1px; height: 20px; background: var(--border-dim); margin: 0 5px;"></div>
-                <div class="filter-chip ${state.filters.cargoType === '<span data-i18n="marketplace.cargo_partial">Parsiyel</span>' /* i18n-handled-dynamically-or-not */ ? 'active' : ''}" onclick="window.marketplaceManager.toggleFilter('cargoType', '<span data-i18n="marketplace.cargo_partial">Parsiyel</span>' /* i18n-handled-dynamically-or-not */)"><i data-lucide="package" style="width: 14px; height: 14px; margin-right: 6px;"></i> <span data-i18n="marketplace.cargo_partial">Parsiyel</span></div>
-                <div class="filter-chip ${state.filters.cargoType === '<span data-i18n="marketplace.cargo_container">Konteyner</span>' /* i18n-handled-dynamically-or-not */ ? 'active' : ''}" onclick="window.marketplaceManager.toggleFilter('cargoType', '<span data-i18n="marketplace.cargo_container">Konteyner</span>' /* i18n-handled-dynamically-or-not */)"><i data-lucide="container" style="width: 14px; height: 14px; margin-right: 6px;"></i> <span data-i18n="marketplace.cargo_container">Konteyner</span></div>
+                <div class="filter-chip ${state.filters.cargoType === 'Parsiyel' ? 'active' : ''}" onclick="window.marketplaceManager.toggleFilter('cargoType', 'Parsiyel')"><i data-lucide="package" style="width: 14px; height: 14px; margin-right: 6px;"></i> <span data-i18n="marketplace.cargo_partial">Parsiyel</span></div>
+                <div class="filter-chip ${state.filters.cargoType === 'Konteyner' ? 'active' : ''}" onclick="window.marketplaceManager.toggleFilter('cargoType', 'Konteyner')"><i data-lucide="container" style="width: 14px; height: 14px; margin-right: 6px;"></i> <span data-i18n="marketplace.cargo_container">Konteyner</span></div>
                 <div class="filter-chip ${state.filters.cargoType === 'Komple' ? 'active' : ''}" onclick="window.marketplaceManager.toggleFilter('cargoType', 'Komple')"><i data-lucide="truck" style="width: 14px; height: 14px; margin-right: 6px;"></i> <span data-i18n="marketplace.cargo_full">Komple Tır</span></div>
                 
                 <!-- Premium Filters -->
@@ -149,7 +149,7 @@ window.marketplaceView = (state) => {
                         <div class="ticket-header">
                             <div class="ticket-header-left">
                                 <span class="status-badge status-${ad.status}">
-                                    ${ad.status === 'pending' ? '<span data-i18n="marketplace.status_pending">Bekliyor</span>' /* i18n-handled-dynamically-or-not */ : ad.status === 'accepted' ? '<span data-i18n="marketplace.status_accepted">Onaylandı</span>' /* i18n-handled-dynamically-or-not */ : '<span data-i18n="marketplace.status_bidded">Teklif Var</span>' /* i18n-handled-dynamically-or-not */}
+                                    ${ad.status === 'pending' ? `<span data-i18n="marketplace.status_pending">Bekliyor</span>` : ad.status === 'accepted' ? `<span data-i18n="marketplace.status_accepted">Onaylandı</span>` : `<span data-i18n="marketplace.status_bidded">Teklif Var</span>`}
                                 </span>
                                 <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600; margin-left: 8px;">${window.utils.formatAdNumber(ad.id)}</span>
                                 <span style="font-size: 0.75rem; color: #e67e22; font-weight: 700; margin-left: 12px; display: flex; align-items: center; gap: 4px;" data-i18n="[title]marketplace.ad_duration_title" title="İlanın yayında kalacağı süre">
@@ -193,13 +193,13 @@ window.marketplaceView = (state) => {
                             <div class="ticket-details">
                                 <div style="font-size: 1.15rem; font-weight: 800; color: var(--secondary); margin-bottom: 18px; padding-bottom: 12px; border-bottom: 1px solid var(--border-dim); display: flex; align-items: center; gap: 8px;">
                                     <i data-lucide="tag" style="width: 18px; height: 18px; color: var(--secondary);"></i>
-                                    ${window.utils.escapeHTML(ad.title || '<span data-i18n="marketplace.default_ad_title">Yük Sevkiyat İlanı</span>' /* i18n-handled-dynamically-or-not */)}
+                                    ${ad.title ? window.utils.escapeHTML(ad.title) : `<span data-i18n="marketplace.default_ad_title">Yük Sevkiyat İlanı</span>`}
                                 </div>
                                 <div class="ticket-info-grid">
                                     <div>
-                                        <p><strong data-i18n="marketplace.goods_type_label">Malın Cinsi:</strong> ${window.utils.escapeHTML(ad.goodsType) || '<span data-i18n="marketplace.not_specified">Belirtilmedi</span>' /* i18n-handled-dynamically-or-not */}</p>
-                                        <p><strong data-i18n="marketplace.category_label">Kategori:</strong> <span style="color: ${ad.cargoCategory?.includes('Tehlikeli') ? 'red' : 'green'}; font-weight: 600;">${window.utils.escapeHTML(ad.cargoCategory) || '<span data-i18n="marketplace.general_cargo">Genel Kargo</span>' /* i18n-handled-dynamically-or-not */}</span></p>
-                                        <p><strong>Incoterm:</strong> <span class="status-badge" style="background: var(--border-dim); color: var(--text-primary); margin:0;">${ad.incoterm || '<span data-i18n="marketplace.not_specified">Belirtilmedi</span>' /* i18n-handled-dynamically-or-not */}</span></p>
+                                        <p><strong data-i18n="marketplace.goods_type_label">Malın Cinsi:</strong> ${ad.goodsType ? window.utils.escapeHTML(ad.goodsType) : `<span data-i18n="marketplace.not_specified">Belirtilmedi</span>`}</p>
+                                        <p><strong data-i18n="marketplace.category_label">Kategori:</strong> <span style="color: ${ad.cargoCategory?.includes('Tehlikeli') ? 'red' : 'green'}; font-weight: 600;">${ad.cargoCategory ? window.utils.escapeHTML(ad.cargoCategory) : `<span data-i18n="marketplace.general_cargo">Genel Kargo</span>`}</span></p>
+                                        <p><strong>Incoterm:</strong> <span class="status-badge" style="background: var(--border-dim); color: var(--text-primary); margin:0;">${ad.incoterm ? window.utils.escapeHTML(ad.incoterm) : `<span data-i18n="marketplace.not_specified">Belirtilmedi</span>`}</span></p>
                                     </div>
                                     <div>
                                         <p><strong data-i18n="marketplace.cargo_details_label">Yük Detayları:</strong></p>
@@ -220,7 +220,7 @@ window.marketplaceView = (state) => {
                                         </ul>
                                         ${ad.weight && !ad.cargoItems ? `<p><strong data-i18n="marketplace.weight_label">Ağırlık:</strong> ${ad.weight}</p>` : ''}
                                         ${ad.totalCBM ? `<p><strong data-i18n="marketplace.total_volume_label">Toplam Hacim:</strong> <span style="color: var(--secondary); font-weight: 600;">${ad.totalCBM} CBM</span></p>` : ad.volume && !ad.cargoItems ? `<p><strong data-i18n="marketplace.volume_label">Hacim:</strong> <span style="color: var(--secondary); font-weight: 600;">${ad.volume}</span></p>` : ''}
-                                        ${ad.cargoItems?.some(item => item.type === '<span data-i18n="marketplace.cargo_partial">Parsiyel</span>' /* i18n-handled-dynamically-or-not */) || ad.cargoType?.includes('<span data-i18n="marketplace.cargo_partial">Parsiyel</span>' /* i18n-handled-dynamically-or-not */) ? `
+                                        ${ad.cargoItems?.some(item => item.type === 'Parsiyel') || ad.cargoType?.includes('Parsiyel') ? `
                                             <p><strong data-i18n="marketplace.stacking_label">İstifleme:</strong> ${ad.isStackable ? '<span style="color: #27ae60; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;"><i data-lucide="check-circle" style="width: 14px; height: 14px;"></i> <span data-i18n="marketplace.stackable">İstiflenebilir</span></span>' : '<span style="color: #e74c3c; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;"><i data-lucide="x-circle" style="width: 14px; height: 14px;"></i> <span data-i18n="marketplace.not_stackable">İstiflenemez</span></span>'}</p>
                                         ` : ''}
                                         <p><strong data-i18n="marketplace.deadline_label">Yükleme Tarihi:</strong> ${ad.deadline}</p>
