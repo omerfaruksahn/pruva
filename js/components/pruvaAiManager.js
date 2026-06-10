@@ -1510,6 +1510,94 @@ window.PruvaAiManager = class PruvaAiManager {
     }
 
     showToast(message, type = 'success') {
+        const toastMap = {
+            'Şablon başarıyla kaydedildi!': 'comp.pruva_ai.toast_template_saved',
+            'Şablon kaydedildi (Çevrimdışı mod).': 'comp.pruva_ai.toast_template_saved_offline',
+            'Şablon varsayılan ayarlara sıfırlandı.': 'comp.pruva_ai.toast_template_reset',
+            'Yeni bildirim alındı': 'comp.pruva_ai.toast_new_notification',
+            'Outlook başarıyla bağlandı': 'comp.pruva_ai.toast_outlook_connected',
+            'Taşıyıcı silindi.': 'comp.pruva_ai.toast_carrier_deleted',
+            'Margin kuralı başarıyla eklendi ve eşitlendi!': 'comp.pruva_ai.toast_margin_added',
+            'Margin kuralı eklendi (Çevrimdışı mod).': 'comp.pruva_ai.toast_margin_added_offline',
+            'Margin kuralı silindi.': 'comp.pruva_ai.toast_margin_deleted',
+            'Margin kuralı silindi (Çevrimdışı mod).': 'comp.pruva_ai.toast_margin_deleted_offline',
+            'Not kaydedildi ✅': 'comp.pruva_ai.toast_note_saved',
+            'Mail taraması için Outlook hesabınızı bağlamalısınız.': 'comp.pruva_ai.toast_outlook_required',
+            'E-postalar taranıyor... 📥': 'comp.pruva_ai.toast_scanning_emails',
+            'Tarama tamamlandı.': 'comp.pruva_ai.toast_scan_complete',
+            'E-posta tarama hatası: Sunucu bağlantısı kurulamadı.': 'comp.pruva_ai.toast_scan_error',
+            'Outlook bağlantısı başlatılıyor... 🔌': 'comp.pruva_ai.toast_outlook_starting',
+            'Lütfen önce giriş yapın.': 'comp.pruva_ai.toast_login_first',
+            'Outlook bağlantısı başlatılamadı.': 'comp.pruva_ai.toast_outlook_failed',
+            'Bağlantı kesiliyor... 🔌': 'comp.pruva_ai.toast_disconnecting',
+            'Outlook bağlantısı başarıyla kesildi.': 'comp.pruva_ai.toast_outlook_disconnected',
+            'Bağlantı kesilemedi.': 'comp.pruva_ai.toast_disconnect_failed',
+            '⚠️ Yapay zekayı kullanmak için tanımlı bir e-posta (Outlook) ile bağlanmalısınız.': 'comp.pruva_ai.toast_ai_outlook_required',
+            'Bu öneri bulunamadı veya daha önce işlenmiş.': 'comp.pruva_ai.toast_suggestion_not_found',
+            'AI aksiyonu başarıyla onaylandı ve gönderildi!': 'comp.pruva_ai.toast_ai_approved',
+            'AI önerisi reddedildi.': 'comp.pruva_ai.toast_ai_rejected',
+            'Copilot konuşması arşivlenemez.': 'comp.pruva_ai.toast_archive_error',
+            'Konuşma arşivlendi!': 'comp.pruva_ai.toast_archived',
+            'Konuşma arşivden çıkarıldı!': 'comp.pruva_ai.toast_unarchived',
+            'Geçmiş kalıcı olarak silindi!': 'comp.pruva_ai.toast_history_deleted',
+            'Metin kopyalandı!': 'comp.pruva_ai.toast_copied',
+            'Kopyalama başarısız oldu.': 'comp.pruva_ai.toast_copy_fail',
+            'PAI Eller Serbest Modu Açıldı. Sizi dinliyorum...': 'comp.pruva_ai.toast_handsfree_on',
+            'PAI Eller Serbest Modu Kapatıldı.': 'comp.pruva_ai.toast_handsfree_off',
+            '⚠️ Sesli komutları kullanmak için tanımlı bir e-posta (Outlook) ile bağlanmalısınız.': 'comp.pruva_ai.toast_voice_outlook_required',
+            'Tarayıcınız sesli komutu desteklemiyor.': 'comp.pruva_ai.toast_voice_not_supported',
+            'Mikrofon izni verilmedi veya kapalı.': 'comp.pruva_ai.toast_mic_denied',
+            'Ses algılanmadı, eller serbest modu kapatıldı.': 'comp.pruva_ai.toast_no_voice'
+        };
+
+        let translatedMessage = message;
+        if (window.i18n && typeof window.i18n.t === 'function') {
+            const trimmedMessage = String(message).trim();
+            if (toastMap[trimmedMessage]) {
+                translatedMessage = window.i18n.t(toastMap[trimmedMessage]);
+            }
+            else if (trimmedMessage.includes('başarıyla taşıyıcı listesine eklendi!')) {
+                const name = trimmedMessage.split(' başarıyla taşıyıcı listesine eklendi!')[0];
+                translatedMessage = name + ' ' + window.i18n.t('comp.pruva_ai.toast_carrier_added');
+            }
+            else if (trimmedMessage.includes('listeye eklendi (Yerel mod).')) {
+                const name = trimmedMessage.split(' listeye eklendi (Yerel mod).')[0];
+                translatedMessage = name + ' ' + window.i18n.t('comp.pruva_ai.toast_carrier_added_offline');
+            }
+            else if (trimmedMessage.startsWith('Outlook başarıyla bağlandı:')) {
+                const suffix = trimmedMessage.slice('Outlook başarıyla bağlandı:'.length);
+                translatedMessage = window.i18n.t('comp.pruva_ai.toast_outlook_connected') + suffix;
+            }
+            else if (trimmedMessage.startsWith('Dosyalar yüklenemedi:')) {
+                const suffix = trimmedMessage.slice('Dosyalar yüklenemedi:'.length);
+                translatedMessage = window.i18n.t('comp.pruva_ai.toast_upload_failed') + suffix;
+            }
+            else if (trimmedMessage.startsWith('Komut işlenemedi.')) {
+                const suffix = trimmedMessage.slice('Komut işlenemedi.'.length);
+                translatedMessage = window.i18n.t('comp.pruva_ai.toast_command_failed') + suffix;
+            }
+            else if (trimmedMessage.startsWith('Hata:')) {
+                const suffix = trimmedMessage.slice('Hata:'.length);
+                translatedMessage = window.i18n.t('comp.pruva_ai.toast_error') + suffix;
+            }
+            else if (trimmedMessage.startsWith('Arşivleme hatası:')) {
+                const suffix = trimmedMessage.slice('Arşivleme hatası:'.length);
+                translatedMessage = window.i18n.t('comp.pruva_ai.toast_archive_fail') + suffix;
+            }
+            else if (trimmedMessage.startsWith('Arşivden çıkarma hatası:')) {
+                const suffix = trimmedMessage.slice('Arşivden çıkarma hatası:'.length);
+                translatedMessage = window.i18n.t('comp.pruva_ai.toast_unarchive_fail') + suffix;
+            }
+            else if (trimmedMessage.startsWith('Silme hatası:')) {
+                const suffix = trimmedMessage.slice('Silme hatası:'.length);
+                translatedMessage = window.i18n.t('comp.pruva_ai.toast_delete_fail') + suffix;
+            }
+            else if (trimmedMessage.startsWith('Ses oluşturulamadı:')) {
+                const suffix = trimmedMessage.slice('Ses oluşturulamadı:'.length);
+                translatedMessage = window.i18n.t('comp.pruva_ai.toast_voice_error') + suffix;
+            }
+        }
+
         const toast = document.createElement('div');
         toast.style.position = 'fixed';
         toast.style.bottom = '56px';
@@ -1541,7 +1629,7 @@ window.PruvaAiManager = class PruvaAiManager {
             color = 'var(--warning, #f59e0b)';
         }
 
-        toast.innerHTML = `<span style="color: ${color}; font-weight: 800; font-size: 1rem;">${icon}</span> ${message}`;
+        toast.innerHTML = `<span style="color: ${color}; font-weight: 800; font-size: 1rem;">${icon}</span> ${translatedMessage}`;
         document.body.appendChild(toast);
 
         setTimeout(() => {

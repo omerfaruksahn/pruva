@@ -61,17 +61,17 @@ export const VIEW_INIT_MAP = {
                 e.preventDefault();
                 const email = document.getElementById('login-email')?.value.trim();
                 if (!email) {
-                    if (window.notificationManager) window.notificationManager.showToast('Lütfen önce e-posta adresinizi girin.', 'warning');
+                    if (window.notificationManager) window.notificationManager.showToast(window.i18n.t('auth.err_enter_email'), 'warning');
                     return;
                 }
                 try {
                     const { sendPasswordResetEmail } = await import('firebase/auth');
                     await sendPasswordResetEmail(window.fbAuth, email);
-                    if (window.notificationManager) window.notificationManager.showToast('Şifre sıfırlama linki e-posta adresinize gönderildi.', 'success');
+                    if (window.notificationManager) window.notificationManager.showToast(window.i18n.t('auth.reset_link_sent'), 'success');
                 } catch(err) {
                     let cleanErr = err.message || '';
                     cleanErr = cleanErr.replace(/firebase:/gi, '').replace(/error/gi, '').replace(/\(auth\/[a-z-]+\)/gi, '').replace(/\./g, '').trim();
-                    const msg = err.code === 'auth/user-not-found' ? 'Bu e-posta adresi kayıtlı değil.' : 'Bir hata oluştu: ' + cleanErr;
+                    const msg = err.code === 'auth/user-not-found' ? window.i18n.t('auth.err_email_not_registered') : window.i18n.t('auth.err_occurred') + cleanErr;
                     if (window.notificationManager) window.notificationManager.showToast(msg, 'error');
                 }
             });
@@ -93,26 +93,26 @@ export const VIEW_INIT_MAP = {
             };
 
             if (!data.terms) {
-                toast('Lütfen Kullanım Koşulları ve KVKK metnini kabul edin.', 'warning');
+                toast(window.i18n.t('auth.err_terms_required'), 'warning');
                 return;
             }
 
             if (data.password !== data.passwordConfirm) {
-                toast('Şifreler birbiriyle eşleşmiyor. Lütfen tekrar kontrol edin.', 'error');
+                toast(window.i18n.t('auth.err_password_mismatch'), 'error');
                 form.querySelector('input[name="password"]').focus();
                 return;
             }
 
             const pwdStrong = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{12,}$/.test(data.password);
             if (!pwdStrong) {
-                toast('Şifre en az 12 karakter olmalı, en az 1 büyük harf, 1 küçük harf ve 1 rakam içermelidir.', 'error');
+                toast(window.i18n.t('auth.err_password_format'), 'error');
                 form.querySelector('input[name="password"]').focus();
                 return;
             }
 
             const taxNum = data.taxNumber?.replace(/\s/g, '');
             if (!/^\d{10,11}$/.test(taxNum)) {
-                toast('Vergi Numarası (VKN) 10 haneli, TCKN 11 haneli ve sadece rakamlardan oluşmalıdır.', 'error');
+                toast(window.i18n.t('auth.err_tax_format'), 'error');
                 form.querySelector('input[name="taxNumber"]').focus();
                 return;
             }
@@ -120,18 +120,18 @@ export const VIEW_INIT_MAP = {
 
             const phoneNum = data.phone?.replace(/\s|-/g, '');
             if (!/^(\+90|0)?5\d{9}$/.test(phoneNum)) {
-                toast('Geçerli bir Türkiye telefon numarası girin. Örn: 05XX XXX XX XX', 'error');
+                toast(window.i18n.t('auth.err_phone_format'), 'error');
                 form.querySelector('input[name="phone"]').focus();
                 return;
             }
 
             if (!data.companyName || data.companyName.trim().length < 3) {
-                toast('Şirket adı en az 3 karakter olmalıdır.', 'error');
+                toast(window.i18n.t('auth.err_company_name_short'), 'error');
                 return;
             }
 
             if (!data.address || data.address.trim().length < 10) {
-                toast('Lütfen geçerli bir firma adresi girin (en az 10 karakter).', 'error');
+                toast(window.i18n.t('auth.err_address_short'), 'error');
                 form.querySelector('textarea[name="address"]').focus();
                 return;
             }
@@ -156,35 +156,35 @@ export const VIEW_INIT_MAP = {
             };
 
             if (!oobCode) {
-                toast('Geçersiz veya süresi dolmuş işlem kodu.', 'error');
+                toast(window.i18n.t('auth.err_invalid_oob'), 'error');
                 return;
             }
 
             if (!newPassword || !confirmPassword) {
-                toast('Lütfen tüm alanları doldurun.', 'warning');
+                toast(window.i18n.t('auth.err_all_fields'), 'warning');
                 return;
             }
 
             const pwdStrong = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{12,}$/.test(newPassword);
             if (!pwdStrong) {
-                toast('Yeni şifreniz en az 12 karakter olmalı, en az 1 büyük harf, 1 küçük harf ve 1 rakam içermelidir.', 'error');
+                toast(window.i18n.t('auth.err_password_format'), 'error');
                 return;
             }
 
             if (newPassword !== confirmPassword) {
-                toast('Şifreler birbiriyle eşleşmiyor.', 'error');
+                toast(window.i18n.t('auth.err_password_mismatch'), 'error');
                 return;
             }
 
             const submitBtn = form.querySelector('button[type="submit"]');
             if (submitBtn) {
                 submitBtn.disabled = true;
-                submitBtn.textContent = 'Güncelleniyor...';
+                submitBtn.textContent = window.i18n.t('auth.updating');
             }
 
             try {
                 const { confirmPasswordReset } = await import('firebase/auth');
-                if (!window.fbAuth) throw new Error('Firebase Auth hazır değil.');
+                if (!window.fbAuth) throw new Error(window.i18n.t('auth.firebase_auth_not_ready'));
 
                 await confirmPasswordReset(window.fbAuth, oobCode, newPassword);
 
@@ -193,31 +193,31 @@ export const VIEW_INIT_MAP = {
                     card.innerHTML = `
                         <div class="auth-header" style="text-align: center;">
                             <div style="font-size: 3.5rem; color: #52c41a; margin-bottom: 15px;">✓</div>
-                            <h2 class="auth-title" style="color: #52c41a;">Şifreniz Güncellendi</h2>
-                            <p class="auth-subtitle">Yeni şifreniz başarıyla kaydedildi.</p>
+                            <h2 class="auth-title" style="color: #52c41a;">${window.i18n.t('auth.password_updated_title')}</h2>
+                            <p class="auth-subtitle">${window.i18n.t('auth.password_updated_subtitle')}</p>
                         </div>
                         <p style="color: var(--text-secondary); margin-bottom: 25px; font-size: 0.95rem; line-height: 1.5; text-align: center;">
-                            Hesap güvenliğiniz güncellenmiştir. Artık yeni şifrenizi kullanarak platforma giriş yapabilirsiniz.
+                            ${window.i18n.t('auth.password_updated_desc')}
                         </p>
-                        <button class="btn-primary auth-submit-btn" onclick="window.app.router.navigate('login')" style="margin-top: 0;">Giriş Yap</button>
+                        <button class="btn-primary auth-submit-btn" onclick="window.app.router.navigate('login')" style="margin-top: 0;">${window.i18n.t('auth.login.submit_btn')}</button>
                     `;
                 }
 
-                toast('Şifreniz başarıyla güncellendi.', 'success');
+                toast(window.i18n.t('auth.toast_password_updated'), 'success');
             } catch (err) {
                 console.error('Password reset confirmation error:', err);
                 if (submitBtn) {
                     submitBtn.disabled = false;
-                    submitBtn.textContent = 'Şifreyi Güncelle';
+                    submitBtn.textContent = window.i18n.t('auth.reset_password.update_btn');
                 }
 
-                let msg = 'Şifre güncellenirken bir hata oluştu.';
+                let msg = window.i18n.t('auth.err_password_update');
                 if (err.code === 'auth/expired-action-code') {
-                    msg = 'Şifre sıfırlama bağlantısının süresi dolmuş. Lütfen yeni bir talep gönderin.';
+                    msg = window.i18n.t('auth.err_reset_code_expired');
                 } else if (err.code === 'auth/invalid-action-code') {
-                    msg = 'Geçersiz şifre sıfırlama bağlantısı.';
+                    msg = window.i18n.t('auth.err_reset_code_invalid');
                 } else if (err.code === 'auth/weak-password') {
-                    msg = 'Şifre çok zayıf.';
+                    msg = window.i18n.t('auth.err_weak_password');
                 }
                 toast(msg, 'error');
             }

@@ -74,7 +74,7 @@ export function renderProfileTab(user) {
             </div>
             <div class="input-group">
                 <label data-i18n="settings.profile.position">Pozisyon / Unvan</label>
-                <input type="text" id="profile-title" value="${user.title || 'Operasyon Müdürü'}" placeholder="Örn: Genel Müdür">
+                <input type="text" id="profile-title" value="${user.title || window.i18n.t('settings.profile.default_title')}" placeholder="${window.i18n.t('settings.profile.placeholder_title')}">
             </div>
         </div>
 
@@ -103,7 +103,7 @@ export function renderProfileTab(user) {
 
         <div class="input-group">
             <label data-i18n="settings.profile.bio">Profesyonel Özet (Bio)</label>
-            <textarea id="profile-bio" placeholder="Şirketiniz veya kendiniz hakkında kısa bir bilgi..." style="height: 100px;">${user.bio || 'Lojistik sektöründe tecrübemizle Pruva platformunda aktif rol alıyoruz.'}</textarea>
+            <textarea id="profile-bio" placeholder="${window.i18n.t('settings.profile.placeholder_bio')}" style="height: 100px;">${user.bio || window.i18n.t('settings.profile.default_bio')}</textarea>
             <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;" data-i18n="settings.profile.bio_desc">Maksimum 500 karakter.</p>
         </div>
 

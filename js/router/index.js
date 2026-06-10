@@ -106,7 +106,7 @@ window.Router = class Router {
 
         if (this.app.state.isLoggedIn && !currentUser && this.app.state.currentUser !== 'Misafir') {
             console.warn("[ROUTER] User record missing in state for authenticated user.");
-            root.innerHTML = `<div style="padding: 40px; text-align: center;">Kullanıcı verileri yüklenemedi. Lütfen sayfayı yenileyin veya <a href="#" onclick="window.app.auth.logout()">çıkış yapıp</a> tekrar deneyin.</div>`;
+            root.innerHTML = `<div style="padding: 40px; text-align: center;">${window.i18n.t('auth.err_user_missing')} <a href="#" onclick="window.app.auth.logout()">${window.i18n.t('auth.logout_relogin')}</a> ${window.i18n.t('auth.try_again')}</div>`;
             return;
         }
 
@@ -246,9 +246,9 @@ window.Router = class Router {
 
         if (!this.app.state.isLoggedIn) {
             if (window.notificationManager) {
-                window.notificationManager.showToast('Bu sayfayı görüntülemek için giriş yapmalısınız.', 'warning');
+                window.notificationManager.showToast(window.i18n.t('auth.toast_login_required'), 'warning');
             } else {
-                alert('Lütfen giriş yapın.');
+                alert(window.i18n.t('auth.alert_login_required'));
             }
             return false;
         }
@@ -272,9 +272,9 @@ window.Router = class Router {
 
         if (roleGuards[view] && !roleGuards[view].includes(role)) {
             if (window.notificationManager) {
-                window.notificationManager.showToast('Bu sayfaya erişim yetkiniz bulunmamaktadır.', 'error');
+                window.notificationManager.showToast(window.i18n.t('auth.toast_access_denied'), 'error');
             } else {
-                alert('Bu sayfaya erişim yetkiniz bulunmamaktadır.');
+                alert(window.i18n.t('auth.alert_access_denied'));
             }
             return false;
         }
@@ -365,7 +365,7 @@ window.Router = class Router {
             membershipBadgeEl.classList.add(badge[0]);
             membershipStatusEl.textContent = badge[1];
         } else {
-            membershipStatusEl.textContent = 'Üyelik';
+            membershipStatusEl.textContent = window.i18n.t('auth.membership_free');
         }
     }
 

@@ -11,14 +11,15 @@ function loadSessionGeoDetails() {
     fetch('https://ipapi.co/json/')
         .then(res => res.json())
         .then(data => {
-            const city = data.city || 'Bilinmeyen Şehir';
-            const country = data.country_name || 'Türkiye';
+            const city = data.city || window.i18n.t('settings.security.unknown_city');
+            const country = data.country_name || window.i18n.t('settings.security.default_country');
             const ip = data.ip || '127.0.0.1';
             geoMetaEl.textContent = `${city}, ${country} • ${ip}`;
         })
         .catch(err => {
             console.error('Geo IP fetch failed, using fallback:', err);
-            geoMetaEl.textContent = 'İstanbul, Türkiye • 127.0.0.1';
+            const fallbackLoc = window.i18n.t('settings.security.default_country') === 'Türkiye' ? 'İstanbul, Türkiye' : 'Istanbul, Turkey';
+            geoMetaEl.textContent = `${fallbackLoc} • 127.0.0.1`;
         });
 }
 

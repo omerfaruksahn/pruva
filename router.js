@@ -782,9 +782,9 @@ const VIEW_INIT_MAP = {
         // Login mandatory for other views
         if (!this.app.state.isLoggedIn) {
             if (window.notificationManager) {
-                window.notificationManager.showToast('Bu sayfayı görüntülemek için giriş yapmalısınız.', 'warning');
+                window.notificationManager.showToast(window.i18n.t('auth.toast_login_required'), 'warning');
             } else {
-                alert('Lütfen giriş yapın.');
+                alert(window.i18n.t('auth.alert_login_required'));
             }
             return false;
         }
@@ -808,9 +808,9 @@ const VIEW_INIT_MAP = {
 
         if (roleGuards[view] && !roleGuards[view].includes(role)) {
             if (window.notificationManager) {
-                window.notificationManager.showToast('Bu sayfaya erişim yetkiniz bulunmamaktadır.', 'error');
+                window.notificationManager.showToast(window.i18n.t('auth.toast_access_denied'), 'error');
             } else {
-                alert('Bu sayfaya erişim yetkiniz bulunmamaktadır.');
+                alert(window.i18n.t('auth.alert_access_denied'));
             }
             return false;
         }
@@ -879,7 +879,7 @@ const VIEW_INIT_MAP = {
             membershipBadgeEl.classList.add(badge[0]);
             membershipStatusEl.textContent = badge[1];
         } else {
-            membershipStatusEl.textContent = 'Üyelik';
+            membershipStatusEl.textContent = window.i18n.t('auth.membership_free');
         }
     }
 };

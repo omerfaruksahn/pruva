@@ -1,7 +1,7 @@
 function getDeviceDetails() {
     const ua = navigator.userAgent;
-    let browser = "Tarayıcı";
-    let os = "İşletim Sistemi";
+    let browser = window.i18n.t('auth.device_browser');
+    let os = window.i18n.t('auth.device_os');
     let icon = "monitor";
 
     if (/windows/i.test(ua)) os = "Windows";
@@ -106,7 +106,7 @@ export function renderSecurityTab(user) {
                         </div>
                     </div>
                 </div>
-                <button class="btn-outline" style="padding: 6px 12px; font-size: 0.75rem;" onclick="${user.phoneVerified ? "alert('Telefon numaranızı profil tabından güncelleyebilirsiniz.')" : "window.settingsManager.startPhoneVerification()" }">
+                <button class="btn-outline" style="padding: 6px 12px; font-size: 0.75rem;" onclick="${user.phoneVerified ? "alert(window.i18n.t('settings.security.alert_update_phone'))" : "window.settingsManager.startPhoneVerification()" }">
                     ${user.phoneVerified ? '<span data-i18n="settings.security.edit">Düzenle</span>' : '<span data-i18n="settings.security.verify_number">Numara Doğrula</span>'}
                 </button>
             </div>
@@ -133,7 +133,7 @@ export function renderSecurityTab(user) {
                     </div>
                 </div>
             </div>
-            <button class="btn-outline" style="width: 100%; margin-top: 20px; color: var(--danger); border-color: #fee2e2;" onclick="if(window.notificationManager) window.notificationManager.showToast('Tüm diğer oturumlar sonlandırıldı.', 'success')" data-i18n="settings.security.logout_all">Tüm Oturumlardan Çıkış Yap</button>
+            <button class="btn-outline" style="width: 100%; margin-top: 20px; color: var(--danger); border-color: #fee2e2;" onclick="if(window.notificationManager) window.notificationManager.showToast(window.i18n.t('settings.security.toast_sessions_terminated'), 'success')" data-i18n="settings.security.logout_all">Tüm Oturumlardan Çıkış Yap</button>
         </div>
 
         <!-- Güvenlik Logları -->
@@ -147,14 +147,14 @@ export function renderSecurityTab(user) {
                     <div class="audit-dot success"></div>
                     <div class="audit-content">
                         <div class="audit-text" data-i18n="settings.security.login_success">Başarılı giriş yapıldı</div>
-                        <div class="audit-time">Bugün, 14:22 • IP: 192.168.1.1</div>
+                        <div class="audit-time">${window.i18n.t('settings.security.today')}, 14:22 • IP: 192.168.1.1</div>
                     </div>
                 </div>
                 <div class="audit-item">
                     <div class="audit-dot info"></div>
                     <div class="audit-content">
                         <div class="audit-text" data-i18n="settings.security.password_changed">Şifre değiştirildi</div>
-                        <div class="audit-time">2 gün önce • IP: 192.168.1.1</div>
+                        <div class="audit-time">${window.i18n.t('settings.security.days_ago').replace('{{days}}', '2')} • IP: 192.168.1.1</div>
                     </div>
                 </div>
             </div>

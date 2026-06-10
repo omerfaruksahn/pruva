@@ -4,15 +4,14 @@ export const StatusPages = {
         <div class="status-page">
             <div class="card status-card status-card--danger">
                 <div class="status-icon">🚫</div>
-                <h1>Hesabınız Askıya Alındı</h1>
+                <h1>${window.i18n.t('auth.status_blocked_title')}</h1>
                 <p>
-                    Sayın <strong>${user.name}</strong>, hesabınız sistem kurallarına aykırı 
-                    hareketler nedeniyle yönetici tarafından geçici olarak askıya alınmıştır.
+                    ${window.i18n.t('auth.status_blocked_desc').replace('{name}', user.name)}
                 </p>
                 <div class="status-reason">
-                    <strong>Sebep:</strong> Güvenlik politikası ihlali veya şüpheli aktivite.
+                    <strong>${window.i18n.t('auth.status_reason_label')}</strong> ${window.i18n.t('auth.status_blocked_reason')}
                 </div>
-                <button class="btn-outline" onclick="window.app.auth.logout()">🚪 Çıkış Yap</button>
+                <button class="btn-outline" onclick="window.app.auth.logout()">${window.i18n.t('auth.status_logout_btn')}</button>
             </div>
         </div>`;
     },
@@ -22,18 +21,17 @@ export const StatusPages = {
         <div class="status-page">
             <div class="card status-card status-card--warning">
                 <div class="status-icon">⏳</div>
-                <h1>İnceleme Devam Ediyor</h1>
+                <h1>${window.i18n.t('auth.status_pending_title')}</h1>
                 <p>
-                    Sayın <strong>${user.name}</strong>, üyeliğiniz başarıyla oluşturuldu. 
-                    Platform güvenliği gereği şirket bilgileriniz admin ekibimiz tarafından incelenmektedir.
+                    ${window.i18n.t('auth.status_pending_desc').replace('{name}', user.name)}
                 </p>
                 <div class="status-reason status-reason--info">
-                    <strong>Durum:</strong> Onay Bekleniyor (VKN ve Şirket Doğrulaması)
+                    <strong>${window.i18n.t('auth.status_label')}</strong> ${window.i18n.t('auth.status_pending_val')}
                 </div>
                 <p class="status-note">
-                    Onaylandığında kurumsal e-posta adresinize bir bilgilendirme gönderilecektir.
+                    ${window.i18n.t('auth.status_pending_note')}
                 </p>
-                <button class="btn-outline" onclick="window.app.auth.logout()">🚪 Çıkış Yap</button>
+                <button class="btn-outline" onclick="window.app.auth.logout()">${window.i18n.t('auth.status_logout_btn')}</button>
             </div>
         </div>`;
     },
@@ -43,18 +41,17 @@ export const StatusPages = {
         <div class="status-page">
             <div class="card status-card status-card--danger">
                 <div class="status-icon">❌</div>
-                <h1>Başvurunuz Reddedildi</h1>
+                <h1>${window.i18n.t('auth.status_rejected_title')}</h1>
                 <p>
-                    Sayın <strong>${user.name}</strong>, platforma yapmış olduğunuz üyelik başvurusu 
-                    yapılan incelemeler sonucunda maalesef kabul edilememiştir.
+                    ${window.i18n.t('auth.status_rejected_desc').replace('{name}', user.name)}
                 </p>
                 <div class="status-reason">
-                    <strong>Sebep:</strong> Kurumsal doğrulama kriterleri karşılanamadı veya eksik bilgi.
+                    <strong>${window.i18n.t('auth.status_reason_label')}</strong> ${window.i18n.t('auth.status_rejected_reason')}
                 </div>
                 <p class="status-note">
-                    Farklı bir şirket veya bilgilerle tekrar başvurmak için çıkış yapabilirsiniz.
+                    ${window.i18n.t('auth.status_rejected_note')}
                 </p>
-                <button class="btn-outline" onclick="window.app.auth.logout()">🚪 Çıkış Yap</button>
+                <button class="btn-outline" onclick="window.app.auth.logout()">${window.i18n.t('auth.status_logout_btn')}</button>
             </div>
         </div>`;
     },
@@ -64,12 +61,12 @@ export const StatusPages = {
         <div class="status-page">
             <div class="card status-card status-card--warning">
                 <div class="status-icon">⚠️</div>
-                <h2>Sayfa Yüklenemedi</h2>
-                <p>Bu sayfa render edilirken bir hata oluştu. Lütfen tekrar deneyin.</p>
+                <h2>${window.i18n.t('auth.status_error_title')}</h2>
+                <p>${window.i18n.t('auth.status_error_desc')}</p>
                 <code class="status-error-code">${window.utils.escapeHTML(errorMessage)}</code>
                 <div class="status-actions">
-                    <button class="btn-primary" onclick="window.app.router.navigate('home')">Ana Sayfa</button>
-                    <button class="btn-outline" onclick="location.reload()">Yenile</button>
+                    <button class="btn-primary" onclick="window.app.router.navigate('home')">${window.i18n.t('auth.status_home_btn')}</button>
+                    <button class="btn-outline" onclick="location.reload()">${window.i18n.t('auth.status_reload_btn')}</button>
                 </div>
             </div>
         </div>`;
