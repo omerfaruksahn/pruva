@@ -43,7 +43,11 @@ window.ThemeManager = {
     },
 
     apply() {
-        document.body.classList.toggle('dark-mode', this.isDark);
+        if (this.isDark) {
+            document.body.classList.add('dark-mode');
+        } else {
+            document.body.classList.remove('dark-mode');
+        }
     },
 
     getBtnHTML() {

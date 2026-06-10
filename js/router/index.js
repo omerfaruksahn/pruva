@@ -129,7 +129,10 @@ window.Router = class Router {
 
         const currentView = this.app.state.currentView || 'home';
         
-        document.body.className = `view-${currentView}`;
+        const currentClasses = Array.from(document.body.classList).filter(c => !c.startsWith('view-'));
+        currentClasses.push(`view-${currentView}`);
+        document.body.className = currentClasses.join(' ');
+
         if (currentView === 'education' && this.app.state.eduViewMode === 'player') {
             document.body.classList.add('view-education-player');
         }
