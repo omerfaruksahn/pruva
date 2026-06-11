@@ -108,15 +108,25 @@ window.pruvaAiView = (state) => {
             
             <div class="saas-header-actions">
                 ${state.outlookConnected ? `
-                    <div style="display: flex; align-items: center; gap: 8px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: var(--radius-md); padding: 8px 16px;">
-                        <span style="color: #10b981; font-weight: 700; font-size: 0.8rem; display: flex; align-items: center; gap: 6px;">
-                            🟢 <span data-i18n="pruva_ai.outlook_connected">Outlook Bağlı:</span> <strong style="color: var(--text-primary); font-weight: 700;">${state.outlookEmail || ''}</strong>
-                        </span>
-                        <button onclick="window.app.managers.pruvaAi.disconnectOutlook()" style="background: transparent; border: none; color: #ef4444; font-size: 0.95rem; font-weight: 700; cursor: pointer; padding: 0 4px; display: flex; align-items: center; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.15)'" onmouseout="this.style.transform='scale(1)'" data-i18n="[title]pruva_ai.disconnect" title="Bağlantıyı Kes">✕</button>
+                    <div style="display: flex; align-items: center; gap: 10px; background: linear-gradient(135deg, rgba(16, 185, 129, 0.08), rgba(16, 185, 129, 0.03)); backdrop-filter: blur(8px); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: 12px; padding: 8px 18px; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.1);">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <div style="position: relative; width: 28px; height: 28px;">
+                                <img src="/assets/outlook_icon.svg" style="width: 28px; height: 28px; filter: drop-shadow(0 2px 4px rgba(0,120,212,0.3));" alt="Outlook">
+                                <span style="position: absolute; bottom: -2px; right: -2px; width: 10px; height: 10px; background: #10b981; border-radius: 50%; border: 2px solid var(--bg-default); box-shadow: 0 0 6px rgba(16,185,129,0.4);"></span>
+                            </div>
+                            <div style="display: flex; flex-direction: column; gap: 1px;">
+                                <span style="font-size: 0.65rem; color: #10b981; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;" data-i18n="pruva_ai.outlook_connected">Outlook Bağlı</span>
+                                <strong style="color: var(--text-primary); font-weight: 700; font-size: 0.82rem;">${state.outlookEmail || ''}</strong>
+                            </div>
+                        </div>
+                        <button onclick="window.app.managers.pruvaAi.disconnectOutlook()" style="background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.15); color: #ef4444; font-size: 0.75rem; font-weight: 700; cursor: pointer; padding: 4px 8px; display: flex; align-items: center; gap: 4px; border-radius: 6px; transition: all 0.2s;" onmouseover="this.style.background='rgba(239,68,68,0.15)'; this.style.borderColor='rgba(239,68,68,0.3)'" onmouseout="this.style.background='rgba(239,68,68,0.08)'; this.style.borderColor='rgba(239,68,68,0.15)'" data-i18n="[title]pruva_ai.disconnect" title="Bağlantıyı Kes">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                        </button>
                     </div>
                 ` : `
-                    <button class="btn btn-secondary" onclick="window.app.managers.pruvaAi.connectOutlook()" style="padding: 8px 16px; font-weight: 700; border-radius: var(--radius-md); display: flex; align-items: center; gap: 6px; cursor: pointer; background: #0078d4; color: white; border: none; transition: background 0.2s;" onmouseover="this.style.background='#005a9e'" onmouseout="this.style.background='#0078d4'">
-                        <span data-i18n="pruva_ai.connect_outlook">📧 Outlook Bağla</span>
+                    <button class="outlook-connect-btn" onclick="window.app.managers.pruvaAi.connectOutlook()" style="padding: 10px 20px; font-weight: 700; border-radius: 12px; display: flex; align-items: center; gap: 10px; cursor: pointer; background: linear-gradient(135deg, #0078d4, #0053a6); color: white; border: none; transition: all 0.3s; box-shadow: 0 4px 12px rgba(0,120,212,0.3); font-size: 0.85rem;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 6px 16px rgba(0,120,212,0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(0,120,212,0.3)'">
+                        <img src="/assets/outlook_icon.svg" style="width: 22px; height: 22px; filter: brightness(10);" alt="Outlook">
+                        <span data-i18n="pruva_ai.connect_outlook">Outlook Bağla</span>
                     </button>
                 `}
             </div>

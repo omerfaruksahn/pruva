@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48">
+  <defs>
+    <linearGradient id="outlookGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0078d4"/>
+      <stop offset="100%" style="stop-color:#0053a6"/>
+    </linearGradient>
+  </defs>
+  <rect x="2" y="10" width="44" height="28" rx="3" ry="3" fill="url(#outlookGrad)"/>
+  <path d="M2 13l22 13 22-13" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="1.5"/>
+  <path d="M2 13l22 13 22-13" fill="none" stroke="white" stroke-width="0.8" stroke-dasharray="0"/>
+  <rect x="6" y="14" width="20" height="20" rx="2" fill="#0053a6"/>
+  <text x="16" y="29" text-anchor="middle" fill="white" font-family="'Segoe UI', Arial, sans-serif" font-weight="700" font-size="16">O</text>
+</svg>

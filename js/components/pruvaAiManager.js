@@ -1799,12 +1799,39 @@ window.PruvaAiManager = class PruvaAiManager {
             // Listen for successful callback message from popup (Eğer cross-origin engeline takılmazsa)
             const handleMessage = async (event) => {
                 if (event.data && event.data.type === 'OUTLOOK_CONNECTED') {
-                    this.showToast(`Outlook başarıyla bağlandı: ${event.data.email} 🎉`, 'success');
                     window.removeEventListener('message', handleMessage);
                     
                     if (this.activeOutlookPopup && !this.activeOutlookPopup.closed) {
                         this.activeOutlookPopup.close();
                     }
+
+                    // ─── EMAIL MATCH ENFORCEMENT ───
+                    // Kullanıcının kayıtlı emaili ile Outlook hesabı eşleşmeli
+                    const connectedEmail = (event.data.email || '').toLowerCase().trim();
+                    const registeredEmail = (firebaseUser.email || '').toLowerCase().trim();
+                    
+                    if (connectedEmail && registeredEmail && connectedEmail !== registeredEmail) {
+                        // Eşleşmedi — backend'e de disconnect gönder
+                        try {
+                            await fetch(CONFIG.API_URL + '/outlook/disconnect', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Authorization': `Bearer ${token}`
+                                }
+                            });
+                        } catch(e) { /* ignore */ }
+                        
+                        this.showToast(
+                            `⚠️ Outlook hesabınız (${connectedEmail}) kayıtlı e-postanız (${registeredEmail}) ile eşleşmiyor. Lütfen kayıt olduğunuz e-posta ile bağlanın.`, 
+                            'danger', 
+                            8000
+                        );
+                        return;
+                    }
+                    // ─── END EMAIL MATCH ───
+
+                    this.showToast(`Outlook başarıyla bağlandı: ${event.data.email} 🎉`, 'success');
                     
                     // Update connection state on frontend immediately
                     this.app.state.outlookConnected = true;
