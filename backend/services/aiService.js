@@ -101,6 +101,10 @@ async function analyzeCommand(userMessage, context = {}, fileParts = []) {
     const hasFiles = Array.isArray(fileParts) && fileParts.length > 0;
     const routed = pickModel(userMessage, context, hasFiles);
     console.log(`[AI ROUTER] Katman seçildi: ${routed.tier} → model: ${routed.model}`);
+
+    // Katmana göre prompt seç: güçlü model TAM JARVIS promptu, ucuz model KOMPAKT versiyonu kullanır.
+    // Kalite korunur, token (maliyet) düşer.
+    const activeSystemPrompt = routed.tier === 'smart' ? SYSTEM_PROMPT : SYSTEM_PROMPT_LITE;
     
     const tools = [{
       functionDeclarations: [
