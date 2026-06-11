@@ -55,6 +55,7 @@ import './firebase-config.js';
 // import './security-hardened.js'; // Konsol kullanımını zorlaştırdığı için geliştirme aşamasında kapattım
 import './state.js';
 import './data/campusContent.js';
+import './utils/educationContent.js';
 import './utils.js';
 import './security.js';
 import './i18n.js';

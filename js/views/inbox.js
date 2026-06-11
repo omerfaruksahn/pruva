@@ -2,6 +2,10 @@ import { db } from '../firebase-config.js';
 import { collection, query, where, orderBy, onSnapshot } from 'firebase/firestore';
 import { FirestoreService } from '../services/firestoreService.js';
 
+// Global erişim: inline onclick'ler ve diğer view'lar window.FirestoreService kullanıyor
+// ama bu atama hiçbir yerde yapılmamıştı → reaction güncellemeleri sessizce patlıyordu
+window.FirestoreService = FirestoreService;
+
 /**
  * PRUVA - SPA Inbox (Gelen Kutusu) View
  * dual-column chat list & messaging interface

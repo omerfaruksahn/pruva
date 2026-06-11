@@ -1,11 +1,14 @@
 // Demo amaçlı arama fonksiyonu (Canlı Filtreleme)
 window.handleCampusSearch = function(query) {
-    const products = window.campusContent ? window.campusContent.products : [];
+    // Statik ürünler + Firestore'dan yüklenen admin kursları birlikte aranır
+    const staticProducts = window.campusContent ? window.campusContent.products : [];
+    const firestoreCourses = window.app?.state?.campusCourses || [];
+    const products = [...staticProducts, ...firestoreCourses];
     const lowerQuery = query.toLowerCase();
     
     const filtered = products.filter(p => 
-        p.title.toLowerCase().includes(lowerQuery) || 
-        p.description.toLowerCase().includes(lowerQuery)
+        (p.title || '').toLowerCase().includes(lowerQuery) || 
+        (p.description || '').toLowerCase().includes(lowerQuery)
     );
     
     const gridElement = document.querySelector('.up-grid');
@@ -17,7 +20,10 @@ window.handleCampusSearch = function(query) {
             const library = appState.campusLibrary || [];
             
             gridElement.innerHTML = filtered.map(p => {
-                const typeLabel = p.type === 'book' ? `<span data-i18n="edu.report_ebook">${window.t ? window.t('edu.report_ebook') : 'Rapor / E-Kitap'}</span>` : p.type === 'article' ? `<span data-i18n="edu.article">${window.t ? window.t('edu.article') : 'Makale'}</span>` : `<span data-i18n="edu.training_set">${window.t ? window.t('edu.training_set') : 'Eğitim Seti'}</span>`;
+                const typeLabel = (p.type === 'books' || p.type === 'book') ? `<span data-i18n="edu.report_ebook">${window.t ? window.t('edu.report_ebook') : 'Rapor / E-Kitap'}</span>`
+                    : (p.type === 'articles' || p.type === 'article') ? `<span data-i18n="edu.article">${window.t ? window.t('edu.article') : 'Makale'}</span>`
+                    : (p.type === 'videos' || p.type === 'video') ? `<span data-i18n="edu.video_training">${window.t ? window.t('edu.video_training') : 'Video Eğitim'}</span>`
+                    : `<span data-i18n="edu.training_set">${window.t ? window.t('edu.training_set') : 'Eğitim Seti'}</span>`;
                 const isFavorited = library.includes(p.id);
                 return `
                 <div class="up-card" onclick="window.utils.viewCampusProduct('${p.id}')" style="position: relative;">
@@ -30,7 +36,7 @@ window.handleCampusSearch = function(query) {
                     <div class="up-card-body">
                         <h3 class="up-card-title" data-i18n="${p.i18nKey || ''}">${window.t && p.i18nKey ? window.t(p.i18nKey) : p.title}</h3>
                         <div class="up-card-footer">
-                            <div class="up-card-price" style="font-size: 1rem; color: var(--up-accent);" data-i18n="edu.free">${window.t ? window.t('edu.free') : 'Ücretsiz'}</div>
+                            ${p.price ? `<div class="up-card-price" style="font-size: 1rem; color: var(--up-accent);">${p.price}</div>` : `<div class="up-card-price" style="font-size: 1rem; color: var(--up-accent);" data-i18n="edu.free">${window.t ? window.t('edu.free') : 'Ücretsiz'}</div>`}
                             <div class="up-card-rating" style="color: var(--up-text-muted); font-weight: 600;">
                                 <i data-lucide="bookmark" style="width: 14px; height: 14px;"></i> ${p.id.length * 37 % 500 + 120}
                             </div>
@@ -94,7 +100,42 @@ window.educationView = (state) => {
         `;
     }
 
-    const selectedProduct = selectedId ? content.products.find(p => p.id === selectedId) : null;
+    const selectedProduct = selectedId ? allProducts().find(p => p.id === selectedId) : null;
+
+    // ── Firestore'dan admin kurslarını yükle (bir kez, arka planda) ──
+    // Admin panelden eklenen kurslar artık kullanıcıya GERÇEKTEN görünüyor
+    // (eskiden eğitim sayfası Firestore'u hiç okumuyordu, admin kursları kayboluyordu)
+    if (viewState.campusCoursesLoaded === undefined) {
+        viewState.campusCoursesLoaded = false; // tekrar tetiklenmesin
+        (async () => {
+            try {
+                const svc = window.FirestoreService
+                    || (await import('../services/firestoreService.js')).FirestoreService;
+                const courses = await svc.getCourses();
+                viewState.campusCourses = courses.map(c => ({
+                    id: 'course-' + c.id,
+                    type: 'courses',
+                    title: c.title || 'İsimsiz Kurs',
+                    description: c.description || '',
+                    price: 'Ücretsiz',
+                    cover: c.cover || 'https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&q=80&w=400',
+                    badge: 'Kurs',
+                    tags: c.tags || ['Eğitim'],
+                    rating: c.rating || ''
+                }));
+            } catch (e) {
+                console.warn('[CAMPUS] Kurslar yüklenemedi:', e.message);
+                viewState.campusCourses = [];
+            }
+            viewState.campusCoursesLoaded = true;
+            if (window.app?.router) window.app.router.render();
+        })();
+    }
+
+    // Statik kampüs ürünleri + Firestore kursları birleşik liste
+    function allProducts() {
+        return [...(content.products || []), ...(viewState.campusCourses || [])];
+    }
 
     // Favoriye Ekleme İşlevi (UI tabanlı)
     window.toggleFavorite = (e, id) => {
@@ -115,6 +156,25 @@ window.educationView = (state) => {
         if(window.utils && window.utils.setCampusView) {
              window.utils.setCampusView(viewMode);
         }
+    };
+
+    // ── Temel Eğitim (Course Reader) navigasyonu ──
+    window.openCourseReader = (chapterId) => {
+        if (!window.app?.state) return;
+        const chapters = window.educationContent?.chapters || [];
+        window.app.state.campusViewMode = 'course_reader';
+        window.app.state.campusChapterId = chapterId || (chapters[0] ? chapters[0].id : null);
+        if (window.app.store) window.app.store.save();
+        window.app.router.render();
+        window.scrollTo(0, 0);
+    };
+
+    window.setCourseChapter = (chapterId) => {
+        if (!window.app?.state) return;
+        window.app.state.campusChapterId = chapterId;
+        if (window.app.store) window.app.store.save();
+        window.app.router.render();
+        window.scrollTo(0, 0);
     };
 
     // Slider ve İkon Kontrolleri (Global)
@@ -151,11 +211,14 @@ window.educationView = (state) => {
         <div class="up-header-bar">
             <h2 style="margin:0; font-size: 1.5rem; color: var(--up-text-title); font-weight: 800; letter-spacing: -0.5px;">Whisper</h2>
             <div class="up-filters">
-                <button class="up-filter-pill ${viewMode !== 'library' ? 'active' : ''}" onclick="window.utils.setCampusView('storefront')">
-                    <i data-lucide="compass"></i> <span data-i18n="edu.campus">Kampüs</span>
+                <button class="up-filter-pill ${viewMode !== 'library' && viewMode !== 'course_reader' ? 'active' : ''}" onclick="window.utils.setCampusView('storefront')">
+                    <i data-lucide="compass"></i> <span data-i18n="edu.campus">${window.t ? window.t('edu.campus') : 'Kampüs'}</span>
+                </button>
+                <button class="up-filter-pill ${viewMode === 'course_reader' ? 'active' : ''}" onclick="window.openCourseReader()">
+                    <i data-lucide="graduation-cap"></i> <span data-i18n="edu.basic_training">${window.t ? window.t('edu.basic_training') : 'Temel Eğitim'}</span>
                 </button>
                 <button class="up-filter-pill ${viewMode === 'library' ? 'active' : ''}" onclick="window.utils.setCampusView('library')">
-                    <i data-lucide="library"></i> <span data-i18n="edu.my_library">Kütüphanem</span>
+                    <i data-lucide="library"></i> <span data-i18n="edu.my_library">${window.t ? window.t('edu.my_library') : 'Kütüphanem'}</span>
                 </button>
             </div>
         </div>
@@ -165,7 +228,17 @@ window.educationView = (state) => {
     // 1. STOREFRONT (KAMPÜS)
     // ---------------------------------------------------------
     const renderStorefront = () => {
-        const filteredProducts = content.products;
+        // Statik ürünler + Firestore kursları; kategori filtresi gerçekten uygulanıyor
+        const merged = allProducts();
+        const filteredProducts = category === 'all'
+            ? merged
+            : merged.filter(p => p.type === category);
+
+        // 'Kurslar' kategorisi (Firestore'dan gelenler için) listede yoksa ekle
+        const categories = [...(content.categories || [])];
+        if (!categories.some(c => c.id === 'courses')) {
+            categories.push({ id: 'courses', name: 'Kurslar', icon: 'graduation-cap' });
+        }
 
         return `
             <!-- WHISPER SLIDER SECTION -->
@@ -230,10 +303,24 @@ window.educationView = (state) => {
                 </div>
             </div>
 
+            <!-- KATEGORİ FİLTRELERİ (eskiden hiç render edilmiyordu — kategori sistemi ölüydü) -->
+            <div class="up-filters" style="margin-bottom: 2rem; flex-wrap: wrap; display: flex; gap: 0.5rem;">
+                ${categories.map(c => `
+                    <button class="up-filter-pill ${category === c.id ? 'active' : ''}" onclick="window.utils.setCampusCategory('${c.id}')">
+                        <i data-lucide="${c.icon}"></i> <span data-i18n="edu.category_${c.id}">${window.t ? window.t('edu.category_' + c.id) : c.name}</span>
+                    </button>
+                `).join('')}
+            </div>
+
             <!-- GRID -->
             <div class="up-grid">
-                ${filteredProducts.map(p => {
-                    const typeLabel = p.type === 'book' ? `<span data-i18n="edu.report_ebook">Rapor / E-Kitap</span>` : p.type === 'article' ? `<span data-i18n="edu.article">Makale</span>` : `<span data-i18n="edu.training_set">Eğitim Seti</span>`;
+                ${filteredProducts.length === 0 ? `
+                    <div style="grid-column: 1 / -1; text-align: center; padding: 4rem; color: var(--up-text-muted);" data-i18n="edu.no_content_category">${window.t ? window.t('edu.no_content_category') : 'Bu kategoride henüz içerik yok.'}</div>
+                ` : filteredProducts.map(p => {
+                    const typeLabel = (p.type === 'books' || p.type === 'book') ? `<span data-i18n="edu.report_ebook">${window.t ? window.t('edu.report_ebook') : 'Rapor / E-Kitap'}</span>`
+                        : (p.type === 'articles' || p.type === 'article') ? `<span data-i18n="edu.article">${window.t ? window.t('edu.article') : 'Makale'}</span>`
+                        : (p.type === 'videos' || p.type === 'video') ? `<span data-i18n="edu.video_training">${window.t ? window.t('edu.video_training') : 'Video Eğitim'}</span>`
+                        : `<span data-i18n="edu.training_set">${window.t ? window.t('edu.training_set') : 'Eğitim Seti'}</span>`;
                     const isFavorited = library.includes(p.id);
                     
                     return `
@@ -249,7 +336,7 @@ window.educationView = (state) => {
                         <div class="up-card-body">
                             <h3 class="up-card-title" data-i18n="${p.i18nKey || ''}">${window.t && p.i18nKey ? window.t(p.i18nKey) : p.title}</h3>
                             <div class="up-card-footer">
-                                <div class="up-card-price" style="font-size: 1rem; color: var(--up-accent);" data-i18n="edu.free">Ücretsiz</div>
+                                ${p.price ? `<div class="up-card-price" style="font-size: 1rem; color: var(--up-accent);">${p.price}</div>` : `<div class="up-card-price" style="font-size: 1rem; color: var(--up-accent);" data-i18n="edu.free">${window.t ? window.t('edu.free') : 'Ücretsiz'}</div>`}
                                 <div class="up-card-rating" style="color: var(--up-text-muted); font-weight: 600;">
                                     <i data-lucide="bookmark" style="width: 14px; height: 14px;"></i> ${p.id.length * 37 % 500 + 120}
                                 </div>
@@ -287,51 +374,192 @@ window.educationView = (state) => {
         const p = selectedProduct;
         const isFavorited = library.includes(p.id);
 
+        // Ürünün GERÇEK verilerini göster (eski kod her ürün için aynı sahte PDF sayfasını basıyordu)
+        const instructor = (content.instructors || []).find(i => i.id === p.instructorId);
+        const typeLabel = (p.type === 'books' || p.type === 'book') ? `<span data-i18n="edu.report_ebook">${window.t ? window.t('edu.report_ebook') : 'Rapor / E-Kitap'}</span>`
+            : (p.type === 'articles' || p.type === 'article') ? `<span data-i18n="edu.article">${window.t ? window.t('edu.article') : 'Makale'}</span>`
+            : (p.type === 'videos' || p.type === 'video') ? `<span data-i18n="edu.video_training">${window.t ? window.t('edu.video_training') : 'Video Eğitim'}</span>`
+            : `<span data-i18n="edu.training_set">${window.t ? window.t('edu.training_set') : 'Eğitim Seti'}</span>`;
+
         return `
-            <div class="pdf-viewer-layout" oncontextmenu="return false;">
-                <!-- PDF HEADER -->
+            <div class="pdf-viewer-layout">
+                <!-- HEADER -->
                 <div class="pdf-viewer-header">
                     <h2 class="pdf-viewer-title">
                         <button class="up-btn up-btn-secondary" onclick="window.utils.setCampusView('storefront')" style="padding: 6px 12px;">
-                            <i data-lucide="arrow-left"></i> <span data-i18n="edu.go_back">Geri Dön</span>
+                            <i data-lucide="arrow-left"></i> <span data-i18n="edu.go_back">${window.t ? window.t('edu.go_back') : 'Geri Dön'}</span>
                         </button>
                         <span style="margin-left: 12px;" data-i18n="${p.i18nKey || ''}">${window.t && p.i18nKey ? window.t(p.i18nKey) : p.title}</span>
                     </h2>
                     
                     <button class="up-btn ${isFavorited ? 'up-btn-secondary' : 'up-btn-primary'}" onclick="window.toggleFavorite(event, '${p.id}')" style="${isFavorited ? 'color: var(--up-primary); border-color: var(--up-primary);' : ''}">
                         <i data-lucide="bookmark" ${isFavorited ? 'fill="currentColor"' : ''}></i> 
-                        ${isFavorited ? '<span data-i18n="edu.added_to_lib">Kütüphanede Eklendi</span>' : '<span data-i18n="edu.add_to_lib">Kütüphaneme Ekle</span>'}
+                        ${isFavorited ? `<span data-i18n="edu.added_to_lib">${window.t ? window.t('edu.added_to_lib') : 'Kütüphanede'}</span>` : `<span data-i18n="edu.add_to_lib">${window.t ? window.t('edu.add_to_lib') : 'Kütüphaneme Ekle'}</span>`}
                     </button>
                 </div>
 
-                <!-- PDF MOCK VIEWER -->
-                <div class="pdf-mock-frame">
-                    <!-- Fake PDF Page 1 -->
-                    <div class="pdf-page">
-                        <div class="pdf-page-header">
-                            <span data-i18n="${p.i18nKey || ''}">${window.t && p.i18nKey ? window.t(p.i18nKey) : p.title}</span>
-                            <span data-i18n="edu.chapter_1">Bölüm 1</span>
+                <!-- ÜRÜN DETAYI -->
+                <div style="display: grid; grid-template-columns: 280px 1fr; gap: 2rem; background: var(--up-surface-solid); border: 1px solid var(--up-border); border-radius: var(--up-radius-lg); padding: 2rem; box-shadow: var(--up-shadow-card);">
+                    <!-- Kapak -->
+                    <div>
+                        <div style="width: 100%; aspect-ratio: 3/4; background-image: url('${p.cover}'); background-size: cover; background-position: center; border-radius: var(--up-radius-lg); box-shadow: var(--up-shadow-card);"></div>
+                    </div>
+
+                    <!-- Bilgiler -->
+                    <div style="display: flex; flex-direction: column; gap: 1rem;">
+                        <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+                            <span class="up-card-badge" style="position: static;">${typeLabel}</span>
+                            ${p.badge ? `<span class="up-card-badge" style="position: static; background: var(--up-accent);">${p.badge}</span>` : ''}
+                            ${p.rating ? `<span style="font-size: 0.85rem; color: var(--up-text-muted); font-weight: 600;">⭐ ${p.rating}</span>` : ''}
                         </div>
-                        
-                        <div class="pdf-page-content">
-                            <h1 data-i18n="edu.pdf_h1">1. Sektöre Giriş ve Temel Kavramlar</h1>
-                            
-                            <p data-i18n="edu.pdf_p1">
-                                Lojistik ve tedarik zinciri yönetimi, günümüz küresel ekonomisinin bel kemiğini oluşturur. Ürünlerin üreticiden tüketiciye ulaştığı bu karmaşık süreçte zaman, maliyet ve kalite optimizasyonu hayati önem taşır. Bu bağlamda, modern teknolojilerin entegrasyonu sektörel bir zorunluluk haline gelmiştir. Geleneksel nakliye yöntemlerinden, veri güdümlü akıllı rotalama sistemlerine geçiş, sadece operasyonel bir değişiklik değil, aynı zamanda stratejik bir devrim niteliğindedir.
-                            </p>
-                            
-                            <p data-i18n="edu.pdf_p2">
-                                <strong>Bu metni seçmeyi ve kopyalamayı deneyebilirsiniz.</strong> Eğer sistem doğru çalışıyorsa, farenizin sol tuşuna basılı tutarak bu yazıları mavi renge (seçim moduna) alamayacaksınız. Aynı zamanda sayfaya sağ tıklayıp "Kopyala" seçeneğini de görememeniz gerekmektedir. Platformun güvenlik katmanı, içerik üreticilerinin fikri mülkiyet haklarını korumak üzere özel olarak tasarlanmıştır.
-                            </p>
-                            
-                            <h3 data-i18n="edu.pdf_h3">Yapay Zeka ve Verimlilik Etkisi</h3>
-                            
-                            <p data-i18n="edu.pdf_p3">
-                                İlerleyen sayfalarda rota optimizasyonu algoritmaları ve yeşil lojistik uygulamaları hakkında detaylı vaka analizlerini inceleyeceğiz. Özellikle yapay zeka destekli tahminleme modellerinin stok maliyetlerini nasıl minimize ettiğini sayısal verilerle göreceksiniz. Araştırmalara göre, dijital dönüşümünü tamamlamış lojistik firmaları, operasyonel giderlerinde %20'ye varan düşüşler yaşamıştır.
-                            </p>
+
+                        <h1 style="font-size: 1.6rem; font-weight: 800; color: var(--up-text-title); margin: 0; letter-spacing: -0.5px;" data-i18n="${p.i18nKey || ''}">${window.t && p.i18nKey ? window.t(p.i18nKey) : p.title}</h1>
+
+                        ${instructor ? `
+                            <div style="display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; background: var(--up-bg); border-radius: var(--up-radius-lg);">
+                                <img src="${instructor.avatar}" alt="${instructor.name}" style="width: 44px; height: 44px; border-radius: 50%; object-fit: cover;">
+                                <div>
+                                    <div style="font-weight: 700; color: var(--up-text-title);">${instructor.name}</div>
+                                    <div style="font-size: 0.8rem; color: var(--up-text-muted);">${instructor.title}</div>
+                                </div>
+                            </div>
+                        ` : ''}
+
+                        <p style="font-size: 1rem; line-height: 1.7; color: var(--up-text-body); margin: 0;">${p.description || ''}</p>
+
+                        ${p.tags?.length ? `
+                            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                                ${p.tags.map(t => `<span style="font-size: 0.75rem; padding: 4px 10px; background: var(--up-bg); border: 1px solid var(--up-border); border-radius: 12px; color: var(--up-text-muted); font-weight: 600;">#${t}</span>`).join('')}
+                            </div>
+                        ` : ''}
+
+                        <div style="margin-top: auto; display: flex; align-items: center; gap: 1rem; padding-top: 1rem; border-top: 1px solid var(--up-border);">
+                            <span style="font-size: 1.4rem; font-weight: 800; color: var(--up-accent);">${p.price ? p.price : `<span data-i18n="edu.free">${window.t ? window.t('edu.free') : 'Ücretsiz'}</span>`}</span>
+                            <span style="font-size: 0.85rem; color: var(--up-text-muted); font-style: italic;" data-i18n="edu.full_version_soon">${window.t ? window.t('edu.full_version_soon') : 'İçeriğin tam sürümü yakında platformda yayınlanacaktır.'}</span>
                         </div>
-                        
-                        <div class="pdf-page-footer">1</div>
+                    </div>
+                </div>
+            </div>
+        `;
+    };
+
+    // ---------------------------------------------------------
+    // TEMEL EĞİTİM OKUYUCU (educationContent.js'i canlandırır)
+    // ---------------------------------------------------------
+    const renderCourseReader = () => {
+        const course = window.educationContent;
+        if (!course || !course.chapters?.length) {
+            return `<div style="text-align:center; padding: 5rem; color: var(--up-text-muted);" data-i18n="edu.course_reader_error">${window.t ? window.t('edu.course_reader_error') : 'Eğitim içeriği yüklenemedi.'}</div>`;
+        }
+
+        const chapters = course.chapters;
+        const activeId = viewState.campusChapterId || chapters[0].id;
+        const activeIdx = Math.max(0, chapters.findIndex(c => c.id === activeId));
+        const chapter = chapters[activeIdx];
+        const prevCh = chapters[activeIdx - 1];
+        const nextCh = chapters[activeIdx + 1];
+
+        // ── Bölüm içindeki her section'ı veri tipine göre render et ──
+        const renderSection = (s) => {
+            let html = `<div style="margin-bottom: 2.5rem;">`;
+            html += `<h3 style="font-size: 1.2rem; font-weight: 800; color: var(--up-text-title); margin: 0 0 0.75rem 0; display:flex; align-items:center; gap:8px;">
+                        ${s.icon ? `<i data-lucide="${s.icon}" style="width:20px; height:20px; color: var(--up-primary);"></i>` : ''}
+                        ${s.title}
+                     </h3>`;
+            if (s.content) {
+                html += `<p style="font-size: 1rem; line-height: 1.8; color: var(--up-text-body); margin: 0 0 1rem 0;">${s.content}</p>`;
+            }
+            if (s.formula) {
+                html += `<div style="padding: 12px 16px; background: var(--up-bg); border-left: 4px solid var(--up-primary); border-radius: 8px; font-family: monospace; font-weight: 700; color: var(--up-text-title); margin-bottom: 1rem;">📐 ${s.formula}</div>`;
+            }
+            if (s.example) {
+                html += `<div style="padding: 12px 16px; background: rgba(14, 165, 233, 0.08); border: 1px dashed var(--up-primary); border-radius: 8px; font-size: 0.95rem; color: var(--up-text-body); margin-bottom: 1rem;"><b>Örnek:</b> ${s.example}</div>`;
+            }
+            if (s.highlights?.length) {
+                html += s.highlights.map(h => `
+                    <div style="display:flex; gap:8px; align-items:flex-start; padding: 8px 12px; background: var(--up-bg); border-radius: 8px; margin-bottom: 6px; font-size: 0.95rem; color: var(--up-text-body);">
+                        <span style="color: var(--up-accent);">💡</span><span>${h}</span>
+                    </div>`).join('');
+            }
+            if (s.list?.length) {
+                html += `<ul style="margin: 0 0 1rem 0; padding-left: 1.25rem; line-height: 2; color: var(--up-text-body);">` +
+                    s.list.map(li => `<li>${li}</li>`).join('') + `</ul>`;
+            }
+            const tableStyle = `width:100%; border-collapse:collapse; margin-bottom:1rem; font-size:0.9rem;`;
+            const thStyle = `text-align:left; padding:10px 12px; background:var(--up-bg); color:var(--up-text-title); font-weight:800; border-bottom:2px solid var(--up-border);`;
+            const tdStyle = `padding:10px 12px; border-bottom:1px solid var(--up-border); color:var(--up-text-body);`;
+            if (s.glossary?.length) {
+                html += `<table style="${tableStyle}"><thead><tr><th style="${thStyle}">Terim</th><th style="${thStyle}">Açıklama</th></tr></thead><tbody>` +
+                    s.glossary.map(g => `<tr><td style="${tdStyle}"><b>${g.term}</b></td><td style="${tdStyle}">${g.desc}</td></tr>`).join('') +
+                    `</tbody></table>`;
+            }
+            if (s.incoterms?.length) {
+                html += s.incoterms.map(t => `
+                    <div style="padding: 12px 16px; border: 1px solid var(--up-border); border-radius: 10px; margin-bottom: 8px; background: var(--up-surface-solid);">
+                        <div style="display:flex; align-items:center; gap:10px; margin-bottom:4px; flex-wrap:wrap;">
+                            <span style="font-weight:900; color:var(--up-primary); font-size:1rem;">${t.code}</span>
+                            <span style="font-weight:700; color:var(--up-text-title);">${t.name}</span>
+                            <span style="font-size:0.7rem; padding:2px 8px; border-radius:10px; background:var(--up-bg); color:var(--up-text-muted); font-weight:700;">${t.mode === 'sea' ? '🚢 Sadece Deniz' : '🌐 Tüm Modlar'}</span>
+                        </div>
+                        <div style="font-size:0.85rem; color:var(--up-text-body); margin-bottom:4px;">${t.desc}</div>
+                        <div style="font-size:0.8rem; color:var(--up-text-muted);">⚠️ Risk Geçişi: <b>${t.risk}</b> &nbsp;|&nbsp; 💰 Navlun: <b>${t.cost}</b></div>
+                    </div>`).join('');
+            }
+            if (s.table?.length) {
+                html += `<table style="${tableStyle}"><thead><tr>
+                    <th style="${thStyle}">Terim</th><th style="${thStyle}">İhracat Gümrük</th><th style="${thStyle}">Yükleme</th><th style="${thStyle}">Navlun</th><th style="${thStyle}">İthalat Gümrük</th><th style="${thStyle}">Risk Geçişi</th>
+                    </tr></thead><tbody>` +
+                    s.table.map(r => `<tr><td style="${tdStyle}"><b>${r.term}</b></td><td style="${tdStyle}">${r.export}</td><td style="${tdStyle}">${r.loading}</td><td style="${tdStyle}">${r.freight}</td><td style="${tdStyle}">${r.import}</td><td style="${tdStyle}">${r.risk}</td></tr>`).join('') +
+                    `</tbody></table>`;
+            }
+            if (s.comparison?.length) {
+                html += `<table style="${tableStyle}"><thead><tr><th style="${thStyle}">Mod</th><th style="${thStyle}">Hız</th><th style="${thStyle}">Maliyet</th><th style="${thStyle}">Kapasite</th></tr></thead><tbody>` +
+                    s.comparison.map(r => `<tr><td style="${tdStyle}"><b>${r.mode}</b></td><td style="${tdStyle}">${r.speed}</td><td style="${tdStyle}">${r.cost}</td><td style="${tdStyle}">${r.capacity}</td></tr>`).join('') +
+                    `</tbody></table>`;
+            }
+            if (s.containers?.length) {
+                html += `<table style="${tableStyle}"><thead><tr><th style="${thStyle}">Tip</th><th style="${thStyle}">Hacim</th><th style="${thStyle}">Kullanım</th></tr></thead><tbody>` +
+                    s.containers.map(r => `<tr><td style="${tdStyle}"><b>${r.type}</b></td><td style="${tdStyle}">${r.vol}</td><td style="${tdStyle}">${r.use}</td></tr>`).join('') +
+                    `</tbody></table>`;
+            }
+            if (s.docs?.length) {
+                html += s.docs.map(d => `
+                    <div style="display:flex; gap:10px; align-items:flex-start; padding: 10px 14px; border: 1px solid var(--up-border); border-radius: 10px; margin-bottom: 6px;">
+                        <i data-lucide="file-text" style="width:18px; height:18px; color:var(--up-primary); flex-shrink:0; margin-top:2px;"></i>
+                        <div><b style="color:var(--up-text-title);">${d.name}</b><div style="font-size:0.85rem; color:var(--up-text-body);">${d.desc}</div></div>
+                    </div>`).join('');
+            }
+            html += `</div>`;
+            return html;
+        };
+
+        return `
+            <div style="display: grid; grid-template-columns: 280px 1fr; gap: 1.5rem; align-items: start;">
+                <!-- BÖLÜM LİSTESİ (Sidebar) -->
+                <div style="background: var(--up-surface-solid); border: 1px solid var(--up-border); border-radius: var(--up-radius-lg); padding: 1rem; position: sticky; top: 1rem; max-height: calc(100vh - 2rem); overflow-y: auto;">
+                    <div style="font-weight: 800; color: var(--up-text-title); padding: 0.5rem; font-size: 0.95rem;" data-i18n="edu.intro_to_logistics">${window.t ? window.t('edu.intro_to_logistics') : '📚 Lojistiğe Giriş Eğitimi'}</div>
+                    ${chapters.map((c, i) => `
+                        <button onclick="window.setCourseChapter('${c.id}')" style="display: block; width: 100%; text-align: left; padding: 10px 12px; margin-bottom: 4px; border: none; border-radius: 8px; cursor: pointer; font-size: 0.85rem; font-weight: ${c.id === chapter.id ? '800' : '600'}; background: ${c.id === chapter.id ? 'var(--up-primary)' : 'transparent'}; color: ${c.id === chapter.id ? '#fff' : 'var(--up-text-body)'}; transition: all 0.15s;">
+                            ${c.title}
+                            <span style="display:block; font-size: 0.7rem; opacity: 0.75; margin-top: 2px;">${c.badge} · ${c.readTime}</span>
+                        </button>
+                    `).join('')}
+                </div>
+
+                <!-- İÇERİK -->
+                <div style="background: var(--up-surface-solid); border: 1px solid var(--up-border); border-radius: var(--up-radius-lg); padding: 2.5rem; box-shadow: var(--up-shadow-card);">
+                    <div style="display:flex; align-items:center; gap:10px; margin-bottom: 0.5rem;">
+                        <span style="font-size: 0.7rem; padding: 3px 10px; border-radius: 10px; background: var(--up-primary); color: #fff; font-weight: 800;">${chapter.badge}</span>
+                        <span style="font-size: 0.8rem; color: var(--up-text-muted);">⏱ ${chapter.readTime}</span>
+                    </div>
+                    <h2 style="font-size: 1.8rem; font-weight: 900; color: var(--up-text-title); margin: 0 0 2rem 0; letter-spacing: -0.5px;">${chapter.title}</h2>
+
+                    ${chapter.sections.map(renderSection).join('')}
+
+                    <!-- Önceki / Sonraki -->
+                    <div style="display:flex; justify-content: space-between; gap: 1rem; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--up-border);">
+                        ${prevCh ? `<button class="up-btn up-btn-secondary" onclick="window.setCourseChapter('${prevCh.id}')"><i data-lucide="arrow-left"></i> <span data-i18n="edu.prev_chapter">${window.t ? window.t('edu.prev_chapter') : 'Önceki Bölüm'}</span></button>` : '<span></span>'}
+                        ${nextCh ? `<button class="up-btn up-btn-primary" onclick="window.setCourseChapter('${nextCh.id}')"><span data-i18n="edu.next_chapter">${window.t ? window.t('edu.next_chapter') : 'Sonraki Bölüm'}</span> <i data-lucide="arrow-right"></i></button>` : `<button class="up-btn up-btn-primary" onclick="window.utils.setCampusView('storefront')"><span data-i18n="edu.finish_course">${window.t ? window.t('edu.finish_course') : '🎉 Eğitimi Bitirdin! Kampüse Dön'}</span></button>`}
                     </div>
                 </div>
             </div>
@@ -342,7 +570,7 @@ window.educationView = (state) => {
     // 3. LIBRARY (FAVORİLERİM)
     // ---------------------------------------------------------
     const renderLibrary = () => {
-        const myItems = content.products.filter(p => library.includes(p.id));
+        const myItems = allProducts().filter(p => library.includes(p.id));
 
         if (myItems.length === 0) {
             return `
@@ -375,7 +603,7 @@ window.educationView = (state) => {
                             
                             <div style="margin-top: auto;">
                                 <button class="up-btn up-btn-primary" style="width: 100%; margin-top: 1.5rem;">
-                                    ${p.type === 'video' ? '<i data-lucide="play"></i> <span data-i18n="edu.watch">İzle</span>' : '<i data-lucide="book-open"></i> <span data-i18n="edu.read">Oku</span>'}
+                                    ${(p.type === 'videos' || p.type === 'video') ? '<i data-lucide="play"></i> <span data-i18n="edu.watch">İzle</span>' : '<i data-lucide="book-open"></i> <span data-i18n="edu.read">Oku</span>'}
                                 </button>
                             </div>
                         </div>
@@ -392,6 +620,7 @@ window.educationView = (state) => {
                 ${renderHeader()}
                 ${viewMode === 'storefront' ? renderStorefront() : ''}
                 ${viewMode === 'product_detail' ? renderProductDetail() : ''}
+                ${viewMode === 'course_reader' ? renderCourseReader() : ''}
                 ${viewMode === 'library' ? renderLibrary() : ''}
             </div>
         </div>

@@ -7,7 +7,22 @@ import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
  * Tüm veritabanı okuma/yazma işlemleri burada soyutlanmıştır (abstracted).
  */
 export class FirestoreService {
-    
+
+    // ─────────────────────────────────────────
+    // COURSES (Eğitim Kursları — admin panelden yönetilir)
+    // ─────────────────────────────────────────
+
+    static async getCourses() {
+        try {
+            const q = query(collection(db, "courses"), limit(100));
+            const snapshot = await getDocs(q);
+            return snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+        } catch (error) {
+            console.warn("[FIRESTORE] Kurslar yüklenemedi:", error.message);
+            return []; // Hata olsa bile sayfa çalışmaya devam etsin
+        }
+    }
+
     // ─────────────────────────────────────────
     // USERS (Kullanıcılar)
     // ─────────────────────────────────────────
@@ -357,16 +372,6 @@ export class FirestoreService {
     // EDUCATION (Eğitim)
     // ─────────────────────────────────────────
 
-    static async getCourses() {
-        try {
-            const q = query(collection(db, "courses"), where("isPublished", "==", true));
-            const querySnapshot = await getDocs(q);
-            return querySnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
-        } catch (error) {
-            console.error("Firestore GetCourses Hatası:", error);
-            return [];
-        }
-    }
 
     static async updateProgress(uid, courseId, completedModules) {
         try {
