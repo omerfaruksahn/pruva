@@ -220,7 +220,14 @@
     "ai_f1": "Escaneo automático de correo electrónico",
     "ai_f2": "Análisis inteligente de cotizaciones",
     "ai_f3": "Negociación automática de precios",
-    "ai_btn": "Descubrir ahora"
+    "ai_btn": "Descubrir ahora",
+    "campus_badge": "Centro Educativo",
+    "campus_title": "Pruva Campus",
+    "campus_desc": "Accede a libros, artículos y videos de expertos de la industria. Aprende directamente de expertos y mejora tu carrera.",
+    "campus_f1": "Cientos de Libros y Artículos",
+    "campus_f2": "Contenido de Instructores Expertos",
+    "campus_f3": "Tu Biblioteca Digital",
+    "campus_btn": "Explorar Campus"
   },
   "membership": {
     "free_member": "Miembro Gratis",
@@ -1598,7 +1605,11 @@
     "pdf_p1": "La logística y la gestión de la cadena de suministro forman la columna vertebral de la economía global actual.",
     "pdf_p2": "Puedes intentar seleccionar y copiar este texto. Si el sistema funciona correctamente, no podrás resaltarlo.",
     "pdf_h3": "Impacto de la IA y la Eficiencia",
-    "pdf_p3": "En las páginas siguientes, examinaremos estudios de caso detallados sobre algoritmos de optimización de rutas."
+    "pdf_p3": "En las páginas siguientes, examinaremos estudios de caso detallados sobre algoritmos de optimización de rutas.",
+    "prod1_title": "Gestión de Carga Internacional y Fletes (E-Book)",
+    "prod2_title": "Cambios en las Regulaciones Aduaneras 2026",
+    "prod3_title": "Clase Magistral de Cadena de Suministro Digital",
+    "prod4_title": "Gestión de Riesgos en el Transporte de Contenedores"
   },
   "market": {
     "err_banned_bid": "No puede realizar una oferta en este momento debido a su envío vencido y no actualizado.",

@@ -28,7 +28,7 @@ window.handleCampusSearch = function(query) {
                         <div class="up-card-badge">${typeLabel}</div>
                     </div>
                     <div class="up-card-body">
-                        <h3 class="up-card-title">${p.title}</h3>
+                        <h3 class="up-card-title" data-i18n="${p.i18nKey || ''}">${window.t && p.i18nKey ? window.t(p.i18nKey) : p.title}</h3>
                         <div class="up-card-footer">
                             <div class="up-card-price" style="font-size: 1rem; color: var(--up-accent);" data-i18n="edu.free">${window.t ? window.t('edu.free') : 'Ücretsiz'}</div>
                             <div class="up-card-rating" style="color: var(--up-text-muted); font-weight: 600;">
@@ -247,7 +247,7 @@ window.educationView = (state) => {
                             <div class="up-card-badge">${typeLabel}</div>
                         </div>
                         <div class="up-card-body">
-                            <h3 class="up-card-title">${p.title}</h3>
+                            <h3 class="up-card-title" data-i18n="${p.i18nKey || ''}">${window.t && p.i18nKey ? window.t(p.i18nKey) : p.title}</h3>
                             <div class="up-card-footer">
                                 <div class="up-card-price" style="font-size: 1rem; color: var(--up-accent);" data-i18n="edu.free">Ücretsiz</div>
                                 <div class="up-card-rating" style="color: var(--up-text-muted); font-weight: 600;">
@@ -295,7 +295,7 @@ window.educationView = (state) => {
                         <button class="up-btn up-btn-secondary" onclick="window.utils.setCampusView('storefront')" style="padding: 6px 12px;">
                             <i data-lucide="arrow-left"></i> <span data-i18n="edu.go_back">Geri Dön</span>
                         </button>
-                        <span style="margin-left: 12px;">${p.title}</span>
+                        <span style="margin-left: 12px;" data-i18n="${p.i18nKey || ''}">${window.t && p.i18nKey ? window.t(p.i18nKey) : p.title}</span>
                     </h2>
                     
                     <button class="up-btn ${isFavorited ? 'up-btn-secondary' : 'up-btn-primary'}" onclick="window.toggleFavorite(event, '${p.id}')" style="${isFavorited ? 'color: var(--up-primary); border-color: var(--up-primary);' : ''}">
@@ -309,7 +309,7 @@ window.educationView = (state) => {
                     <!-- Fake PDF Page 1 -->
                     <div class="pdf-page">
                         <div class="pdf-page-header">
-                            <span>${p.title}</span>
+                            <span data-i18n="${p.i18nKey || ''}">${window.t && p.i18nKey ? window.t(p.i18nKey) : p.title}</span>
                             <span data-i18n="edu.chapter_1">Bölüm 1</span>
                         </div>
                         
@@ -371,7 +371,7 @@ window.educationView = (state) => {
                     
                         <div class="up-card-cover" style="background-image: url('${p.cover}'); height: 160px;"></div>
                         <div class="up-card-body" style="padding: 1.5rem;">
-                            <h3 class="up-card-title" style="font-size:1.15rem; margin-bottom: 1.5rem;">${p.title}</h3>
+                            <h3 class="up-card-title" style="font-size:1.15rem; margin-bottom: 1.5rem;" data-i18n="${p.i18nKey || ''}">${window.t && p.i18nKey ? window.t(p.i18nKey) : p.title}</h3>
                             
                             <div style="margin-top: auto;">
                                 <button class="up-btn up-btn-primary" style="width: 100%; margin-top: 1.5rem;">

@@ -220,7 +220,14 @@
     "ai_f1": "Otomatik Mail Tarama",
     "ai_f2": "Akıllı Teklif Analizi",
     "ai_f3": "Otomatik Fiyat Pazarlığı",
-    "ai_btn": "Şimdi Keşfet"
+    "ai_btn": "Şimdi Keşfet",
+    "campus_badge": "Eğitim Merkezi",
+    "campus_title": "Pruva Kampüs",
+    "campus_desc": "Öğretmenlerin ve sektör uzmanlarının kendi yazdıkları kitaplara, makalelere ve videolara ulaşın. Pruva Kampüs ile doğrudan uzmanlardan öğrenin ve kariyerinizi geliştirin.",
+    "campus_f1": "Yüzlerce Kitap & Makale",
+    "campus_f2": "Uzman Eğitmenlerden İçerikler",
+    "campus_f3": "Kendi Dijital Kütüphanen",
+    "campus_btn": "Kampüsü Keşfet"
   },
   "membership": {
     "free_member": "Ücretsiz Üye",
@@ -1598,7 +1605,11 @@
     "pdf_p1": "Lojistik ve tedarik zinciri yönetimi, günümüz küresel ekonomisinin bel kemiğini oluşturur. Ürünlerin üreticiden tüketiciye ulaştığı bu karmaşık süreçte zaman, maliyet ve kalite optimizasyonu hayati önem taşır.",
     "pdf_p2": "Bu metni seçmeyi ve kopyalamayı deneyebilirsiniz. Eğer sistem doğru çalışıyorsa, farenizin sol tuşuna basılı tutarak bu yazıları mavi renge (seçim moduna) alamayacaksınız.",
     "pdf_h3": "Yapay Zeka ve Verimlilik Etkisi",
-    "pdf_p3": "İlerleyen sayfalarda rota optimizasyonu algoritmaları ve yeşil lojistik uygulamaları hakkında detaylı vaka analizlerini inceleyeceğiz."
+    "pdf_p3": "İlerleyen sayfalarda rota optimizasyonu algoritmaları ve yeşil lojistik uygulamaları hakkında detaylı vaka analizlerini inceleyeceğiz.",
+    "prod1_title": "Uluslararası Nakliye ve Navlun Yönetimi (E-Kitap)",
+    "prod2_title": "2026 Gümrük Mevzuatı Değişiklikleri ve Etkileri",
+    "prod3_title": "A'dan Z'ye Dijital Tedarik Zinciri Masterclass",
+    "prod4_title": "Konteyner Taşımacılığında Risk Yönetimi"
   },
   "market": {
     "err_banned_bid": "Zaman aşımına uğramış ve güncellenmemiş sevkiyatınızdan dolayı şu an teklif veremezsiniz.",

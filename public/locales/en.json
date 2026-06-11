@@ -220,7 +220,14 @@
     "ai_f1": "Automatic Email Scanning",
     "ai_f2": "Smart Quote Analysis",
     "ai_f3": "Automated Price Negotiation",
-    "ai_btn": "Discover Now"
+    "ai_btn": "Discover Now",
+    "campus_badge": "Education Center",
+    "campus_title": "Pruva Campus",
+    "campus_desc": "Access books, articles, and videos written by teachers and industry experts. Learn directly from experts and advance your career with Pruva Campus.",
+    "campus_f1": "Hundreds of Books & Articles",
+    "campus_f2": "Content from Expert Instructors",
+    "campus_f3": "Your Digital Library",
+    "campus_btn": "Explore Campus"
   },
   "membership": {
     "free_member": "Free Member",
@@ -1598,7 +1605,11 @@
     "pdf_p1": "Logistics and supply chain management form the backbone of today's global economy. Time, cost, and quality optimization are vital.",
     "pdf_p2": "You can try to select and copy this text. If the system is working correctly, you will not be able to highlight this text.",
     "pdf_h3": "AI and Efficiency Impact",
-    "pdf_p3": "In the following pages, we will examine detailed case studies on route optimization algorithms and green logistics applications."
+    "pdf_p3": "In the following pages, we will examine detailed case studies on route optimization algorithms and green logistics applications.",
+    "prod1_title": "International Freight and Freight Management (E-Book)",
+    "prod2_title": "2026 Customs Regulations Changes and Impacts",
+    "prod3_title": "Digital Supply Chain Masterclass from A to Z",
+    "prod4_title": "Risk Management in Container Shipping"
   },
   "market": {
     "err_banned_bid": "You cannot place a bid right now due to your expired and unupdated shipment.",
