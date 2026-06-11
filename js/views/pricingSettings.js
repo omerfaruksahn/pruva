@@ -26,7 +26,7 @@ window.pricingSettingsView = (state) => {
     <div class="pricing-settings-page-container">
         
         <!-- ÜST BİLGİ VE GİRİŞ -->
-        <div class="pruva-ai-hero-header" style="background: linear-gradient(135deg, var(--primary), #4f46e5); margin-bottom: 25px;">
+        <div class="pruva-ai-hero-header" style="margin-bottom: 25px;">
             <div class="hero-left-meta">
                 <div class="hero-badge" style="background: rgba(255,255,255,0.15); color: white;">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right: 4px;"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
@@ -180,7 +180,7 @@ window.pricingSettingsView = (state) => {
                     <div class="editor-card" style="padding: 20px; background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-lg); display: flex; flex-direction: column; gap: 16px;">
                         <div class="editor-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 12px;">
                             <div class="editor-title-area">
-                                <h3 id="current-template-title" style="margin: 0; font-size: 1.1rem; color: var(--text-primary);" data-i18n="pricing_settings.loading">Yükleniyor...</h3>
+                                <h3 id="current-template-title" style="margin: 0; font-size: 1.1rem; color: var(--text-primary);">Yükleniyor...</h3>
                                 <span id="current-template-subtitle" style="font-size: 0.75rem; color: var(--text-muted);" data-i18n="pricing_settings.template_editing_area">Şablon düzenleme alanı</span>
                             </div>
                             <div class="editor-actions" style="display: flex; gap: 8px;">
@@ -279,8 +279,16 @@ window.pricingSettingsView = (state) => {
                             </div>
                             <div class="rule-group-title" style="font-size: 0.7rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-top: 10px;" data-i18n="pricing_settings.mandatory_fields">Zorunlu Alanlar</div>
                             <div class="rule-checkbox-grid" id="mandatory-rules-checkboxes" style="display: flex; flex-direction: column; gap: 6px; max-height: 150px; overflow-y: auto; padding: 4px; border: 1px solid var(--border); border-radius: var(--radius-md); background: rgba(0,0,0,0.01);">
-                                <!-- SEKME 3: MARGİN KURALLARI -->
-        <div class="tab-content-block" id="tab-margins" style="display: \${isMargins ? 'block' : 'none'};">
+                                <!-- Zorunlu alan checkbox'ları dinamik yüklenecek -->
+                            </div>
+                        </div>
+                    </div>
+                </aside>
+            </div>
+        </div>
+
+        <!-- SEKME 3: MARGİN KURALLARI -->
+        <div class="tab-content-block" id="tab-margins" style="display: ${isMargins ? 'block' : 'none'};">
             <div class="pricing-ai-workspace" style="display: grid; grid-template-columns: 280px 1fr; gap: 20px;">
                 <!-- Sol Panel: Form -->
                 <aside class="ai-side-panel left-side" style="padding: 20px; background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-lg); height: fit-content;">
@@ -349,28 +357,28 @@ window.pricingSettingsView = (state) => {
                 <div class="summary-card blue" style="background: rgba(59, 130, 246, 0.05); border: 1px solid rgba(59, 130, 246, 0.2); padding: 16px; border-radius: var(--radius-md); display: flex; align-items: center; gap: 12px;">
                     <div class="summary-card-icon" style="font-size: 1.8rem;">👥</div>
                     <div>
-                        <span class="summary-card-value" style="font-size: 1.4rem; font-weight: 800; display: block; color: var(--text-primary);">\${totalCustomers}</span>
+                        <span class="summary-card-value" style="font-size: 1.4rem; font-weight: 800; display: block; color: var(--text-primary);">${totalCustomers}</span>
                         <span class="summary-card-label" style="font-size: 0.72rem; color: var(--text-secondary);" data-i18n="pricing_settings.registered_customer">Kayıtlı Müşteri</span>
                     </div>
                 </div>
                 <div class="summary-card green" style="background: rgba(16, 185, 129, 0.05); border: 1px solid rgba(16, 185, 129, 0.2); padding: 16px; border-radius: var(--radius-md); display: flex; align-items: center; gap: 12px;">
                     <div class="summary-card-icon" style="font-size: 1.8rem;">📊</div>
                     <div>
-                        <span class="summary-card-value" style="font-size: 1.4rem; font-weight: 800; display: block; color: var(--text-primary);">\${avgVolume} FCL</span>
+                        <span class="summary-card-value" style="font-size: 1.4rem; font-weight: 800; display: block; color: var(--text-primary);">${avgVolume} FCL</span>
                         <span class="summary-card-label" style="font-size: 0.72rem; color: var(--text-secondary);" data-i18n="pricing_settings.avg_monthly_volume">Ort. Aylık Hacim</span>
                     </div>
                 </div>
                 <div class="summary-card yellow" style="background: rgba(245, 158, 11, 0.05); border: 1px solid rgba(245, 158, 11, 0.2); padding: 16px; border-radius: var(--radius-md); display: flex; align-items: center; gap: 12px;">
                     <div class="summary-card-icon" style="font-size: 1.8rem;">⚠️</div>
                     <div>
-                        <span class="summary-card-value" style="font-size: 1.4rem; font-weight: 800; display: block; color: var(--text-primary);">\${customers.filter(c => c.price_sensitivity === 'HIGH').length}</span>
+                        <span class="summary-card-value" style="font-size: 1.4rem; font-weight: 800; display: block; color: var(--text-primary);">${customers.filter(c => c.price_sensitivity === 'HIGH').length}</span>
                         <span class="summary-card-label" style="font-size: 0.72rem; color: var(--text-secondary);" data-i18n="pricing_settings.high_price_sensitivity">Yüksek Fiyat Duyarlılığı</span>
                     </div>
                 </div>
                 <div class="summary-card purple" style="background: rgba(139, 92, 246, 0.05); border: 1px solid rgba(139, 92, 246, 0.2); padding: 16px; border-radius: var(--radius-md); display: flex; align-items: center; gap: 12px;">
                     <div class="summary-card-icon" style="font-size: 1.8rem;">👑</div>
                     <div>
-                        <span class="summary-card-value" style="font-size: 1.4rem; font-weight: 800; display: block; color: var(--text-primary);">\${customers.filter(c => c.customer_type === 'VIP').length}</span>
+                        <span class="summary-card-value" style="font-size: 1.4rem; font-weight: 800; display: block; color: var(--text-primary);">${customers.filter(c => c.customer_type === 'VIP').length}</span>
                         <span class="summary-card-label" style="font-size: 0.72rem; color: var(--text-secondary);" data-i18n="pricing_settings.vip_profile_count">VIP Profil Sayısı</span>
                     </div>
                 </div>
@@ -501,15 +509,36 @@ window.pricingSettingsViewInit = async (app) => {
         }
     };
 
-    // 1. Tab Değiştirme
+    // 1. Tab Değiştirme (DOM üzerinden, commit YAPILMADAN — titreme ve donma engellenir)
     window.pricingSettingsViewInit.switchTab = (tabName) => {
         app.state.activeSettingsTab = tabName;
-        app.commit();
-        
-        // Dom render sonrası alt inits çağır
+
+        // Tüm tab içeriklerini gizle, sadece seçileni göster
+        const allTabs = document.querySelectorAll('.pricing-settings-page-container .tab-content-block');
+        allTabs.forEach(tab => { tab.style.display = 'none'; });
+        const target = document.getElementById('tab-' + tabName);
+        if (target) target.style.display = 'block';
+
+        // Buton aktiflik durumlarını güncelle
+        const allBtns = document.querySelectorAll('.pricing-settings-page-container .settings-tabs-wrapper .tab-trigger');
+        allBtns.forEach(btn => {
+            btn.classList.remove('active');
+            btn.style.background = 'transparent';
+            btn.style.color = 'var(--text-secondary)';
+            btn.style.borderColor = 'var(--border)';
+        });
+        const activeBtn = Array.from(allBtns).find(btn => btn.onclick && btn.onclick.toString().includes(`'${tabName}'`));
+        if (activeBtn) {
+            activeBtn.classList.add('active');
+            activeBtn.style.background = 'var(--primary)';
+            activeBtn.style.color = 'white';
+            activeBtn.style.borderColor = 'var(--primary)';
+        }
+
+        // Alt init'leri çağır (gerekli veri yüklemesi)
         setTimeout(() => {
             window.pricingSettingsViewInit.initializeActiveTab(tabName);
-        }, 50);
+        }, 30);
     };
 
     // 2. Aktif Tab Başlatıcı

@@ -35,6 +35,10 @@ window.pruvaAiView = (state) => {
 
     // Konuşmaları Filtrele
     const filteredConversations = conversations.filter(c => {
+        // Eğer Outlook bağlı değilse copilot hariç hepsini gizle
+        if (!state.outlookConnected && c.id !== 'copilot') {
+            return false;
+        }
         // Arama Terimi Eşleşmesi
         const matchesSearch = c.company.toLowerCase().includes(searchQuery) || 
                               c.lastMessage.toLowerCase().includes(searchQuery);
@@ -211,11 +215,19 @@ window.pruvaAiView = (state) => {
                             </div>
                         </div>
                     `).join('')}
-                    ${filteredConversations.filter(c => c.id !== 'copilot').length === 0 ? `
+                    ${!state.outlookConnected ? `
+                        <div style="text-align: center; padding: 40px 20px; color: var(--text-secondary); font-size: 0.85rem; display: flex; flex-direction: column; align-items: center; gap: 12px; opacity: 0.8;">
+                            <img src="/assets/outlook_icon.svg" style="width: 42px; height: 42px; filter: grayscale(100%); opacity: 0.7;" alt="Outlook Logo">
+                            <div style="max-width: 200px; line-height: 1.4;">Geçmiş konuşmalarınızı ve yeni talepleri görmek için Outlook hesabınızı bağlayın.</div>
+                            <button class="btn btn-primary" onclick="window.app.managers.pruvaAi.connectOutlook()" style="margin-top: 8px; padding: 6px 14px; font-size: 0.8rem; border-radius: var(--radius-md); background: var(--bg-elevated); color: var(--text-primary); border: 1px solid var(--border); transition: all 0.2s;" onmouseover="this.style.borderColor='var(--primary)'; this.style.color='var(--primary)';" onmouseout="this.style.borderColor='var(--border)'; this.style.color='var(--text-primary)';">
+                                Outlook Bağla
+                            </button>
+                        </div>
+                    ` : (filteredConversations.filter(c => c.id !== 'copilot').length === 0 ? `
                         <div style="text-align: center; padding: 40px; color: var(--text-secondary); font-size: 0.8rem;" data-i18n="pruva_ai.no_conversations">
                             Konuşma bulunamadı.
                         </div>
-                    ` : ''}
+                    ` : '')}
                 </div>
 
                 <!-- Sol Kolon Alt Rapor & Ayarlar -->
@@ -261,11 +273,11 @@ window.pruvaAiView = (state) => {
                             </div>
                         </div>
                         <div style="display: flex; gap: 8px; align-items: center;">
-                            <button class="btn btn-secondary" onclick="window.app.managers.pruvaAi.clearConversationHistory('${activeConv.id}')" data-i18n="[title]pruva_ai.clear_history" title="Geçmişi Temizle" style="padding: 6px 8px; font-size: 1rem; border-radius: var(--radius-md); color: #ef4444; background: transparent; border: 1px solid transparent; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='rgba(239,68,68,0.1)'; this.style.borderColor='rgba(239,68,68,0.2)'" onmouseout="this.style.background='transparent'; this.style.borderColor='transparent'">
-                                🗑️
+                            <button class="btn btn-secondary" onclick="window.app.managers.pruvaAi.clearConversationHistory('${activeConv.id}')" data-i18n="[title]pruva_ai.clear_history" title="Geçmişi Temizle" style="padding: 6px 8px; border-radius: var(--radius-md); color: #ef4444; background: transparent; border: 1px solid transparent; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center;" onmouseover="this.style.background='rgba(239,68,68,0.1)'; this.style.borderColor='rgba(239,68,68,0.2)'" onmouseout="this.style.background='transparent'; this.style.borderColor='transparent'">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                             </button>
-                            <button class="btn btn-secondary" onclick="window.app.managers.pruvaAi.toggleDetailsDrawer()" style="padding: 6px 12px; font-size: 0.75rem; font-weight: 700; border-radius: var(--radius-md); display: flex; align-items: center; gap: 6px; background: var(--bg-surface); border: 1px solid var(--border);">
-                                <span data-i18n="pruva_ai.details">📋 Detaylar</span>
+                            <button class="btn btn-secondary" onclick="window.app.managers.pruvaAi.toggleDetailsDrawer()" data-i18n="[title]pruva_ai.details" title="Detaylar" style="padding: 6px 8px; font-weight: 700; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; background: var(--bg-surface); border: 1px solid var(--border); color: var(--text-secondary); cursor: pointer; transition: all 0.2s;" onmouseover="this.style.color='var(--primary)'; this.style.borderColor='var(--primary)';" onmouseout="this.style.color='var(--text-secondary)'; this.style.borderColor='var(--border)';">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="15" y1="3" x2="15" y2="21"></line></svg>
                             </button>
                         </div>
                     </div>

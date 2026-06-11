@@ -926,3 +926,192 @@ body.dark-mode .rate-sheet-card:hover {
     border-color: var(--secondary);
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
 }
+
+/* ─────────────────────────────────────────
+   PRICING SETTINGS PAGE — DARK MODE FIXES
+   ───────────────────────────────────────── */
+
+/* Settings tab buttons: ensure text is readable */
+body.dark-mode .pricing-settings-page-container .tab-trigger {
+    color: var(--text-secondary) !important;
+    background: var(--bg-elevated) !important;
+    border-color: var(--border) !important;
+}
+
+body.dark-mode .pricing-settings-page-container .tab-trigger.active {
+    background: var(--secondary) !important;
+    color: white !important;
+    border-color: var(--secondary) !important;
+}
+
+/* Editor card & aside panels */
+body.dark-mode .pricing-settings-page-container .editor-card,
+body.dark-mode .pricing-settings-page-container .ai-side-panel,
+body.dark-mode .pricing-settings-page-container .analysis-card {
+    background: var(--bg-surface) !important;
+    border-color: var(--border) !important;
+}
+
+/* All input/select/textarea inside pricing settings */
+body.dark-mode .pricing-settings-page-container .text-input,
+body.dark-mode .pricing-settings-page-container input[type="text"],
+body.dark-mode .pricing-settings-page-container input[type="email"],
+body.dark-mode .pricing-settings-page-container input[type="number"],
+body.dark-mode .pricing-settings-page-container select,
+body.dark-mode .pricing-settings-page-container textarea {
+    background-color: var(--bg-elevated) !important;
+    color: var(--text-primary) !important;
+    border-color: var(--border) !important;
+}
+
+/* Labels inside the page */
+body.dark-mode .pricing-settings-page-container .input-label {
+    color: var(--text-secondary) !important;
+}
+
+/* Summary/Metric cards (Tab 4 stats) */
+body.dark-mode .pricing-settings-page-container .summary-card {
+    background: var(--bg-elevated) !important;
+    border-color: var(--border) !important;
+}
+
+body.dark-mode .pricing-settings-page-container .summary-card .summary-card-value {
+    color: var(--text-primary) !important;
+}
+
+body.dark-mode .pricing-settings-page-container .summary-card .summary-card-label {
+    color: var(--text-secondary) !important;
+}
+
+/* Carrier / Customer cards */
+body.dark-mode .pricing-settings-page-container .carrier-card {
+    background: var(--bg-elevated) !important;
+    border-color: var(--border) !important;
+}
+
+/* Rule checkbox grid */
+body.dark-mode .pricing-settings-page-container .rule-checkbox-grid {
+    background: var(--bg-elevated) !important;
+    border-color: var(--border) !important;
+}
+
+body.dark-mode .pricing-settings-page-container .checkbox-label {
+    color: var(--text-secondary) !important;
+}
+
+/* Table (Rate History) */
+body.dark-mode .pricing-settings-page-container .rfqs-custom-table {
+    color: var(--text-primary);
+}
+
+body.dark-mode .pricing-settings-page-container .rfqs-custom-table thead {
+    background: var(--bg-elevated) !important;
+}
+
+body.dark-mode .pricing-settings-page-container .rfqs-custom-table th {
+    color: var(--text-secondary) !important;
+    border-bottom-color: var(--border) !important;
+}
+
+body.dark-mode .pricing-settings-page-container .rfqs-custom-table td {
+    color: var(--text-primary) !important;
+    border-bottom-color: var(--border) !important;
+}
+
+body.dark-mode .pricing-settings-page-container .rfqs-custom-table tr:hover {
+    background: var(--bg-elevated) !important;
+}
+
+/* Template cards */
+body.dark-mode .pricing-settings-page-container .template-card {
+    background: var(--bg-elevated) !important;
+    border-color: var(--border) !important;
+}
+
+body.dark-mode .pricing-settings-page-container .template-card.active {
+    background: var(--bg-surface) !important;
+    border-color: var(--text-primary) !important;
+}
+
+/* Mode tabs */
+body.dark-mode .pricing-settings-page-container .mode-tab {
+    color: var(--text-secondary) !important;
+    background: transparent !important;
+}
+
+body.dark-mode .pricing-settings-page-container .mode-tab.active {
+    color: var(--accent) !important;
+}
+
+/* Fix switch slider in dark mode */
+body.dark-mode .switch-slider {
+    background-color: var(--border) !important;
+}
+
+body.dark-mode input:checked + .switch-slider {
+    background-color: var(--accent) !important;
+}
+
+/* Fix inline rgba(0,0,0,0.01) and rgba(0,0,0,0.02) backgrounds */
+body.dark-mode [style*="background: rgba(0,0,0,0.01)"],
+body.dark-mode [style*="background: rgba(0,0,0,0.02)"] {
+    background: var(--bg-elevated) !important;
+}
+
+/* Fix inline rgba(255,255,255,0.01) backgrounds */
+body.dark-mode [style*="background: rgba(255,255,255,0.01)"] {
+    background: var(--bg-elevated) !important;
+}
+
+/* Editor toolbar */
+body.dark-mode .pricing-settings-page-container .editor-toolbar {
+    background: var(--bg-elevated) !important;
+    border-color: var(--border) !important;
+}
+
+/* Dropdown in dark mode */
+body.dark-mode .pricing-settings-page-container .dropdown-menu {
+    background: var(--bg-surface) !important;
+    border-color: var(--border) !important;
+}
+
+/* Stars select */
+body.dark-mode .pricing-settings-page-container .stars-select {
+    color: var(--text-muted) !important;
+}
+
+/* Widget titles and rule containers */
+body.dark-mode .pricing-settings-page-container .widget-title {
+    color: var(--text-primary) !important;
+    border-bottom-color: var(--border) !important;
+}
+
+body.dark-mode .pricing-settings-page-container .rules-container {
+    background: var(--bg-elevated) !important;
+    border-color: var(--border) !important;
+}
+
+/* Preview container */
+body.dark-mode .pricing-settings-page-container .preview-container {
+    background: var(--bg-elevated) !important;
+    border-color: var(--border) !important;
+}
+
+/* Tabs wrapper border */
+body.dark-mode .pricing-settings-page-container .settings-tabs-wrapper {
+    border-bottom-color: var(--border) !important;
+}
+
+/* Btn overrides for settings page buttons */
+body.dark-mode .pricing-settings-page-container .btn-secondary {
+    background: var(--bg-elevated) !important;
+    color: var(--text-primary) !important;
+    border-color: var(--border) !important;
+}
+
+body.dark-mode .pricing-settings-page-container .btn-primary {
+    background: var(--secondary) !important;
+    color: white !important;
+    border-color: var(--secondary) !important;
+}
+

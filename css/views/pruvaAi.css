@@ -1717,18 +1717,20 @@ input:checked + .switch-slider:before {
 .drawer-notes-save {
   margin-top: 8px;
   padding: 8px 16px;
-  border: none;
+  border: 1px solid var(--border);
   border-radius: var(--radius-sm);
-  background: var(--primary);
-  color: white;
+  background: var(--bg-elevated);
+  color: var(--text-primary);
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
-  transition: opacity 0.2s;
+  transition: all 0.2s;
 }
 
 .drawer-notes-save:hover {
-  opacity: 0.9;
+  background: var(--bg-surface);
+  border-color: var(--primary);
+  color: var(--primary);
 }
 
 /* ==========================================================================
@@ -1746,11 +1748,7 @@ body.view-pricing-reports #app-footer {
 
 /* 2. Prevent page-level scroll on desktop to keep the layout locked in the viewport */
 @media (min-width: 1025px) {
-    body.view-pruva-ai,
-    body.view-pricing-actions,
-    body.view-pricing-customers,
-    body.view-pricing-settings,
-    body.view-pricing-reports {
+    body.view-pruva-ai {
         overflow: hidden !important;
         height: 100vh !important;
     }

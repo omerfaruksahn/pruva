@@ -15,6 +15,7 @@
     ]
   },
   "hosting": {
+    "site": "pruva-633b8",
     "public": "dist",
     "ignore": [
       "firebase.json",

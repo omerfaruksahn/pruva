@@ -214,15 +214,32 @@ router.get('/status', auth, async (req, res) => {
 // @route   POST api/outlook/disconnect
 // @desc    Outlook bağlantısını koparır
 router.post('/disconnect', auth, async (req, res) => {
+    const client = await db.getClient();
     try {
-        await db.query(
+        const userId = req.user.id;
+        await client.query('BEGIN');
+
+        // Bağlantıyı kapat
+        await client.query(
             'UPDATE pricing_outlook_accounts SET is_connected = false, home_account_id = NULL WHERE user_id = $1',
-            [req.user.id]
+            [userId]
         );
+
+        // Outlook'tan taranıp gelen mail/RFQ verilerini temizle — yeniden bağlanınca
+        // eski mailler geri dönmesin (kullanıcının manuel girdiği copilot kayıtları KORUNUR)
+        await client.query("DELETE FROM pricing_carrier_performance WHERE rfq_id IN (SELECT id FROM pricing_rfqs WHERE user_id = $1 AND sender_email != 'copilot@pruva.ai')", [userId]);
+        await client.query("DELETE FROM pricing_rates WHERE rfq_id IN (SELECT id FROM pricing_rfqs WHERE user_id = $1 AND sender_email != 'copilot@pruva.ai')", [userId]);
+        await client.query("DELETE FROM pricing_actions WHERE user_id = $1 AND rfq_id IN (SELECT id FROM pricing_rfqs WHERE user_id = $1 AND sender_email != 'copilot@pruva.ai')", [userId]);
+        await client.query("DELETE FROM pricing_rfqs WHERE user_id = $1 AND sender_email != 'copilot@pruva.ai'", [userId]);
+
+        await client.query('COMMIT');
         res.json({ success: true, message: 'Outlook bağlantısı kesildi.' });
     } catch (err) {
+        await client.query('ROLLBACK');
         console.error('[OUTLOOK DISCONNECT ERR]', err);
         res.status(500).json({ error: 'Bağlantı kesilirken hata oluştu.' });
+    } finally {
+        client.release();
     }
 });
 

@@ -49,6 +49,12 @@ class I18nManager {
         
         await this.loadLanguage(lang);
         this.updateDOM();
+
+        // Sync language with app state and router
+        if (window.app && window.app.state) {
+            window.app.state.lang = lang;
+        }
+
         window.dispatchEvent(new CustomEvent('languageChanged', { detail: lang }));
     }
 

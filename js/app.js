@@ -131,6 +131,12 @@ class App {
         // Resolve initial view, language, and programmatic parameters from URL pathname on launch
         const { view, lang, routeParams } = window.parseUrl(window.location.pathname);
         this.state.lang = lang;
+
+        // i18n dilini URL'den gelen dil ile senkronize et
+        if (lang && window.i18n && window.i18n.currentLang !== lang) {
+            await window.i18n.setLanguage(lang);
+        }
+
         if (routeParams) {
             this.state.activeRouteParams = routeParams;
         }

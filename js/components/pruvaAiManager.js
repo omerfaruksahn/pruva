@@ -728,7 +728,7 @@ window.PruvaAiManager = class PruvaAiManager {
 
         if (this.previewMode) {
             editPanel.style.display = 'none';
-            previewPanel.classList.add('show');
+            previewPanel.style.display = 'flex';
             
             pBtn.innerHTML = `
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
@@ -738,7 +738,7 @@ window.PruvaAiManager = class PruvaAiManager {
             this.renderMailPreview();
         } else {
             editPanel.style.display = 'flex';
-            previewPanel.classList.remove('show');
+            previewPanel.style.display = 'none';
 
             pBtn.innerHTML = `
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
@@ -1795,28 +1795,54 @@ window.PruvaAiManager = class PruvaAiManager {
             // Open OAuth login popup
             const popup = window.open(loginUrl, 'Outlook Bağlantısı', `width=${width},height=${height},left=${left},top=${top}`);
             this.activeOutlookPopup = popup; // Socket.io üzerinden kapatabilmek için kaydet
-            
-            // Listen for successful callback message from popup (Eğer cross-origin engeline takılmazsa)
+
+            // Bağlantıyı kesinleştirip arayüzü tazeleyen ortak fonksiyon
+            const finalizeConnection = async (email) => {
+                this.app.state.outlookConnected = true;
+                if (email) this.app.state.outlookEmail = email;
+                if (this.app.store) this.app.store.save();
+                this.app.commit();
+                await this.loadConversations(1, false);
+                this.showToast(`Outlook başarıyla bağlandı${email ? ': ' + email : ''} 🎉`, 'success');
+            };
+
+            // YÖNTEM 1: postMessage (aynı origin ise çalışır)
             const handleMessage = async (event) => {
                 if (event.data && event.data.type === 'OUTLOOK_CONNECTED') {
-                    this.showToast(`Outlook başarıyla bağlandı: ${event.data.email} 🎉`, 'success');
                     window.removeEventListener('message', handleMessage);
-                    
+                    if (pollTimer) clearInterval(pollTimer);
                     if (this.activeOutlookPopup && !this.activeOutlookPopup.closed) {
                         this.activeOutlookPopup.close();
                     }
-                    
-                    // Update connection state on frontend immediately
-                    this.app.state.outlookConnected = true;
-                    this.app.state.outlookEmail = event.data.email;
-                    if (this.app.store) this.app.store.save();
-                    this.app.commit();
-                    
-                    // Reload state after connection
-                    this.loadConversations(1, false);
+                    await finalizeConnection(event.data.email);
                 }
             };
             window.addEventListener('message', handleMessage);
+
+            // YÖNTEM 2 (FALLBACK): Cross-origin'de postMessage gelmez.
+            // Popup kapanınca backend'e status sor — sayfa yenilemeye GEREK kalmaz.
+            let pollCount = 0;
+            const pollTimer = setInterval(async () => {
+                pollCount++;
+                const popupClosed = !this.activeOutlookPopup || this.activeOutlookPopup.closed;
+                // Popup kapandıysa ya da 2.5 dakika geçtiyse durumu kontrol et
+                if (popupClosed || pollCount > 50) {
+                    clearInterval(pollTimer);
+                    window.removeEventListener('message', handleMessage);
+                    try {
+                        const headers = { 'Authorization': `Bearer ${token}` };
+                        const statusRes = await fetch(CONFIG.API_URL + '/outlook/status', { headers });
+                        if (statusRes.ok) {
+                            const status = await statusRes.json();
+                            if (status.connected) {
+                                await finalizeConnection(status.email);
+                            }
+                        }
+                    } catch (e) {
+                        console.warn('[OUTLOOK] Status kontrolü başarısız:', e.message);
+                    }
+                }
+            }, 3000);
         } catch (e) {
             console.error('Outlook connection error:', e);
             this.showToast('Outlook bağlantısı başlatılamadı.', 'danger');
@@ -1848,6 +1874,10 @@ window.PruvaAiManager = class PruvaAiManager {
 
             this.app.state.outlookConnected = false;
             delete this.app.state.outlookEmail;
+            // Bağlantı kesilince soldaki mail/konuşma listesi de TEMİZLENMELİ
+            // (eskiden sadece bayrak kapanıyordu, mailler solda kalmaya devam ediyordu)
+            this.app.state.pricingConversations = [];
+            this.app.state.activePricingConversationId = null;
             this.app.store.save();
             this.app.commit();
             this.showToast('Outlook bağlantısı başarıyla kesildi.', 'success');
