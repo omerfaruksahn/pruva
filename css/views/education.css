@@ -29,6 +29,39 @@
     --up-radius-xl: 12px;
 }
 
+body.dark-mode {
+    --up-bg: var(--bg-page);
+    --up-surface: var(--bg-surface);
+    --up-surface-solid: var(--bg-surface);
+    --up-border: var(--border);
+    
+    --up-primary: #3b82f6;
+    --up-primary-hover: #60a5fa;
+    --up-accent: #10b981;
+    
+    --up-text-title: var(--text-primary);
+    --up-text-body: var(--text-secondary);
+    --up-text-muted: var(--text-muted);
+    
+    --up-shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.5);
+    --up-shadow-card-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.6);
+}
+
+body.dark-mode .whisper-slider {
+    background: var(--up-surface);
+    border-color: var(--up-border);
+}
+
+body.dark-mode .pdf-page {
+    background: var(--up-surface);
+    color: var(--up-text-body);
+}
+
+body.dark-mode .pdf-page-skeleton-title,
+body.dark-mode .pdf-page-skeleton-text {
+    background: var(--bg-elevated);
+}
+
 /* Base Container */
 .education-container {
     width: 100%;
@@ -52,9 +85,9 @@
     position: relative;
     width: 100%;
     height: 460px; /* Yaklaşık 1cm kadar uzatıldı */
-    background: #ffffff;
+    background: var(--up-surface);
     border-radius: 32px;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--up-border);
     box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.05);
     margin-bottom: 4rem;
     overflow: hidden;
@@ -237,7 +270,7 @@
 }
 
 .up-btn-secondary:hover {
-    background: #f8fafc;
+    background: var(--up-bg);
 }
 
 /* ==========================================================================
@@ -274,7 +307,7 @@
 
 .up-filter-pill:hover {
     color: var(--up-text-title);
-    background: #f1f5f9;
+    background: var(--up-bg);
 }
 
 .up-filter-pill.active {
@@ -308,7 +341,7 @@
 .up-card:hover {
     transform: translateY(-4px);
     box-shadow: var(--up-shadow-card-hover);
-    border-color: #cbd5e1;
+    border-color: var(--up-primary);
 }
 
 .up-card-cover {
@@ -335,7 +368,7 @@
     font-weight: 700;
     letter-spacing: 0.5px;
     text-transform: uppercase;
-    color: var(--up-surface-solid);
+    color: white;
     background: var(--up-primary);
     box-shadow: var(--up-shadow-button);
     z-index: 2;
@@ -412,7 +445,7 @@
     display: flex;
     flex-direction: column;
     height: calc(100vh - 120px);
-    background: #e2e8f0;
+    background: var(--up-bg);
     border-radius: var(--up-radius-xl);
     border: 1px solid var(--up-border);
     overflow: hidden;
@@ -455,7 +488,7 @@
     width: 100%;
     max-width: 800px;
     aspect-ratio: 1 / 1.414; /* A4 Ratio */
-    background: white;
+    background: var(--up-surface);
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
     border-radius: 4px;
     display: flex;
@@ -466,7 +499,7 @@
 .pdf-page-skeleton-title {
     width: 60%;
     height: 32px;
-    background: #f1f5f9;
+    background: var(--up-bg);
     margin-bottom: 2rem;
     border-radius: 4px;
 }
@@ -474,7 +507,7 @@
 .pdf-page-skeleton-text {
     width: 100%;
     height: 16px;
-    background: #f1f5f9;
+    background: var(--up-bg);
     margin-bottom: 1rem;
     border-radius: 4px;
 }

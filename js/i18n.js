@@ -98,16 +98,22 @@ class I18nManager {
                         el.textContent = translation;
                     } else {
                         let textUpdated = false;
-                        for (let i = 0; i < el.childNodes.length; i++) {
-                            const node = el.childNodes[i];
-                            if (node.nodeType === Node.TEXT_NODE && node.nodeValue.trim() !== '') {
-                                node.nodeValue = translation;
-                                textUpdated = true;
-                                break; 
+                        
+                        // If translation has HTML tags, just overwrite with innerHTML
+                        if (translation.includes('<') && translation.includes('>')) {
+                            el.innerHTML = translation;
+                        } else {
+                            for (let i = 0; i < el.childNodes.length; i++) {
+                                const node = el.childNodes[i];
+                                if (node.nodeType === Node.TEXT_NODE && node.nodeValue.trim() !== '') {
+                                    node.nodeValue = translation;
+                                    textUpdated = true;
+                                    break; 
+                                }
                             }
-                        }
-                        if (!textUpdated) {
-                            el.innerHTML = translation; 
+                            if (!textUpdated) {
+                                el.innerHTML = translation; 
+                            }
                         }
                     }
                 }
