@@ -320,17 +320,31 @@ window.educationView = (state) => {
                         <div class="whisper-visual" style="background-image: url('https://images.unsplash.com/photo-1494412574643-ff11b0a5c1c3?q=80&w=2070&auto=format&fit=crop');"></div>
                     </div>`;
 
-        const defaultVisual = 'https://images.unsplash.com/photo-1494412574643-ff11b0a5c1c3?q=80&w=2070&auto=format&fit=crop';
-        const realSlides = realNews.map(n => `
+        // Görsel yoksa: tek bir görsel yerine havuzdan sıraya göre farklı lojistik görselleri ata
+        // (bot imageUrl'i boş bırakınca tüm slaytlar aynı görünmesin)
+        const visualPool = [
+            'https://images.unsplash.com/photo-1494412574643-ff11b0a5c1c3?q=80&w=2070&auto=format&fit=crop',
+            'https://images.unsplash.com/photo-1577416412292-747c6607f055?q=80&w=2070&auto=format&fit=crop',
+            'https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?q=80&w=2070&auto=format&fit=crop',
+            'https://images.unsplash.com/photo-1586528116311-ad8ed7c80a30?q=80&w=2070&auto=format&fit=crop',
+            'https://images.unsplash.com/photo-1605281317010-fe5ffe798166?q=80&w=2070&auto=format&fit=crop',
+            'https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=2070&auto=format&fit=crop',
+            'https://images.unsplash.com/photo-1578575437130-527eed3abbec?q=80&w=2070&auto=format&fit=crop',
+            'https://images.unsplash.com/photo-1494412519320-aa613dfb7738?q=80&w=2070&auto=format&fit=crop'
+        ];
+        const realSlides = realNews.map((n, idx) => {
+            const visual = (n.imageUrl || n.image_url) || visualPool[idx % visualPool.length];
+            return `
                     <div class="whisper-slide">
                         <div class="whisper-content">
                             <div class="whisper-badge"><i data-lucide="newspaper" style="width:14px; height:14px; display:inline-block; margin-right:4px; vertical-align:middle;"></i> ${escapeHTML(n.sourceName || n.source || 'Sektörel Haber')}</div>
                             <h1 class="whisper-title">${escapeHTML(n.title || '')}</h1>
-                            <p class="whisper-desc">${escapeHTML((n.summary || '').slice(0, 240))}${(n.summary || '').length > 240 ? '...' : ''}</p>
+                            <p class="whisper-desc">${escapeHTML((n.summary || '').slice(0, 800))}${(n.summary || '').length > 800 ? '...' : ''}</p>
                             ${(n.sourceUrl || n.link) ? `<a href="${escapeHTML(n.sourceUrl || n.link)}" target="_blank" rel="noopener noreferrer" class="up-btn up-btn-secondary" style="margin-top: 12px; display: inline-flex; width: fit-content;"><i data-lucide="external-link"></i> Haberin Kaynağı</a>` : ''}
                         </div>
-                        <div class="whisper-visual" style="background-image: url('${escapeHTML(n.imageUrl || n.image_url || defaultVisual)}');"></div>
-                    </div>`).join('');
+                        <div class="whisper-visual" style="background-image: url('${escapeHTML(visual)}');"></div>
+                    </div>`;
+        }).join('');
 
         const slidesHtml = realNews.length > 0 ? realSlides : fallbackSlides;
         const slideTotal = realNews.length > 0 ? realNews.length : 3;

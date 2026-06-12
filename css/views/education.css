@@ -136,12 +136,16 @@ body.dark-mode .pdf-page-skeleton-text {
 }
 
 .whisper-title {
-    font-size: 2.6rem;
+    font-size: 2.2rem;
     font-weight: 800;
     line-height: 1.2;
-    margin-bottom: 1.2rem;
+    margin-bottom: 1rem;
     color: var(--up-text-title);
     letter-spacing: -0.02em;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
 .whisper-highlight {
@@ -153,9 +157,9 @@ body.dark-mode .pdf-page-skeleton-text {
     color: var(--up-text-body);
     line-height: 1.6;
     max-width: 90%;
-    /* Uzun yazıları 3 satırla sınırlandırıp sonuna ... koyar */
+    /* Uzun yazıları 4 satırla sınırlandırıp sonuna ... koyar */
     display: -webkit-box;
-    -webkit-line-clamp: 3;
+    -webkit-line-clamp: 4;
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
