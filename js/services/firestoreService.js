@@ -24,18 +24,32 @@ export class FirestoreService {
     }
 
     // Whisper haberleri (GitHub Actions botunun yazdığı sektörel haberler)
-    static async getWhispers(max = 8) {
+    static async getWhispers(max = 12) {
         try {
             const q = query(
                 collection(db, "whispers"),
-                orderBy("published_at", "desc"),
+                orderBy("publishedAt", "desc"),
                 limit(max)
             );
             const snapshot = await getDocs(q);
             return snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
         } catch (error) {
-            console.warn("[FIRESTORE] Whisper haberleri yüklenemedi:", error.message);
-            return [];
+            // orderBy index hatası verirse: sıralamasız çek, JS tarafında sırala (haberler yine görünsün)
+            console.warn("[FIRESTORE] Sıralı whisper sorgusu başarısız, sıralamasız deneniyor:", error.message);
+            try {
+                const q2 = query(collection(db, "whispers"), limit(max));
+                const snap2 = await getDocs(q2);
+                const rows = snap2.docs.map(d => ({ id: d.id, ...d.data() }));
+                rows.sort((a, b) => {
+                    const ta = a.publishedAt?.seconds || new Date(a.publishedAt || 0).getTime() / 1000 || 0;
+                    const tb = b.publishedAt?.seconds || new Date(b.publishedAt || 0).getTime() / 1000 || 0;
+                    return tb - ta;
+                });
+                return rows;
+            } catch (e2) {
+                console.warn("[FIRESTORE] Whisper haberleri yüklenemedi:", e2.message);
+                return [];
+            }
         }
     }
 
