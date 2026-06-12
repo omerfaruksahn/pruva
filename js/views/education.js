@@ -1,3 +1,12 @@
+// XSS koruması: HTML özel karakterlerini güvenli hale getirir
+// (Whisper slider ve diğer dinamik içeriklerde kullanılıyor)
+const escapeHTML = (str) => {
+    if (str === null || str === undefined) return '';
+    return String(str).replace(/[&<>'"]/g, tag => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+    }[tag] || tag));
+};
+
 // Demo amaçlı arama fonksiyonu (Canlı Filtreleme)
 window.handleCampusSearch = function(query) {
     // Statik ürünler + Firestore'dan yüklenen admin kursları birlikte aranır
