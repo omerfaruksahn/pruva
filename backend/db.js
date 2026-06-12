@@ -6,11 +6,13 @@ const USE_DUMMY_DATA = process.env.USE_DUMMY_DATA === 'true';
 
 let pool;
 if (!USE_DUMMY_DATA) {
+    const useSsl = process.env.DATABASE_URL && /render|supabase|neon|azure/i.test(process.env.DATABASE_URL);
+
     pool = new Pool(
         process.env.DATABASE_URL
             ? {
                 connectionString: process.env.DATABASE_URL,
-                ssl: { rejectUnauthorized: false }
+                ssl: useSsl ? { rejectUnauthorized: false } : false
               }
             : {
                 user: process.env.DB_USER,

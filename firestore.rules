@@ -7,8 +7,16 @@ service cloud.firestore {
       return request.auth != null;
     }
 
+    function isAdmin() {
+      return isAuthenticated() && request.auth.token.admin == true;
+    }
+
     function isOwner(userId) {
       return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isAdminOrOwner(userId) {
+      return isAdmin() || isOwner(userId);
     }
 
     // ── İlanlar (Ads) ─────────────────────────────────────────
@@ -18,12 +26,12 @@ service cloud.firestore {
     match /ads/{adId} {
       allow read: if true;
       allow create: if isAuthenticated()
-        && request.resource.data.ownerId == request.auth.uid;
+        && request.resource.data.ownerId == request.auth.uid
+        && request.resource.data.ownerId is string;
       allow update: if isAuthenticated() && (
-        // İlan sahibi her şeyi güncelleyebilir
         resource.data.ownerId == request.auth.uid ||
-        // Taşıyıcıların teklif vermesi, çekmesi veya statü güncellemesi için gerekli izinler
-        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['bids', 'status', 'operationTimeline', 'documents'])
+        (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['bids', 'status', 'operationTimeline', 'documents'])
+          && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['ownerId', 'createdAt', 'id']))
       );
       allow delete: if isAuthenticated()
         && resource.data.ownerId == request.auth.uid;
@@ -36,12 +44,13 @@ service cloud.firestore {
     // Güncelleme: Sadece kendi verisini güncelleyebilir
     // Silme: İstemci tarafından silme yasak — sadece admin-server.js yapabilir
     match /users/{userId} {
-      allow read: if isOwner(userId);
+      allow read: if isAdminOrOwner(userId);
       allow create: if isAuthenticated() && userId == request.auth.uid;
       allow update: if isOwner(userId)
+        && request.resource.data.uid == request.auth.uid
         && !request.resource.data.diff(resource.data).affectedKeys()
-            .hasAny(['role', 'status', 'isAdmin']); // subscriptionType → client güncelleyebilir (demo)
-      allow delete: if false; // Sadece admin-server.js (Admin SDK) silebilir
+            .hasAny(['role', 'status', 'isAdmin']);
+      allow delete: if false;
     }
 
     // ── Teklifler (Offers) ────────────────────────────────────
@@ -52,9 +61,11 @@ service cloud.firestore {
     match /offers/{offerId} {
       allow read: if isAuthenticated();
       allow create: if isAuthenticated()
-        && request.resource.data.carrierId == request.auth.uid;
+        && request.resource.data.carrierId == request.auth.uid
+        && request.resource.data.carrierId is string;
       allow update: if isAuthenticated()
-        && resource.data.carrierId == request.auth.uid;
+        && resource.data.carrierId == request.auth.uid
+        && request.resource.data.carrierId == resource.data.carrierId;
       allow delete: if false;
     }
 
@@ -63,7 +74,8 @@ service cloud.firestore {
     match /notifications/{notifId} {
       allow read, update: if isAuthenticated()
         && resource.data.userId == request.auth.uid;
-      allow create: if isAuthenticated();
+      allow create: if isAuthenticated()
+        && request.resource.data.userId == request.auth.uid;
       allow delete: if isAuthenticated()
         && resource.data.userId == request.auth.uid;
     }

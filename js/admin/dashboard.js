@@ -5,6 +5,10 @@ import { lineChart, doughnutChart } from './charts.js';
 export function renderDashboard(state) {
     const s = state.stats || {};
     const trends = state.trends || {};
+    const backendHealthy = Boolean(state.backendOnline);
+    const pgHealthy = Boolean(state.pgOnline);
+    const pendingCount = Number(s.pendingUsers || 0);
+    const securityLabel = backendHealthy && pgHealthy ? 'Güvenlik katmanları aktif' : 'Bazı servisler denetlenmeli';
 
     // ─── KPI Kartları ───
     const kpiCards = `
@@ -17,6 +21,47 @@ export function renderDashboard(state) {
         ${utils.statCard('purple', 'users', 'Auth Kullanıcı', s.authUsers, trends.authUsers)}
         ${utils.statCard('indigo', 'brain', 'Aktif RFQ', s.activeRfqs || 0, trends.activeRfqs)}
         ${utils.statCard('pink', 'coins', 'Toplam Coin', s.totalCoins || 0, trends.totalCoins)}
+    </div>`;
+
+    const healthCards = `
+    <div class="grid-2" style="margin-bottom:16px;">
+        <div class="card super-card">
+            <div class="card-header">
+                <h3><i data-lucide="shield-check"></i> Operasyonel Durum</h3>
+                <span class="status-badge ${backendHealthy ? 'active' : 'pending'}">${backendHealthy ? 'Sistem canlı' : 'Bakım gerekli'}</span>
+            </div>
+            <div class="card-body">
+                <div style="display:grid;gap:10px;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:rgba(255,255,255,0.03);">
+                        <span style="font-size:0.82rem;color:var(--text-secondary);">Backend</span>
+                        <strong style="color:${backendHealthy ? 'var(--success)' : 'var(--danger)'}; font-size:0.82rem;">${backendHealthy ? 'Online' : 'Offline'}</strong>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:rgba(255,255,255,0.03);">
+                        <span style="font-size:0.82rem;color:var(--text-secondary);">PostgreSQL</span>
+                        <strong style="color:${pgHealthy ? 'var(--success)' : 'var(--warning)'}; font-size:0.82rem;">${pgHealthy ? 'Online' : 'Beklemede'}</strong>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:rgba(255,255,255,0.03);">
+                        <span style="font-size:0.82rem;color:var(--text-secondary);">Bekleyen Onay</span>
+                        <strong style="color:${pendingCount > 0 ? 'var(--warning)' : 'var(--success)'}; font-size:0.82rem;">${pendingCount}</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header">
+                <h3><i data-lucide="lock"></i> Güvenlik Profili</h3>
+                <span class="status-badge active">Yüksek</span>
+            </div>
+            <div class="card-body">
+                <p style="font-size:0.9rem;color:var(--text-secondary);line-height:1.5;margin-bottom:10px;">${securityLabel}. Admin paneli, Helmet CSP, rate limiting ve Firestore/Storage kuralları ile koruma altındadır.</p>
+                <div style="display:flex;flex-wrap:gap:8px;">
+                    <span class="cargo-tag">CSP aktif</span>
+                    <span class="cargo-tag">Rate limit</span>
+                    <span class="cargo-tag">Rules korumalı</span>
+                    <span class="cargo-tag">Audit ready</span>
+                </div>
+            </div>
+        </div>
     </div>`;
 
     // ─── Aktivite Logu ───
@@ -95,6 +140,7 @@ export function renderDashboard(state) {
     return `
     <div class="tab-content-inner">
         ${kpiCards}
+        ${healthCards}
         ${chartsSection}
     </div>`;
 }

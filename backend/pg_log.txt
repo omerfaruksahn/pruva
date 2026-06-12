@@ -7,3 +7,25 @@
 ÝPUCU:This may indicate an incomplete PostgreSQL installation, or that the file "C:/Users/Ömer/.gemini/antigravity/scratch/my-first-react-site/backend/pg16/bin/postgres.exe" has been moved away from its proper location.
 ÖLÜMCÜL (FATAL):  "C:/Users/Ömer/.gemini/antigravity/scratch/my-first-react-site/backend/pg16/lib" dizini açýlamýyor: Not a directory
 ÝPUCU:This may indicate an incomplete PostgreSQL installation, or that the file "C:/Users/Ömer/.gemini/antigravity/scratch/my-first-react-site/backend/pg16/bin/postgres.exe" has been moved away from its proper location.
+ÖLÜMCÜL (FATAL):  "C:/Users/Ömer/.gemini/antigravity/scratch/my-first-react-site/backend/pg16/lib" dizini açýlamýyor: Not a directory
+ÝPUCU:This may indicate an incomplete PostgreSQL installation, or that the file "C:/Users/Ömer/.gemini/antigravity/scratch/my-first-react-site/backend/pg16/bin/postgres.exe" has been moved away from its proper location.
+2026-06-13 00:22:13.584 +03 [9648] LOG:  starting PostgreSQL 16.14, compiled by Visual C++ build 1944, 64-bit
+2026-06-13 00:22:13.589 +03 [9648] LOG:  listening on IPv6 address "::1", port 5432
+2026-06-13 00:22:13.589 +03 [9648] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2026-06-13 00:22:13.756 +03 [10596] LOG:  database system was shut down at 2026-06-13 00:22:01 +03
+2026-06-13 00:22:13.807 +03 [9648] LOG:  database system is ready to accept connections
+2026-06-13 00:22:13.954 +03 [15340] FATAL:  role "Ömer" does not exist
+2026-06-13 00:23:14.264 +03 [18496] LOG:  could not receive data from client: An existing connection was forcibly closed by the remote host.
+	
+2026-06-13 00:23:34.236 +03 [16388] LOG:  could not receive data from client: An existing connection was forcibly closed by the remote host.
+	
+2026-06-13 00:23:42.720 +03 [18660] FATAL:  role "Ã–mer" does not exist
+2026-06-13 00:24:12.019 +03 [12392] LOG:  could not receive data from client: An existing connection was forcibly closed by the remote host.
+	
+2026-06-13 00:27:13.642 +03 [10768] LOG:  checkpoint starting: time
+2026-06-13 00:29:11.661 +03 [10768] LOG:  checkpoint complete: wrote 1080 buffers (6.6%); 0 WAL file(s) added, 0 removed, 0 recycled; write=117.678 s, sync=0.331 s, total=118.019 s; sync files=408, longest=0.004 s, average=0.001 s; distance=5435 kB, estimate=5435 kB; lsn=0/1ABC6B0, redo lsn=0/1ABC678
+2026-06-13 01:08:43.199 +03 [9648] LOG:  background worker "logical replication launcher" (PID 19272) was terminated by exception 0xC000013A
+2026-06-13 01:08:43.199 +03 [9648] HINT:  See C include file "ntstatus.h" for a description of the hexadecimal value.
+2026-06-13 01:08:43.201 +03 [9648] LOG:  terminating any other active server processes
+2026-06-13 01:08:43.230 +03 [9648] LOG:  received fast shutdown request
+^C

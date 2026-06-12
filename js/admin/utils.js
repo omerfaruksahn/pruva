@@ -198,17 +198,31 @@ export function closeModal() {
 
 // ─── API HELPER ───
 export async function api(endpoint, body) {
-    const API = 'http://localhost:3005/api';
+    const API = (window.location.origin || 'http://127.0.0.1:3005') + '/api';
     try {
         const headers = {};
         if (body) headers['Content-Type'] = 'application/json';
-        const opts = {
-            method: body ? 'POST' : 'GET',
-            headers
-        };
+        const opts = { method: body ? 'POST' : 'GET', headers };
         if (body) opts.body = JSON.stringify(body);
+
         const res = await fetch(API + endpoint, opts);
-        return await res.json();
+        const text = await res.text();
+
+        if (!text) {
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            return {};
+        }
+
+        try {
+            const data = JSON.parse(text);
+            if (!res.ok) {
+                throw new Error(data?.error || data?.message || `HTTP ${res.status}`);
+            }
+            return data;
+        } catch (parseErr) {
+            if (!res.ok) throw new Error(`HTTP ${res.status}: ${text}`);
+            throw new Error('Invalid JSON response from admin API.');
+        }
     } catch (e) {
         console.error('API Error:', endpoint, e);
         return { error: e.message };

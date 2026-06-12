@@ -15,20 +15,30 @@ const app = express();
 app.set('trust proxy', 1);
 
 // --- PARANOID SECURITY MIDDLEWARE ---
+app.disable('x-powered-by');
 app.use(helmet({
-    crossOriginOpenerPolicy: false, // OAuth pop-up penceresinin parent ile iletişim kurabilmesi için kapatıldı
+    crossOriginOpenerPolicy: false,
+    referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
+    frameguard: { action: 'deny' },
     contentSecurityPolicy: {
+        useDefaults: true,
         directives: {
             defaultSrc: ["'self'"],
-            scriptSrc: ["'self'", "'unsafe-inline'", "https://unpkg.com"],
-            scriptSrcAttr: ["'unsafe-inline'"], // Allow onclick handlers
-            styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+            baseUri: ["'self'"],
+            formAction: ["'self'"],
+            objectSrc: ["'none'"],
+            frameAncestors: ["'none'"],
+            scriptSrc: ["'self'", "'unsafe-inline'", "https://unpkg.com", "https://cdn.jsdelivr.net", "https://cdnjs.cloudflare.com"],
+            scriptSrcAttr: ["'unsafe-inline'"],
+            styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://cdnjs.cloudflare.com"],
             imgSrc: ["'self'", "data:", "blob:", "https:"],
             fontSrc: ["'self'", "https://fonts.gstatic.com"],
             connectSrc: ["'self'", "http://localhost:5000", "http://127.0.0.1:5000", "https://firebasestorage.googleapis.com", ...(process.env.CORS_ORIGINS ? process.env.CORS_ORIGINS.split(',') : [])],
+            upgradeInsecureRequests: [],
         },
     },
-})); 
+}));
+app.use(helmet.noSniff());
 app.use(xss());    // Request body/query/params içindeki script'leri temizle
 app.use(hpp());    // HTTP Parameter Pollution koruması
 const ALLOWED_ORIGINS = process.env.CORS_ORIGINS ? process.env.CORS_ORIGINS.split(',') : ['http://localhost:5000', 'http://127.0.0.1:5000', 'http://localhost:3005', 'https://pruvahub.com', 'https://www.pruvahub.com'];
