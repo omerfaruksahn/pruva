@@ -345,6 +345,7 @@ window.educationView = (state) => {
 
         // ── Whisper slaytları: Gerçek bot haberleri varsa onları, yoksa varsayılan tanıtım slaytları ──
         const realNews = viewState.whispers || [];
+        window._whispersCache = realNews; // Her render'da cache'i tazele ki modal her zaman habere ulaşabilsin
         const fallbackSlides = `
                     <div class="whisper-slide">
                         <div class="whisper-content">
