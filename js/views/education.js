@@ -199,6 +199,67 @@ window.educationView = (state) => {
         }
     };
 
+    window.openWhisperDetail = (index) => {
+        if (!window._whispersCache || !window._whispersCache[index]) return;
+        const n = window._whispersCache[index];
+        const defaultVisual = 'https://images.unsplash.com/photo-1494412574643-ff11b0a5c1c3?q=80&w=2070&auto=format&fit=crop';
+        const visual = n.imageUrl || n.image_url || defaultVisual;
+        
+        let detailedText = n.detailedSummary || n.summary || '';
+        const paragraphs = detailedText.split(/\n\n+/).map(p => `<p style="margin-bottom: 1rem; line-height: 1.8; color: var(--up-text-body); font-size: 1.05rem;">${escapeHTML(p)}</p>`).join('');
+
+        const modalHtml = `
+            <div id="whisperDetailModal" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 9999; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s ease;" onclick="if(event.target === this) window.closeWhisperDetail()">
+                <div style="background: var(--up-surface-solid); width: 90%; max-width: 800px; max-height: 90vh; border-radius: var(--up-radius-xl); overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); position: relative; transform: translateY(20px); transition: transform 0.3s ease;" class="modal-content-box">
+                    
+                    <button onclick="window.closeWhisperDetail()" style="position: absolute; top: 1rem; right: 1rem; background: rgba(0,0,0,0.5); color: white; border: none; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 10; transition: background 0.2s;">
+                        <i data-lucide="x"></i>
+                    </button>
+
+                    <div style="width: 100%; height: 250px; background-image: url('${escapeHTML(visual)}'); background-size: cover; background-position: center; position: relative; flex-shrink: 0;">
+                        <div style="position: absolute; bottom: 0; left: 0; width: 100%; padding: 2rem; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);">
+                            <div class="whisper-badge" style="color: white; border-color: rgba(255,255,255,0.3); margin-bottom: 0.5rem;"><i data-lucide="newspaper" style="width:14px; height:14px; display:inline-block; margin-right:4px; vertical-align:middle;"></i> ${escapeHTML(n.sourceName || n.source || 'Sektörel Haber')}</div>
+                            <h2 style="color: white; margin: 0; font-size: 1.8rem; font-weight: 800; line-height: 1.3;">${escapeHTML(n.title || '')}</h2>
+                        </div>
+                    </div>
+
+                    <div style="padding: 2rem; overflow-y: auto; flex: 1;">
+                        ${paragraphs}
+                        
+                        ${(n.sourceUrl || n.link) ? `
+                        <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--up-border);">
+                            <a href="${escapeHTML(n.sourceUrl || n.link)}" target="_blank" rel="noopener noreferrer" class="up-btn up-btn-secondary" style="display: inline-flex; width: fit-content;">
+                                <i data-lucide="external-link"></i> Orijinal Haberi Görüntüle
+                            </a>
+                        </div>
+                        ` : ''}
+                    </div>
+                </div>
+            </div>
+        `;
+
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+        if(window.lucide) window.lucide.createIcons();
+        
+        // Animasyonu tetikle
+        setTimeout(() => {
+            const m = document.getElementById('whisperDetailModal');
+            if(m) {
+                m.style.opacity = '1';
+                m.querySelector('.modal-content-box').style.transform = 'translateY(0)';
+            }
+        }, 10);
+    };
+
+    window.closeWhisperDetail = () => {
+        const m = document.getElementById('whisperDetailModal');
+        if(m) {
+            m.style.opacity = '0';
+            m.querySelector('.modal-content-box').style.transform = 'translateY(20px)';
+            setTimeout(() => m.remove(), 300);
+        }
+    };
+
     // ── Whisper haberlerini Firestore'dan çek (bot bunları yazıyor) ──
     // Eskiden slider'da koda gömülü 3 sahte haber vardı, botun gerçek haberleri
     // ekrana hiç düşmüyordu. Artık gerçek veriyi çekip slider'ı yeniden basıyoruz.
@@ -210,9 +271,11 @@ window.educationView = (state) => {
                     || (await import('../services/firestoreService.js')).FirestoreService;
                 const news = await svc.getWhispers(12);
                 viewState.whispers = news;
+                window._whispersCache = news;
             } catch (e) {
                 console.warn('[WHISPER] Haberler yüklenemedi:', e.message);
                 viewState.whispers = [];
+                window._whispersCache = [];
             }
             viewState.whispersLoaded = true;
             if (window.app?.router) window.app.router.render();
@@ -339,8 +402,8 @@ window.educationView = (state) => {
                         <div class="whisper-content">
                             <div class="whisper-badge"><i data-lucide="newspaper" style="width:14px; height:14px; display:inline-block; margin-right:4px; vertical-align:middle;"></i> ${escapeHTML(n.sourceName || n.source || 'Sektörel Haber')}</div>
                             <h1 class="whisper-title">${escapeHTML(n.title || '')}</h1>
-                            <p class="whisper-desc">${escapeHTML((n.summary || '').slice(0, 800))}${(n.summary || '').length > 800 ? '...' : ''}</p>
-                            ${(n.sourceUrl || n.link) ? `<a href="${escapeHTML(n.sourceUrl || n.link)}" target="_blank" rel="noopener noreferrer" class="up-btn up-btn-secondary" style="margin-top: 12px; display: inline-flex; width: fit-content;"><i data-lucide="external-link"></i> Haberin Kaynağı</a>` : ''}
+                            <p class="whisper-desc">${escapeHTML((n.summary || '').slice(0, 150))}${(n.summary || '').length > 150 ? '...' : ''}</p>
+                            <button onclick="window.openWhisperDetail(${idx})" class="up-btn up-btn-primary" style="margin-top: 12px; display: inline-flex; width: fit-content;"><i data-lucide="book-open"></i> Detaylı Analizi Oku</button>
                         </div>
                         <div class="whisper-visual" style="background-image: url('${escapeHTML(visual)}');"></div>
                     </div>`;
