@@ -190,15 +190,46 @@ window.educationView = (state) => {
         }
     };
 
-    if (!window.whisperInterval) {
-        window.currentSlide = 0;
-        window.whisperInterval = setInterval(() => {
-            if(document.getElementById('whisperContainer')) {
-                const next = (window.currentSlide + 1) % 3;
-                window.goToSlide(next);
+    // ── Whisper haberlerini Firestore'dan çek (bot bunları yazıyor) ──
+    // Eskiden slider'da koda gömülü 3 sahte haber vardı, botun gerçek haberleri
+    // ekrana hiç düşmüyordu. Artık gerçek veriyi çekip slider'ı yeniden basıyoruz.
+    if (viewState.whispersLoaded === undefined) {
+        viewState.whispersLoaded = false;
+        (async () => {
+            try {
+                const svc = window.FirestoreService
+                    || (await import('../services/firestoreService.js')).FirestoreService;
+                const news = await svc.getWhispers(12);
+                viewState.whispers = news;
+            } catch (e) {
+                console.warn('[WHISPER] Haberler yüklenemedi:', e.message);
+                viewState.whispers = [];
             }
-        }, 5000);
+            viewState.whispersLoaded = true;
+            if (window.app?.router) window.app.router.render();
+        })();
     }
+
+    const whisperCount = (viewState.whispers && viewState.whispers.length) ? viewState.whispers.length : 3;
+
+    // Slider otomatik geçiş — önceki interval'i temizle (bellek sızıntısı önlemi)
+    if (window.whisperInterval) {
+        clearInterval(window.whisperInterval);
+        window.whisperInterval = null;
+    }
+    window.currentSlide = 0;
+    window.whisperInterval = setInterval(() => {
+        const container = document.getElementById('whisperContainer');
+        if (container) {
+            const total = container.children.length || whisperCount;
+            const next = (window.currentSlide + 1) % total;
+            window.goToSlide(next);
+        } else {
+            // Slider artık sayfada değil (başka view'a geçildi) → interval'i durdur
+            clearInterval(window.whisperInterval);
+            window.whisperInterval = null;
+        }
+    }, 5000);
 
     // Lucide ikonlarını HTML render olduktan sonra yenile
     setTimeout(() => {
@@ -240,17 +271,16 @@ window.educationView = (state) => {
             categories.push({ id: 'courses', name: 'Kurslar', icon: 'graduation-cap' });
         }
 
-        return `
-            <!-- WHISPER SLIDER SECTION -->
-            <div class="whisper-slider" id="whisperSlider">
-                <div class="whisper-slides-container" id="whisperContainer">
+        // ── Whisper slaytları: Gerçek bot haberleri varsa onları, yoksa varsayılan tanıtım slaytları ──
+        const realNews = viewState.whispers || [];
+        const fallbackSlides = `
                     <div class="whisper-slide">
                         <div class="whisper-content">
-                            <div class="whisper-badge"><i data-lucide="zap" style="width:14px; height:14px; display:inline-block; margin-right:4px; vertical-align:middle;"></i> <span data-i18n="edu.industry_news">Sektörel Haberler</span></div>
-                            <h1 class="whisper-title" data-i18n="edu.slide1_title">
+                            <div class="whisper-badge"><i data-lucide="zap" style="width:14px; height:14px; display:inline-block; margin-right:4px; vertical-align:middle;"></i> Sektörel Haberler</div>
+                            <h1 class="whisper-title">
                                 Yeni Nesil <span class="whisper-highlight">Yeşil Lojistik</span> Trendleri
                             </h1>
-                            <p class="whisper-desc" data-i18n="edu.slide1_desc">
+                            <p class="whisper-desc">
                                 Sürdürülebilirlik odaklı yeşil taşımacılık modelleri ile karbon ayak izini azaltın. Sektörün önde gelen liderlerinin analizlerini keşfedin.
                             </p>
                         </div>
@@ -258,11 +288,11 @@ window.educationView = (state) => {
                     </div>
                     <div class="whisper-slide">
                         <div class="whisper-content">
-                            <div class="whisper-badge"><i data-lucide="trending-up" style="width:14px; height:14px; display:inline-block; margin-right:4px; vertical-align:middle;"></i> <span data-i18n="edu.case_study">Vaka Analizi</span></div>
-                            <h1 class="whisper-title" data-i18n="edu.slide2_title">
+                            <div class="whisper-badge"><i data-lucide="trending-up" style="width:14px; height:14px; display:inline-block; margin-right:4px; vertical-align:middle;"></i> Vaka Analizi</div>
+                            <h1 class="whisper-title">
                                 Yapay Zeka ile <span class="whisper-highlight">Rota Optimizasyonu</span>
                             </h1>
-                            <p class="whisper-desc" data-i18n="edu.slide2_desc">
+                            <p class="whisper-desc">
                                 Maliyetleri %30'a varan oranda düşüren yeni makine öğrenmesi algoritmaları lojistik ağlarını nasıl baştan yaratıyor? Gerçek verilerle inceleyin.
                             </p>
                         </div>
@@ -270,21 +300,43 @@ window.educationView = (state) => {
                     </div>
                     <div class="whisper-slide">
                         <div class="whisper-content">
-                            <div class="whisper-badge"><i data-lucide="award" style="width:14px; height:14px; display:inline-block; margin-right:4px; vertical-align:middle;"></i> <span data-i18n="edu.new_training">Yeni Eğitim</span></div>
-                            <h1 class="whisper-title" data-i18n="edu.slide3_title">
+                            <div class="whisper-badge"><i data-lucide="award" style="width:14px; height:14px; display:inline-block; margin-right:4px; vertical-align:middle;"></i> Yeni Eğitim</div>
+                            <h1 class="whisper-title">
                                 Global Tedarik Zinciri <span class="whisper-highlight">Kriz Yönetimi</span>
                             </h1>
-                            <p class="whisper-desc" data-i18n="edu.slide3_desc">
+                            <p class="whisper-desc">
                                 Beklenmedik küresel krizlerde tedarik zincirini ayakta tutmanın altın kuralları ve modern kriz yönetim stratejilerini uzmanından dinleyin.
                             </p>
                         </div>
                         <div class="whisper-visual" style="background-image: url('https://images.unsplash.com/photo-1494412574643-ff11b0a5c1c3?q=80&w=2070&auto=format&fit=crop');"></div>
-                    </div>
+                    </div>`;
+
+        const defaultVisual = 'https://images.unsplash.com/photo-1494412574643-ff11b0a5c1c3?q=80&w=2070&auto=format&fit=crop';
+        const realSlides = realNews.map(n => `
+                    <div class="whisper-slide">
+                        <div class="whisper-content">
+                            <div class="whisper-badge"><i data-lucide="newspaper" style="width:14px; height:14px; display:inline-block; margin-right:4px; vertical-align:middle;"></i> ${escapeHTML(n.source || 'Sektörel Haber')}</div>
+                            <h1 class="whisper-title">${escapeHTML(n.title || '')}</h1>
+                            <p class="whisper-desc">${escapeHTML((n.summary || '').slice(0, 240))}${(n.summary || '').length > 240 ? '...' : ''}</p>
+                            ${n.link ? `<a href="${escapeHTML(n.link)}" target="_blank" rel="noopener noreferrer" class="up-btn up-btn-secondary" style="margin-top: 12px; display: inline-flex; width: fit-content;"><i data-lucide="external-link"></i> Haberin Kaynağı</a>` : ''}
+                        </div>
+                        <div class="whisper-visual" style="background-image: url('${escapeHTML(n.image_url || defaultVisual)}');"></div>
+                    </div>`).join('');
+
+        const slidesHtml = realNews.length > 0 ? realSlides : fallbackSlides;
+        const slideTotal = realNews.length > 0 ? realNews.length : 3;
+        const dotsHtml = Array.from({ length: slideTotal }, (_, i) =>
+            `<div class="whisper-dot ${i === 0 ? 'active' : ''}" onclick="window.goToSlide(${i})"></div>`
+        ).join('');
+
+        return `
+            <!-- WHISPER SLIDER SECTION -->
+            <div class="whisper-slider" id="whisperSlider">
+                <div class="whisper-slides-container" id="whisperContainer">
+                    ${slidesHtml}
                 </div>
                 <div class="whisper-controls">
-                    <div class="whisper-dot active" onclick="window.goToSlide(0)"></div>
-                    <div class="whisper-dot" onclick="window.goToSlide(1)"></div>
-                    <div class="whisper-dot" onclick="window.goToSlide(2)"></div>
+                    ${dotsHtml}
                 </div>
             </div>
 

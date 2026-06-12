@@ -88,6 +88,14 @@ service cloud.firestore {
       allow write: if false; // Sadece admin-server.js
     }
 
+    // ── Whisper Haberleri (Sektörel Haber Botu) ──────────────
+    // Herkese açık okuma; yazma sadece GitHub Actions botu (firebase-admin SDK ile,
+    // service account kuralları bypass eder, bu yüzden write: false güvenli)
+    match /whispers/{whisperId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
     // ── Kullanıcı İlerlemesi (UserProgress) ──────────────────
     match /userProgress/{progressId} {
       allow read, write: if isAuthenticated()

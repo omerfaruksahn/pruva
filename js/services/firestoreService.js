@@ -23,6 +23,22 @@ export class FirestoreService {
         }
     }
 
+    // Whisper haberleri (GitHub Actions botunun yazdığı sektörel haberler)
+    static async getWhispers(max = 8) {
+        try {
+            const q = query(
+                collection(db, "whispers"),
+                orderBy("published_at", "desc"),
+                limit(max)
+            );
+            const snapshot = await getDocs(q);
+            return snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+        } catch (error) {
+            console.warn("[FIRESTORE] Whisper haberleri yüklenemedi:", error.message);
+            return [];
+        }
+    }
+
     // ─────────────────────────────────────────
     // USERS (Kullanıcılar)
     // ─────────────────────────────────────────

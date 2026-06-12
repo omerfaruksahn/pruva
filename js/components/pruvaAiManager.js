@@ -887,8 +887,14 @@ window.PruvaAiManager = class PruvaAiManager {
             });
 
             if (res.ok) {
-                const apiConversations = await res.json();
-                
+                let apiConversations = await res.json();
+
+                // Outlook bağlı DEĞİLSE mail kaynaklı konuşmaları gösterme — sadece Copilot.
+                // (Bu filtre olmadan, bağlantı kesildikten sonra sayfa yenilenince mailler geri geliyordu)
+                if (!this.app.state.outlookConnected) {
+                    apiConversations = apiConversations.filter(c => c.id === 'copilot');
+                }
+
                 // P-AI Komut Merkezi (copilot) veritabanında tutulmadığı için lokal kopyasını koru
                 const existingCopilot = (this.app.state.pricingConversations || []).find(c => c.id === 'copilot');
                 
@@ -1834,7 +1840,8 @@ window.PruvaAiManager = class PruvaAiManager {
                         const statusRes = await fetch(CONFIG.API_URL + '/outlook/status', { headers });
                         if (statusRes.ok) {
                             const status = await statusRes.json();
-                            if (status.connected) {
+                            // Backend 'isConnected' alanı döner ('connected' DEĞİL — eski yazım hatası bağlantı algılamayı bozuyordu)
+                            if (status.isConnected) {
                                 await finalizeConnection(status.email);
                             }
                         }
@@ -1874,10 +1881,11 @@ window.PruvaAiManager = class PruvaAiManager {
 
             this.app.state.outlookConnected = false;
             delete this.app.state.outlookEmail;
-            // Bağlantı kesilince soldaki mail/konuşma listesi de TEMİZLENMELİ
+            // Bağlantı kesilince soldaki mail konuşmaları TEMİZLENMELİ — sadece Copilot kalmalı
             // (eskiden sadece bayrak kapanıyordu, mailler solda kalmaya devam ediyordu)
-            this.app.state.pricingConversations = [];
-            this.app.state.activePricingConversationId = null;
+            this.app.state.pricingConversations =
+                (this.app.state.pricingConversations || []).filter(c => c.id === 'copilot');
+            this.app.state.activeConversationId = 'copilot';
             this.app.store.save();
             this.app.commit();
             this.showToast('Outlook bağlantısı başarıyla kesildi.', 'success');
