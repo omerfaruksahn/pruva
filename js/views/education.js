@@ -315,12 +315,12 @@ window.educationView = (state) => {
         const realSlides = realNews.map(n => `
                     <div class="whisper-slide">
                         <div class="whisper-content">
-                            <div class="whisper-badge"><i data-lucide="newspaper" style="width:14px; height:14px; display:inline-block; margin-right:4px; vertical-align:middle;"></i> ${escapeHTML(n.source || 'Sektörel Haber')}</div>
+                            <div class="whisper-badge"><i data-lucide="newspaper" style="width:14px; height:14px; display:inline-block; margin-right:4px; vertical-align:middle;"></i> ${escapeHTML(n.sourceName || n.source || 'Sektörel Haber')}</div>
                             <h1 class="whisper-title">${escapeHTML(n.title || '')}</h1>
                             <p class="whisper-desc">${escapeHTML((n.summary || '').slice(0, 240))}${(n.summary || '').length > 240 ? '...' : ''}</p>
-                            ${n.link ? `<a href="${escapeHTML(n.link)}" target="_blank" rel="noopener noreferrer" class="up-btn up-btn-secondary" style="margin-top: 12px; display: inline-flex; width: fit-content;"><i data-lucide="external-link"></i> Haberin Kaynağı</a>` : ''}
+                            ${(n.sourceUrl || n.link) ? `<a href="${escapeHTML(n.sourceUrl || n.link)}" target="_blank" rel="noopener noreferrer" class="up-btn up-btn-secondary" style="margin-top: 12px; display: inline-flex; width: fit-content;"><i data-lucide="external-link"></i> Haberin Kaynağı</a>` : ''}
                         </div>
-                        <div class="whisper-visual" style="background-image: url('${escapeHTML(n.image_url || defaultVisual)}');"></div>
+                        <div class="whisper-visual" style="background-image: url('${escapeHTML(n.imageUrl || n.image_url || defaultVisual)}');"></div>
                     </div>`).join('');
 
         const slidesHtml = realNews.length > 0 ? realSlides : fallbackSlides;
